@@ -44,46 +44,27 @@ public class Generate : MonoBehaviour
         {
             new RoadTile(roadStraightPrefab, 0, new[] { 'N', 'S' }, new[] { 'E', 'W' }),
             new RoadTile(roadStraightPrefab, 90, new[] { 'W', 'E' }, new[] { 'N', 'S' }),
-            new RoadTile(roadTurnPrefab, 90, new[] { 'S', 'E' }, new[] { 'W', 'N' }), // leave
-            new RoadTile(roadTurnPrefab, 180, new[] { 'S', 'W' }, new[] { 'N', 'E' }),  // ?
-            new RoadTile(roadTurnPrefab, 270, new[] { 'N', 'W' }, new[] { 'S', 'E' }),  // rotate
-            new RoadTile(roadTurnPrefab, 0, new[] { 'N', 'E' }, new[] { 'S', 'W' }),  // ?
-            new RoadTile(roadJoinPrefab, 0, new[] { 'N', 'E', 'S' }, new[] { 'W' }),  // ?
-            new RoadTile(roadJoinPrefab, 180, new[] { 'N', 'W', 'S' }, new[] { 'E' }), // ?
-            new RoadTile(roadJoinPrefab, 90, new[] { 'W', 'S', 'E' }, new[] { 'N' }),  // ?
-            new RoadTile(roadJoinPrefab, 270, new[] { 'W', 'N', 'E' }, new[] { 'S' }), // ?
+            new RoadTile(roadTurnPrefab, 0, new[] { 'N', 'E' }, new[] { 'W', 'S' }), // leave
+            new RoadTile(roadTurnPrefab, 90, new[] { 'E', 'S' }, new[] { 'W', 'N' }),  // ?
+            new RoadTile(roadTurnPrefab, 180, new[] { 'S', 'W' }, new[] { 'N', 'E' }),  // rotate
+            new RoadTile(roadTurnPrefab, 270, new[] { 'W', 'N' }, new[] { 'E', 'S' }),  // ?
+            new RoadTile(roadJoinPrefab, 0, new[] { 'W', 'N', 'E' }, new[] { 'S' }),  // ?
+            new RoadTile(roadJoinPrefab, 90, new[] { 'N', 'E', 'S' }, new[] { 'W' }), // ?
+            new RoadTile(roadJoinPrefab, 180, new[] { 'E', 'S', 'W' }, new[] { 'N' }),  // ?
+            new RoadTile(roadJoinPrefab, 270, new[] { 'S', 'W', 'N' }, new[] { 'E' }), // ?
             new RoadTile(roadCrossPrefab, 0, new[] { 'N', 'S', 'E', 'W' }, new char[] {}),
-            new RoadTile(roadEndPrefab, 0, new[] { 'S' }, new[] { 'N', 'E', 'W' }),
-            new RoadTile(roadEndPrefab, 90, new[] { 'W' }, new[] { 'S', 'N', 'E' }),
-            new RoadTile(roadEndPrefab, 180, new[] { 'N' }, new[] { 'S', 'E', 'W' }),
-            new RoadTile(roadEndPrefab, 270, new[] { 'E' }, new[] { 'S', 'W', 'N' }),
+            new RoadTile(roadEndPrefab, 0, new[] { 'N' }, new[] { 'S', 'E', 'W' }),
+            new RoadTile(roadEndPrefab, 90, new[] { 'E' }, new[] { 'S', 'N', 'W' }),
+            new RoadTile(roadEndPrefab, 180, new[] { 'S' }, new[] { 'N', 'E', 'W' }),
+            new RoadTile(roadEndPrefab, 270, new[] { 'W' }, new[] { 'S', 'E', 'N' }),
         };
-
-
-        //new RoadTile(roadStraightPrefab, 90, new[] { 'W', 'E' }, new[] { 'N', 'S' }), // ok
-        //    new RoadTile(roadStraightPrefab, 0, new[] { 'N', 'S' }, new[] { 'E', 'W' }), // ok
-        //    new RoadTile(roadTurnPrefab, 90, new[] { 'W', 'N' }, new[] { 'E', 'S' }), // leave
-        //    new RoadTile(roadTurnPrefab, 180, new[] { 'N', 'E' }, new[] { 'W', 'S' }),  // ?
-        //    new RoadTile(roadTurnPrefab, 270, new[] { 'S', 'E' }, new[] { 'N', 'W' }),  // rotate
-        //    new RoadTile(roadTurnPrefab, 0, new[] { 'S', 'W' }, new[] { 'E', 'N' }),  // ?
-        //    new RoadTile(roadJoinPrefab, 0, new[] { 'N', 'S', 'W' }, new[] { 'E' }),  // ?
-        //    new RoadTile(roadJoinPrefab, 180, new[] { 'N', 'S', 'E' }, new[] { 'W' }), // ?
-        //    new RoadTile(roadJoinPrefab, 90, new[] { 'W', 'N', 'E' }, new[] { 'S' }),  // ?
-        //    new RoadTile(roadJoinPrefab, 270, new[] { 'W', 'S', 'E' }, new[] { 'N' }), // ?
-        //    new RoadTile(roadCrossPrefab, 0, new[] { 'N', 'S', 'E', 'W' }, new char[] { }),
-        //    new RoadTile(roadEndPrefab, 0, new[] { 'N' }, new[] { 'S', 'E', 'W' }),
-        //    new RoadTile(roadEndPrefab, 90, new[] { 'E' }, new[] { 'S', 'N', 'W' }),
-        //    new RoadTile(roadEndPrefab, 180, new[] { 'S' }, new[] { 'N', 'E', 'W' }),
-        //    new RoadTile(roadEndPrefab, 270, new[] { 'W' }, new[] { 'S', 'E', 'N' }),
-
 
         possibilities = new List<RoadTile>[gridSize, gridSize];
         for (int i = 0; i < gridSize; ++i)
             for (int j = 0; j < gridSize; ++j)
-            {
                 possibilities[i, j] = new List<RoadTile>(tiles);
-            }
 
+        // Initialize center tile
         possibilities[gridSize / 2, gridSize / 2] = null;
         grid[gridSize / 2, gridSize / 2] = tiles.Find(t => t.prefab == roadCrossPrefab);
         spawnGrid[gridSize / 2, gridSize / 2] = spawnCount;
@@ -93,10 +74,13 @@ public class Generate : MonoBehaviour
         // WFC
         GenerateGrid();
 
+        // Optimize
+        Optimize();
+
         // Spawn prefabs
         GeneratePrefabs();
     }
-    
+
     void GenerateGrid()
     {
         while (true)
@@ -129,11 +113,6 @@ public class Generate : MonoBehaviour
 
                 int entropy = possibilities[i, j].Count;
 
-                if (j + 1 < gridSize && grid[i, j + 1] is not null && RoadTile.OnRoadPath('N', grid[i, j + 1])) entropy -= 4;
-                if (i + 1 < gridSize && grid[i + 1, j] is not null && RoadTile.OnRoadPath('E', grid[i + 1, j])) entropy -= 4;
-                if (j - 1 >= 0 && grid[i, j - 1] is not null && RoadTile.OnRoadPath('S', grid[i, j - 1])) entropy -= 4;
-                if (i - 1 >= 0 && grid[i - 1, j] is not null && RoadTile.OnRoadPath('W', grid[i - 1, j])) entropy -= 4;
-
                 if (entropy < minEntropy)
                 {
                     minEntropy = entropy;
@@ -150,7 +129,6 @@ public class Generate : MonoBehaviour
     {
         RoadTile chosen = possibilities[x, y].Count != 0 ?
             ChooseRandomTile(x, y) :
-            //possibilities[x, y][UnityEngine.Random.Range(0, possibilities[x, y].Count)] :
             null;
 
         possibilities[x, y] = null;
@@ -160,16 +138,16 @@ public class Generate : MonoBehaviour
     void PropagateConstraints(int x, int y)
     {
         if (x + 1 < gridSize && possibilities[x + 1, y] is not null)
-            possibilities[x + 1, y].RemoveAll((rt) => !rt.CanConnect('E', grid[x, y]));
+            possibilities[x + 1, y].RemoveAll((rt) => !rt.CanConnect('W', grid[x, y]));
 
         if (x - 1 >= 0 && possibilities[x - 1, y] is not null)
-            possibilities[x - 1, y].RemoveAll((rt) => !rt.CanConnect('W', grid[x, y]));
+            possibilities[x - 1, y].RemoveAll((rt) => !rt.CanConnect('E', grid[x, y]));
 
         if (y + 1 < gridSize && possibilities[x, y + 1] is not null)
-            possibilities[x, y + 1].RemoveAll((rt) => !rt.CanConnect('N', grid[x, y]));
+            possibilities[x, y + 1].RemoveAll((rt) => !rt.CanConnect('S', grid[x, y]));
 
         if (y - 1 >= 0 && possibilities[x, y - 1] is not null)
-            possibilities[x, y - 1].RemoveAll((rt) => !rt.CanConnect('S', grid[x, y]));
+            possibilities[x, y - 1].RemoveAll((rt) => !rt.CanConnect('N', grid[x, y]));
     }
 
     void GeneratePrefabs()
@@ -184,38 +162,39 @@ public class Generate : MonoBehaviour
 
                 Vector3 spawnPos = new Vector3((i * cellSize - centerOffset.x) * (blockCells + 1), 0, (j * cellSize - centerOffset.y) * (blockCells + 1));
 
-                var obj = Instantiate(tile.prefab, spawnPos, Quaternion.identity);
+                var obj = Instantiate(tile.prefab, spawnPos, Quaternion.Euler(0, tile.rotY, 0));
                 obj.SetActive(true);
-                obj.transform.GetChild(0).gameObject.SetActive(true);
-                obj.transform.Rotate(Vector3.up, tile.rotY);
-                obj.name += $"_{tile.rotY}_{spawnGrid[i, j]}";
+                obj.name += $"_{tile.rotY}_{new string(tile.validConnections.ToArray())}";
 
                 for (int k = 1; k <= blockCells; ++k)
                 {
                     Vector3 roadPosHorizontal = spawnPos + new Vector3(k * cellSize, 0, 0);
                     Vector3 roadPosHorizontal2 = spawnPos + new Vector3(-k * cellSize, 0, 0);
                     Vector3 roadPosVertical = spawnPos + new Vector3(0, 0, k * cellSize);
-                    Vector3 roadPosVertical2 = spawnPos + new Vector3(0, 0,-k * cellSize);
+                    Vector3 roadPosVertical2 = spawnPos + new Vector3(0, 0, -k * cellSize);
+
+                    Quaternion horRot = Quaternion.Euler(0, 90, 0);
+                    Quaternion vertRot = Quaternion.Euler(0, 0, 0);
 
                     GameObject road;
-                    if (i + 1 < gridSize && tile.CanConnectWithRoad('E', grid[i + 1, j]))
+                    if (i + 1 < gridSize && tile.CanConnectThroughRoad('E', grid[i + 1, j]))
                     {
-                        road = Instantiate(roadStraightPrefab, roadPosHorizontal, Quaternion.Euler(90, 90, 0));
+                        road = Instantiate(roadStraightPrefab, roadPosHorizontal, horRot);
                         road.SetActive(true);
                     }
-                    if (j + 1 < gridSize && tile.CanConnectWithRoad('N', grid[i, j + 1]))
+                    if (j + 1 < gridSize && tile.CanConnectThroughRoad('N', grid[i, j + 1])) // NS
                     {
-                        road = Instantiate(roadStraightPrefab, roadPosVertical, Quaternion.Euler(90, 0, 0));
+                        road = Instantiate(roadStraightPrefab, roadPosVertical, vertRot);
                         road.SetActive(true);
                     }
-                    if (i - 1 >= 0 && tile.CanConnectWithRoad('W', grid[i - 1, j]))
+                    if (i - 1 >= 0 && tile.CanConnectThroughRoad('W', grid[i - 1, j]))
                     {
-                        road = Instantiate(roadStraightPrefab, roadPosHorizontal2, Quaternion.Euler(90, 90, 0));
+                        road = Instantiate(roadStraightPrefab, roadPosHorizontal2, horRot);
                         road.SetActive(true);
                     }
-                    if (j - 1 >= 0 && tile.CanConnectWithRoad('N', grid[i, j - 1]))
+                    if (j - 1 >= 0 && tile.CanConnectThroughRoad('S', grid[i, j - 1])) // NS
                     {
-                        road = Instantiate(roadStraightPrefab, roadPosVertical2, Quaternion.Euler(90, 0, 0));
+                        road = Instantiate(roadStraightPrefab, roadPosVertical2, vertRot);
                         road.SetActive(true);
                     }
                 }
@@ -277,6 +256,85 @@ public class Generate : MonoBehaviour
             return -1.53884176851f * Mathf.Pow(factor - 1, 2) + 4.5388417686f;
     }
 
+    public (int[], int[]) GetGridNeighbours(int i, int j)
+    {
+        List<int> Is = new List<int>();
+        List<int> Js = new List<int>();
+
+        if (i + 1 < gridSize && grid[i, j].CanConnectThroughRoad('E', grid[i + 1, j]))
+        {
+            Is.Add(i + 1);
+            Js.Add(j);
+        }
+        if (j + 1 < gridSize && grid[i, j].CanConnectThroughRoad('N', grid[i, j + 1]))
+        {
+            Is.Add(i);
+            Js.Add(j + 1);
+        }
+        if (i - 1 >= 0 && grid[i, j].CanConnectThroughRoad('W', grid[i - 1, j]))
+        {
+            Is.Add(i - 1);
+            Js.Add(j);
+        }
+        if (j - 1 >= 0 && grid[i, j].CanConnectThroughRoad('S', grid[i, j - 1]))
+        {
+            Is.Add(i);
+            Js.Add(j - 1);
+        }
+
+        return (Is.ToArray(), Js.ToArray());
+    }
+
+    void Optimize()
+    {
+        bool[,] visited = new bool[gridSize, gridSize];
+        List<List<(int, int)>> allComponents = new List<List<(int, int)>>();
+        int largestComponent = int.MinValue;
+        List<(int, int)> largestComponentObj = null;
+
+        for (int i = 0; i < gridSize; i++)
+        {
+            for (int j = 0; j < gridSize; j++)
+            {
+                if (!visited[i, j])
+                {
+                    List<(int, int)> component = new List<(int, int)>();
+
+                    DFS(ref component, ref visited, i, j);
+                    allComponents.Add(component);
+
+                    if (largestComponent < component.Count)
+                    {
+                        largestComponent = component.Count;
+                        largestComponentObj = component;
+                    }
+
+                    component.Clear();
+                }
+            }
+        }
+
+        foreach (var component in allComponents)
+            if (component != largestComponentObj)
+                for (int i = 0; i < component.Count; ++i)
+                    grid[component[i].Item1, component[i].Item2] = null;
+    }
+
+    public void DFS(ref List<(int, int)> indeces, ref bool[,] visited, int i, int j)
+    {
+        visited[i, j] = true;
+        indeces.Add((i, j));
+
+        var (neighboursI, neighboursJ) = GetGridNeighbours(i, j);
+
+        for (int k = 0; k < neighboursI.Length; k++)
+        {
+            if (!visited[neighboursI[k], neighboursJ[k]])
+                    DFS(ref indeces, ref visited, neighboursI[k], neighboursJ[k]);
+        }
+    }
+    
+
     public class RoadTile
     {
         public GameObject prefab;
@@ -316,20 +374,14 @@ public class Generate : MonoBehaviour
                 (invalidConnections.Contains(directionToOther) && other.invalidConnections.Contains(oppositeDirection));
         }
 
-        public bool CanConnectWithRoad(char directionToOther, RoadTile other)
+        public bool CanConnectThroughRoad(char directionToOther, RoadTile other)
         {
             if (other is null)
                 return false;
 
             char oppositeDirection = GetOppositeDirection(directionToOther);
 
-            return (validConnections.Contains(directionToOther) && other.validConnections.Contains(oppositeDirection));
-        }
-
-        public static bool OnRoadPath(char directionToRoad, RoadTile other)
-        {
-            char oppositeDirection = GetOppositeDirection(directionToRoad);
-            return other.validConnections.Contains(oppositeDirection);
+            return validConnections.Contains(directionToOther) && other.validConnections.Contains(oppositeDirection);
         }
     }
 }
