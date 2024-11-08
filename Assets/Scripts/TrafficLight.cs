@@ -13,6 +13,7 @@ public class TrafficLight
 {
     public Junction junction;
     public Road road;
+    public Vector3 pos;
     Status status;
     Status prevStatus;
     public float greenInterval = 10.0f;
@@ -24,6 +25,20 @@ public class TrafficLight
     {
         this.junction = junction;
         this.road = road;
+
+        Vector3 closestPoint = new Vector3();
+        float minDist = float.MaxValue;
+        foreach (Vector3 p in road.path)
+        {
+            float dist = Vector3.Distance(junction.obj.transform.position, p);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                closestPoint = p;
+            }
+        }
+        this.pos = (junction.obj.transform.position + closestPoint) / 2;
+
         status = Status.Red;
         prevStatus = Status.Red;
     }

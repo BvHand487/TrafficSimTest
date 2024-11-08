@@ -5,6 +5,9 @@ using System.Text;
 using Unity.VisualScripting;
 using UnityEngine;
 using static Generate;
+using static UnityEditor.PlayerSettings;
+using static UnityEditor.UIElements.ToolbarMenu;
+using static UnityEngine.Rendering.DebugUI.Table;
 
 public class Generate : MonoBehaviour
 {
@@ -23,12 +26,17 @@ public class Generate : MonoBehaviour
     private float maxDistanceFromCenter = 1.0f;
 
     [SerializeField]
-    public GameObject roadStraightPrefab, roadTurnPrefab, roadJoinPrefab, roadCrossPrefab, roadEndPrefab;
+    public GameObject roadStraightPrefab, roadTurnPrefab, roadJoinPrefab, roadCrossPrefab, roadEndPrefab, simulation;
+
     private float straightChance = 0, turnChance = 0, joinChance = 0, crossChance = 0, endChance = 0;
+    
 
     private RoadTile[,] grid;
     private List<RoadTile> tiles;
     private List<RoadTile>[,] possibilities;
+
+    private List<Road> roads = new List<Road>();
+    private List<Junction> junctions = new List<Junction>();
 
     private int[,] spawnGrid;
     private int spawnCount = 1;
@@ -81,6 +89,9 @@ public class Generate : MonoBehaviour
 
         // Spawn prefabs
         GeneratePrefabs();
+
+        simulation.GetComponent<Simulation>().Initialize(junctions, roads);
+        simulation.SetActive(true);
 
         Destroy(this.gameObject);
     }
@@ -154,150 +165,143 @@ public class Generate : MonoBehaviour
             possibilities[x, y - 1].RemoveAll((rt) => !rt.CanConnect('N', grid[x, y]));
     }
 
-    void GetFullRoad(ref List<(int, int)> road, ref Vector2Int startJunction, ref Vector2Int endJunction, ref bool[,] visited, int i, int j)
+    void GetFullRoad(ref RoadTile[,] grid, ref List<(int, int)> road, ref List<Vector2Int> juncs, ref bool[,] visited, int i, int j, int gridSize)
     {
-        if (i < 0 || j < 0 || i >= gridSize || j >= gridSize || visited[i, j] || grid[i, j] == null)
+        if (i < 0 || j < 0 || i >= gridSize || j >= gridSize || grid[i, j] == null)
             return;
 
+        if (!grid[i, j].IsRoad())
+        {
+            juncs.Add(new Vector2Int(i, j));
+            return;
+        }
+
+        if (visited[i, j]) return;
         visited[i, j] = true;
 
         if (grid[i, j].IsRoad())
             road.Add((i, j));
-        else
-        {
-            endJunction = new Vector2Int(i, j);
-            return;
-        }
 
-        if (i < gridSize - 1 && grid[i + 1, j]?.CanConnectThroughRoad('E', grid[i, j]) == true)
-            GetFullRoad(ref road, ref startJunction, ref endJunction, ref visited, i + 1, j);
+        if (i < gridSize - 1 && grid[i + 1, j]?.CanConnectThroughRoad('W', grid[i, j]) == true)
+            GetFullRoad(ref grid, ref road, ref juncs, ref visited, i + 1, j, gridSize);
 
-        if (j < gridSize - 1 && grid[i, j + 1]?.CanConnectThroughRoad('N', grid[i, j]) == true)
-            GetFullRoad(ref road, ref startJunction, ref endJunction, ref visited, i, j + 1);
+        if (j < gridSize - 1 && grid[i, j + 1]?.CanConnectThroughRoad('S', grid[i, j]) == true)
+            GetFullRoad(ref grid, ref road, ref juncs, ref visited, i, j + 1, gridSize);
 
-        if (i > 0 && grid[i - 1, j]?.CanConnectThroughRoad('W', grid[i, j]) == true)
-            GetFullRoad(ref road, ref startJunction, ref endJunction, ref visited, i - 1, j);
+        if (i > 0 && grid[i - 1, j]?.CanConnectThroughRoad('E', grid[i, j]) == true)
+            GetFullRoad(ref grid, ref road, ref juncs, ref visited, i - 1, j, gridSize);
 
-        if (j > 0 && grid[i, j - 1]?.CanConnectThroughRoad('S', grid[i, j]) == true)
-            GetFullRoad(ref road, ref startJunction, ref endJunction, ref visited, i, j - 1);
+        if (j > 0 && grid[i, j - 1]?.CanConnectThroughRoad('N', grid[i, j]) == true)
+            GetFullRoad(ref grid, ref road, ref juncs, ref visited, i, j - 1, gridSize);
     }
 
     void GeneratePrefabs()
     {
-        Dictionary<Vector2Int, GameObject> junctions = new Dictionary<Vector2Int, GameObject> ();
-        List<Road> roads = new List<Road>();
+        Dictionary<Vector2Int, Junction> juncsMap = new Dictionary<Vector2Int, Junction>();
 
-        for (int i = 0; i < gridSize; ++i)
-        {
-            for (int j = 0; j < gridSize; ++j)
+        RoadTile[,] grid2 = new RoadTile[gridSize * (blockCells + 1), gridSize * (blockCells + 1)];
+        int grid2Size = gridSize * (blockCells + 1);
+
+        for (int i = 0; i < gridSize; i++)
+            for (int j = 0; j < gridSize; j++)
+                grid2[i * (blockCells + 1), j * (blockCells + 1)] = grid[i, j];
+
+        List<(int, int, RoadTile)> toAdd = new List<(int, int, RoadTile)>();
+        for (int i = 0; i < grid2Size; ++i)
+            for (int j = 0; j < grid2Size; ++j)
             {
-                RoadTile tile = grid[i, j];
+                RoadTile tile = grid2[i, j];
                 if (tile == null) continue;
 
-                Vector3 pos = new Vector3((i * cellSize - centerOffset.x) * (blockCells + 1), 0, (j * cellSize - centerOffset.y) * (blockCells + 1));
+                if (i + blockCells + 1 < grid2Size && tile.CanConnectThroughRoad('E', grid2[i + blockCells + 1, j]))
+                    for (int k = 1; k <= blockCells; ++k)
+                        toAdd.Add((i + k, j, tiles[1]));
+
+                if (i - blockCells - 1 >= 0 && tile.CanConnectThroughRoad('W', grid2[i - blockCells - 1, j]))
+                    for (int k = 1; k <= blockCells; ++k)
+                        toAdd.Add((i - k, j, tiles[1]));
+
+                if (j + blockCells + 1 < grid2Size && tile.CanConnectThroughRoad('N', grid2[i, j + blockCells + 1]))
+                    for (int k = 1; k <= blockCells; ++k)
+                        toAdd.Add((i, j + k, tiles[0]));
+
+                if (j - blockCells - 1 >= 0 && tile.CanConnectThroughRoad('S', grid2[i, j - blockCells - 1]))
+                    for (int k = 1; k <= blockCells; ++k)
+                        toAdd.Add((i, j - k, tiles[0]));
+            }
+
+        foreach (var a in toAdd)
+            grid2[a.Item1, a.Item2] = a.Item3;
+
+        for (int i = 0; i < grid2Size; ++i)
+        {
+            for (int j = 0; j < grid2Size; ++j)
+            {
+                RoadTile tile = grid2[i, j];
+                if (tile == null) continue;
+
+                Vector3 pos = new Vector3((i * cellSize - centerOffset.x) - blockCells * cellSize, 0, (j * cellSize - centerOffset.y) - blockCells * cellSize);
 
                 var obj = Instantiate(tile.prefab, pos, Quaternion.Euler(0, tile.rotY, 0));
                 obj.SetActive(true);
+                obj.name = $"{tile.prefab.name}_({i}, {j})";
 
                 if (!tile.IsRoad())
-                    junctions.Add(new Vector2Int(i, j), obj);
+                    juncsMap.Add(new Vector2Int(i, j), new Junction(obj));
             }
         }
 
-        bool[,] visited = new bool[gridSize, gridSize];
-        for (int i = 0; i < gridSize; ++i)
+        bool[,] visited = new bool[grid2Size, grid2Size];
+        for (int i = 0; i < grid2Size; ++i)
         {
-            for(int j = 0; j < gridSize; ++j)
+            for (int j = 0; j < grid2Size; ++j)
             {
-                RoadTile tile = grid[i, j];
+                RoadTile tile = grid2[i, j];
                 if (tile == null) continue;
 
-                if (!tile.IsRoad())
+                if (tile.IsRoad() && !visited[i, j] && grid2[i, j] != null)
                 {
-                    Vector2Int startJunc = new Vector2Int(i, j);
+                    List<(int, int)> roadTiles = new List<(int, int)>();
+                    List<Vector2Int> juncs = new List<Vector2Int>();
 
-                    if (i < gridSize - 1 && !visited[i + 1, j] && grid[i + 1, j] != null)
-                    {
-                        Vector2Int endJunc = -Vector2Int.one;
-                        List<(int, int)> roadTiles = new List<(int, int)>();
+                    GetFullRoad(ref grid2, ref roadTiles, ref juncs, ref visited, i, j, grid2Size);
 
-                        GetFullRoad(ref roadTiles, ref startJunc, ref endJunc, ref visited, i + 1, j);
-
-                        var road = new Road(roadTiles.Select((r) => new Vector3(
-                            (r.Item1 * cellSize - centerOffset.x) * (blockCells + 1),
+                    roads.Add(new Road(roadTiles.Select((r) => new Vector3(
+                            (r.Item1 * cellSize - centerOffset.x) - blockCells * cellSize,
                             0,
-                            (r.Item2 * cellSize - centerOffset.y) * (blockCells + 1)
+                            (r.Item2 * cellSize - centerOffset.x) - blockCells * cellSize
                         )).ToArray(),
-                        junctions[startJunc].GetComponent<Junction>(),
-                        junctions[endJunc].GetComponent<Junction>());
-                    }
-
-                    if (j < gridSize - 1 && !visited[i, j + 1] && grid[i, j + 1] != null)
-                    {
-                        Vector2Int endJunc = -Vector2Int.one;
-                        List<(int, int)> roadTiles = new List<(int, int)>();
-
-                        GetFullRoad(ref roadTiles, ref startJunc, ref endJunc, ref visited, i, j + 1);
-
-                        var road = new Road(roadTiles.Select((r) => new Vector3(
-                            (r.Item1 * cellSize - centerOffset.x) * (blockCells + 1),
-                            0,
-                            (r.Item2 * cellSize - centerOffset.y) * (blockCells + 1)
-                        )).ToArray(),
-                        junctions[startJunc].GetComponent<Junction>(),
-                        junctions[endJunc].GetComponent<Junction>());
-                    }
-                    if (i > 0 && !visited[i - 1, j] && grid[i - 1, j] != null)
-                    {
-                        Vector2Int endJunc = -Vector2Int.one;
-                        List<(int, int)> roadTiles = new List<(int, int)>();
-
-                        GetFullRoad(ref roadTiles, ref startJunc, ref endJunc, ref visited, i - 1, j);
-
-                        var road = new Road(roadTiles.Select((r) => new Vector3(
-                            (r.Item1 * cellSize - centerOffset.x) * (blockCells + 1),
-                            0,
-                            (r.Item2 * cellSize - centerOffset.y) * (blockCells + 1)
-                        )).ToArray(),
-                        junctions[startJunc].GetComponent<Junction>(),
-                        junctions[endJunc].GetComponent<Junction>());
-                    }
-
-                    if (j > 0 && !visited[i, j - 1] && grid[i, j - 1] != null)
-                    {
-                        Vector2Int endJunc = -Vector2Int.one;
-                        List<(int, int)> roadTiles = new List<(int, int)>();
-
-                        GetFullRoad(ref roadTiles, ref startJunc, ref endJunc, ref visited, i, j - 1);
-
-                        var road = new Road(roadTiles.Select((r) => new Vector3(
-                            (r.Item1 * cellSize - centerOffset.x) * (blockCells + 1),
-                            0,
-                            (r.Item2 * cellSize - centerOffset.y) * (blockCells + 1)
-                        )).ToArray(),
-                        junctions[startJunc].GetComponent<Junction>(),
-                        junctions[endJunc].GetComponent<Junction>());
-                    }
+                        juncsMap[juncs[0]],
+                        juncsMap[juncs[1]])
+                    );
                 }
-
-                //if (tile.IsRoad() && !visited[i, j] && grid[i, j] != null)
-                //{
-                //    List<(int, int)> roadTiles = new List<(int, int)>();
-                //    Vector2Int startJunc = -Vector2Int.one, endJunc = -Vector2Int.one;
-
-                //    GetFullRoad(ref roadTiles, ref startJunc, ref endJunc, ref visited, i, j);
-
-                //    Debug.Log(roadTiles.Count);
-
-                //    var road = new Road(roadTiles.Select((r) => new Vector3(
-                //            (r.Item1 * cellSize - centerOffset.x) * (blockCells + 1),
-                //            0,
-                //            (r.Item2 * cellSize - centerOffset.y) * (blockCells + 1)
-                //        )).ToArray(),
-                //        junctions[startJunc].GetComponent<Junction>(),
-                //        junctions[endJunc].GetComponent<Junction>());
-                //}
             }
+        }
+
+        Dictionary<Junction, List<Road>> junctionToRoadConnections = new Dictionary<Junction, List<Road>>();
+        foreach (var j in juncsMap.Values)
+            junctionToRoadConnections.Add(j, new List<Road>());
+
+        foreach (var r in roads)
+        {
+            junctionToRoadConnections[r.j1].Add(r);
+            junctionToRoadConnections[r.j2].Add(r);
+        }
+
+        foreach ((Junction junc, List<Road> roadsList) in junctionToRoadConnections)
+        {
+            junctions.Add(junc);
+            junc.SetRoads(roadsList);
+        }
+
+        foreach (var j in junctionToRoadConnections.Keys)
+        {
+            Debug.Log($"Junction: {j.obj.transform.position}, {j.roads.Length}");
+        }
+        
+        foreach (var r in roads)
+        {
+            Debug.Log($"Road: {r.j1.obj.transform.position} -> {string.Join(',', r.path)} -> {r.j2.obj.transform.position}");
         }
 
         //for (int i = 0; i < gridSize; ++i)
@@ -305,55 +309,116 @@ public class Generate : MonoBehaviour
         //    for (int j = 0; j < gridSize; ++j)
         //    {
         //        RoadTile tile = grid[i, j];
-        //        if (tile == null)
-        //            continue;
-        //        Vector3 spawnPos = new Vector3((i * cellSize - centerOffset.x) * (blockCells + 1), 0, (j * cellSize - centerOffset.y) * (blockCells + 1));
+        //        if (tile == null) continue;
 
-        //        var obj = Instantiate(tile.prefab, spawnPos, Quaternion.Euler(0, tile.rotY, 0));
+        //        Vector3 pos = new Vector3((i * cellSize - centerOffset.x) * (blockCells + 1), 0, (j * cellSize - centerOffset.y) * (blockCells + 1));
+
+        //        var obj = Instantiate(tile.prefab, pos, Quaternion.Euler(0, tile.rotY, 0));
         //        obj.SetActive(true);
+        //        obj.name = $"{tile.prefab.name}_({i}, {j})";
 
-        //        if (tile.prefab == roadCrossPrefab || tile.prefab == roadJoinPrefab || tile.prefab == roadEndPrefab)
-        //            obj.name = "JUNCTION";
-        //        else
-        //            obj.name = "ROAD";
+        //        if (!tile.IsRoad())
+        //            junctions.Add(new Vector2Int(i, j), new Junction(obj));
+        //    }
+        //}
+
+        //for (int i = 0; i < gridSize; ++i)
+        //{
+        //    for (int j = 0; j < gridSize; ++j)
+        //    {
+        //        RoadTile tile = grid[i, j];
+        //        if (tile == null) continue;
 
         //        for (int k = 1; k <= blockCells; ++k)
         //        {
-        //            Vector3 roadPosHorizontal = spawnPos + new Vector3(k * cellSize, 0, 0);
-        //            Vector3 roadPosHorizontal2 = spawnPos + new Vector3(-k * cellSize, 0, 0);
-        //            Vector3 roadPosVertical = spawnPos + new Vector3(0, 0, k * cellSize);
-        //            Vector3 roadPosVertical2 = spawnPos + new Vector3(0, 0, -k * cellSize);
-
-        //            Quaternion horRot = Quaternion.Euler(0, 90, 0);
-        //            Quaternion vertRot = Quaternion.Euler(0, 0, 0);
-
-        //            GameObject road;
         //            if (i + 1 < gridSize && tile.CanConnectThroughRoad('E', grid[i + 1, j]))
         //            {
-        //                road = Instantiate(roadStraightPrefab, roadPosHorizontal, horRot);
-        //                road.SetActive(true);
-        //                road.name = "ROAD";
-        //            }
-        //            if (j + 1 < gridSize && tile.CanConnectThroughRoad('N', grid[i, j + 1])) // NS
-        //            {
-        //                road = Instantiate(roadStraightPrefab, roadPosVertical, vertRot);
-        //                road.SetActive(true);
-        //                road.name = "ROAD";
+        //                var obj = Instantiate(
+        //                    tiles[0].prefab,
+        //                    new Vector3((i * cellSize - centerOffset.x) * (blockCells + 1) + k * cellSize, 0, (j * cellSize - centerOffset.y) * (blockCells + 1)),
+        //                    Quaternion.Euler(0, 90, 0)
+        //                );
+        //                obj.SetActive(true);
+        //                obj.name = $"{tile.prefab.name}_({i}, {j})";
         //            }
         //            if (i - 1 >= 0 && tile.CanConnectThroughRoad('W', grid[i - 1, j]))
         //            {
-        //                road = Instantiate(roadStraightPrefab, roadPosHorizontal2, horRot);
-        //                road.SetActive(true);
-        //                road.name = "ROAD";
+        //                var obj = Instantiate(
+        //                    tiles[0].prefab,
+        //                    new Vector3((i * cellSize - centerOffset.x) * (blockCells + 1) - k * cellSize, 0, (j * cellSize - centerOffset.y) * (blockCells + 1)),
+        //                    Quaternion.Euler(0, 90, 0)
+        //                );
+        //                obj.SetActive(true);
+        //                obj.name = $"{tile.prefab.name}_({i}, {j})";
         //            }
-        //            if (j - 1 >= 0 && tile.CanConnectThroughRoad('S', grid[i, j - 1])) // NS
+
+        //            if (j + 1 < gridSize && tile.CanConnectThroughRoad('N', grid[i, j + 1]))
         //            {
-        //                road = Instantiate(roadStraightPrefab, roadPosVertical2, vertRot);
-        //                road.SetActive(true);
-        //                road.name = "ROAD";
+        //                var obj = Instantiate(
+        //                    tiles[1].prefab,
+        //                    new Vector3((i * cellSize - centerOffset.x) * (blockCells + 1), 0, (j * cellSize - centerOffset.y) * (blockCells + 1) + k * cellSize),
+        //                    Quaternion.Euler(0, 0, 0)
+        //                );
+        //                obj.SetActive(true);
+        //                obj.name = $"{tile.prefab.name}_({i}, {j})";
+        //            }
+        //            if (j - 1 >= 0 && tile.CanConnectThroughRoad('S', grid[i, j - 1]))
+        //            {
+        //                var obj = Instantiate(
+        //                    tiles[1].prefab,
+        //                    new Vector3((i * cellSize - centerOffset.x) * (blockCells + 1), 0, (j * cellSize - centerOffset.y) * (blockCells + 1) - k * cellSize),
+        //                    Quaternion.Euler(0, 0, 0)
+        //                );
+        //                obj.SetActive(true);
+        //                obj.name = $"{tile.prefab.name}_({i}, {j})";
         //            }
         //        }
         //    }
+        //}
+
+        //bool[,] visited = new bool[gridSize, gridSize];
+        //for (int i = 0; i < gridSize; ++i)
+        //{
+        //    for (int j = 0; j < gridSize; ++j)
+        //    {
+        //        RoadTile tile = grid[i, j];
+        //        if (tile == null) continue;
+
+        //        if (tile.IsRoad() && !visited[i, j] && grid[i, j] != null)
+        //        {
+        //            List<(int, int)> roadTiles = new List<(int, int)>();
+        //            List<Vector2Int> juncs = new List<Vector2Int>();
+
+        //            GetFullRoad(ref roadTiles, ref juncs, ref visited, i, j);
+
+        //            roads.Add(new Road(roadTiles.Select((r) => new Vector3(
+        //                    (r.Item1 * cellSize - centerOffset.x) * (blockCells + 1),
+        //                    0,
+        //                    (r.Item2 * cellSize - centerOffset.y) * (blockCells + 1)
+        //                )).ToArray(),
+        //                junctions[juncs[0]],
+        //                junctions[juncs[1]])
+        //            );
+        //        }
+        //    }
+        //}
+
+        //Dictionary<Junction, List<Road>> junctionToRoadConnections = new Dictionary<Junction, List<Road>>();
+        //foreach (var j in junctions.Values)
+        //    junctionToRoadConnections.Add(j, new List<Road>());
+
+        //foreach (var r in roads)
+        //{
+        //    junctionToRoadConnections[r.j1].Add(r);
+        //    junctionToRoadConnections[r.j2].Add(r);
+        //}
+
+        //foreach ((Junction junc, List<Road> roadsList) in junctionToRoadConnections)
+        //    junc.SetRoads(roadsList);
+
+        //foreach (var j in junctionToRoadConnections.Keys)
+        //{
+        //    Debug.Log($"Junction: {j.obj.transform.position}, {j.roads.Length}");
         //}
     }
 
