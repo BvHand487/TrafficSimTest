@@ -11,14 +11,18 @@ public enum Status
 
 public class TrafficLight
 {
+    // Keeps info about which junction and road it belongs to
     public Junction junction;
     public Road road;
     public Vector3 pos;
+
     Status status;
     Status prevStatus;
+
     public float greenInterval = 10.0f;
     public float redInterval = 10.0f;
     public static readonly float yellowInterval = 2.0f;
+
     public float elapsedTime = 0.0f;
 
     public TrafficLight(Junction junction, Road road)
@@ -43,6 +47,7 @@ public class TrafficLight
         prevStatus = Status.Red;
     }
 
+    // Returns the traffic light color
     public Color GetStatusColor()
     {
         switch (status)
@@ -54,6 +59,8 @@ public class TrafficLight
         }
     }
 
+
+    // Update function that tracks time and changes the traffic light color if necessary
     public void Update()
     {
         elapsedTime += Time.deltaTime;

@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+// General class that runs the simulation
 public class Simulation : MonoBehaviour
-{
+{   
+    // All junctions
     public List<Junction> junctions;
+
+    // All roads
     public List<Road> roads;
 
     public void Initialize(List<Junction> js, List<Road> rs)
