@@ -18,4 +18,9 @@ public class Road
         this.j1 = j1;
         this.j2 = j2;
     }
+
+    public Junction GetOtherJunction(Junction j)
+    {
+        return j == j1 ? j2 : j1;
+    }
 }

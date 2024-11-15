@@ -43,4 +43,9 @@ public class Junction
         foreach (var light in lights)
             light.Update();
     }
+
+    public static Road GetCommonRoad(Junction a, Junction b)
+    {
+        return a.roads.Intersect(b.roads).First();
+    }
 }

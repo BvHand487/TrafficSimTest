@@ -294,15 +294,15 @@ public class Generate : MonoBehaviour
         }
 
         // Debug messages
-        foreach (var j in junctionToRoadConnections.Keys)
-        {
-            Debug.Log($"Junction: {j.obj.transform.position}, {j.roads.Length}");
-        }
+        //foreach (var j in junctionToRoadConnections.Keys)
+        //{
+        //    Debug.Log($"Junction: {j.obj.transform.position}, {j.roads.Length}");
+        //}
         
-        foreach (var r in roads)
-        {
-            Debug.Log($"Road: {r.j1.obj.transform.position} -> {string.Join(',', r.path)} -> {r.j2.obj.transform.position}");
-        }
+        //foreach (var r in roads)
+        //{
+        //    Debug.Log($"Road: {r.j1.obj.transform.position} -> {string.Join(',', r.path)} -> {r.j2.obj.transform.position}");
+        //}
     }
 
     // Chooses a random tile depending on the distance from the center of the grid.

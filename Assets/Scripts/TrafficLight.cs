@@ -2,25 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum Status
-{
-    Red,
-    Yellow,
-    Green
-};
-
 public class TrafficLight
 {
+    public enum Status
+    {
+        Red,
+        Yellow,
+        Green
+    };
+
     // Keeps info about which junction and road it belongs to
     public Junction junction;
     public Road road;
     public Vector3 pos;
 
-    Status status;
+    public Status status { get; private set; }
     Status prevStatus;
 
-    public float greenInterval = 10.0f;
-    public float redInterval = 10.0f;
+    public float greenInterval = 3.0f;
+    public float redInterval = 20.0f;
     public static readonly float yellowInterval = 2.0f;
 
     public float elapsedTime = 0.0f;
