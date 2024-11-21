@@ -74,4 +74,13 @@ namespace Utils
             return path;
         }
     }
+
+    public static class Time
+    {
+        // For speeding up time
+        public static void SetTimeScale(int timeScale)
+        {
+            UnityEngine.Time.timeScale = timeScale;
+        }
+    }
 }

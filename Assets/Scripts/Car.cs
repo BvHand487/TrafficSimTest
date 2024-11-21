@@ -15,21 +15,28 @@ public class Car : MonoBehaviour
         WAITING_ON_CAR,
     }
 
-    public float carDistance = 15.0f;
+    public float carDistance = 20.0f;
     public float lookDistance = 30.0f;
-    public float lightDistance = 15.0f;
+    public float lightDistance = 20.0f;
+    public float stoppedGap = 3.0f;
+
     public float maxSpeed = 25.0f;
 
     public float mass = 1800;
+
     public float torque = 500;
     public float dragConstant = 0.01f;
     public float rrConstant = 0.30f;
-    public float brakingConstant = 5.0f;
+    public float brakingConstant = 35000.0f;
 
     public GameObject simulationObject;
 
+    private Vector3 bumperOffset;
     private Vector3 velocity = Vector3.zero;
     private bool isAccelerating = true;
+
+    // Represents how hard the car is braking (0.0f, 1.0f)
+    private float brakingFactor = 0.0f;
 
     public Status status { get; private set; }
 
@@ -54,6 +61,10 @@ public class Car : MonoBehaviour
     void Start()
     {
         simulation = simulationObject.GetComponent<Simulation>();
+
+        var collider = GetComponent<BoxCollider>();
+        bumperOffset = new Vector3(collider.center.x, collider.center.y, collider.size.z / 2 + collider.center.z);
+        
         status = Status.DRIVING;
     }
 
@@ -75,7 +86,7 @@ public class Car : MonoBehaviour
     {
         RaycastHit hit;
 
-        if (Physics.Raycast(transform.position, Vector3.forward, out hit, lookDistance))
+        if (Physics.Raycast(transform.position + bumperOffset, Vector3.forward, out hit, lookDistance))
         {
             if (hit.collider != null)
             {
@@ -107,6 +118,8 @@ public class Car : MonoBehaviour
 
                     if ((status == TrafficLight.Status.Red || status == TrafficLight.Status.Yellow) && hit.distance < lightDistance)
                     {
+                        brakingFactor = CalculateBrakingFactor(hit.distance - stoppedGap);
+
                         isAccelerating = false;
 
                         if (IsStopped())
@@ -131,6 +144,19 @@ public class Car : MonoBehaviour
 
     private void Move()
     {
+        velocity += CalculateAcceleration() * Time.deltaTime;
+
+        if (isAccelerating && velocity.magnitude >= maxSpeed)
+            velocity = maxSpeed * Vector3.forward;
+       
+        if (IsStopped())
+            velocity.z = 0.0f;
+
+        transform.position += velocity * Time.deltaTime;
+    }
+
+    private Vector3 CalculateAcceleration()
+    {
         Vector3 drag = -dragConstant * velocity.magnitude * velocity;
         Vector3 rollingResistance = -rrConstant * velocity;
 
@@ -143,20 +169,11 @@ public class Car : MonoBehaviour
         }
         else
         {
-            Vector3 braking = -Vector3.forward * brakingConstant;
+            Vector3 braking = -Vector3.forward * brakingConstant * brakingFactor;
             totalForce += braking;
         }
 
-        Vector3 acceleration = totalForce / mass;
-        velocity += acceleration * Time.deltaTime;
-
-        if (isAccelerating && velocity.magnitude >= maxSpeed)
-            velocity = maxSpeed * Vector3.forward;
-       
-        if (IsStopped())
-            velocity.z = 0.0f;
-
-        transform.position += velocity * Time.deltaTime;
+        return totalForce / mass;
     }
 
     private bool IsOnLastRoad()
@@ -175,6 +192,12 @@ public class Car : MonoBehaviour
         return Vector3.Distance(transform.position, currentRoad.path[toRoadTile]) <= acceptibleCompletionDist;
     }
 
+    private float CalculateBrakingFactor(float distance)
+    {
+        float requiredForce = ((mass * velocity.magnitude * velocity.magnitude) / 2) / distance;
+        return Mathf.Clamp01((requiredForce + dragConstant * velocity.magnitude + rrConstant * velocity.magnitude) / (brakingConstant * 1.0f));
+    }
+
     private bool IsStopped()
     {
         return velocity.z <= 0.0f;
@@ -186,6 +209,11 @@ public class Car : MonoBehaviour
         {
             canStop = false;
             isAccelerating = true;
+
+            if (collision.gameObject == currentRoad.j1.obj)
+                currentJunc = currentRoad.j1;
+            else if (collision.gameObject == currentRoad.j2.obj)
+                currentJunc = currentRoad.j2;
         }
     }
 
@@ -194,7 +222,10 @@ public class Car : MonoBehaviour
         if (collision.gameObject.tag == "Junction")
         {
             canStop = true;
-            isAccelerating = true;  
+            isAccelerating = true;
+
+            int juncIndex = path.FindIndex((j) => j.obj == collision.gameObject);
+            currentRoad = Junction.GetCommonRoad(path[juncIndex], path[juncIndex + 1]);
         }
     }
 
@@ -212,5 +243,8 @@ public class Car : MonoBehaviour
                 Gizmos.color = Color.black; break;
         }
         Gizmos.DrawCube(transform.GetChild(0).transform.position + 3 * Vector3.up, Vector3.one);
+
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawSphere(transform.position + bumperOffset, 1);
     }
 }
