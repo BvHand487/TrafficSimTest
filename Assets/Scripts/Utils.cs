@@ -33,7 +33,7 @@ namespace Utils
                 foreach (var road in current.roads)
                 {
                     var neighbor = road.GetOtherJunction(current);
-                    float tentativeGScore = gScore[current] + road.path.Length;
+                    float tentativeGScore = gScore[current] + road.path.Count;
 
                     if (!gScore.ContainsKey(neighbor) || tentativeGScore < gScore[neighbor])
                     {
@@ -73,6 +73,28 @@ namespace Utils
             path.Reverse();
             return path;
         }
+
+        public static List<Vector3> JunctionToVectorPath(List<Junction> junctionPath)
+        {
+            List<Vector3> vectorPath = new List<Vector3>();
+
+            for (int i = 0; i < junctionPath.Count - 1; ++i)
+            {
+                var juncPos1 = junctionPath[i].obj.transform.position;
+                var juncPos2 = junctionPath[i + 1].obj.transform.position;
+                var road = Junction.GetCommonRoad(junctionPath[i], junctionPath[i + 1]);
+
+                vectorPath.Add(juncPos1);
+
+                if (Vector3.Distance(juncPos1, road.path[0]) > Vector3.Distance(juncPos2, road.path[0]))
+                    road.path.Reverse();
+                vectorPath.AddRange(road.path);
+            }
+
+            vectorPath.Add(junctionPath[junctionPath.Count - 1].obj.transform.position);
+
+            return vectorPath;
+        }
     }
 
     public static class Time
@@ -81,6 +103,53 @@ namespace Utils
         public static void SetTimeScale(int timeScale)
         {
             UnityEngine.Time.timeScale = timeScale;
+        }
+    }
+
+    public static class Math
+    {
+        // Orders a list of points so that each pair of points are nearest-neighbours
+        public static List<Vector3> OrderVectorPath(List<Vector3> points)
+        {
+            if (points == null || points.Count == 0)
+                return null;
+
+            if (points.Count <= 2)
+                return points;
+
+            List<Vector3> orderedPoints = new List<Vector3>() { points[points.Count - 1] };
+            points.Remove(points[points.Count - 1]);
+
+            while (points.Count > 0)
+            {
+                var closest = GetClosestVector(orderedPoints.Last(), points);
+                orderedPoints.Add(closest);
+                points.Remove(closest);
+            }   
+
+            return orderedPoints;
+        }
+
+
+        public static Vector3 GetClosestVector(Vector3 target, List<Vector3> points)
+        {
+            float minDist = float.MaxValue;
+            Vector3 closest = Vector3.zero;
+
+            foreach (var point in points)
+            {
+                if (point == target)
+                    continue;
+
+                var dist = Vector3.Distance(target, point);
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    closest = point;
+                }
+            }
+
+            return closest;
         }
     }
 }

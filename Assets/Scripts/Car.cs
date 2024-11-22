@@ -4,6 +4,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
+using static UnityEditor.ShaderGraph.Internal.KeywordDependentCollection;
 
 
 public class Car : MonoBehaviour
@@ -43,19 +44,16 @@ public class Car : MonoBehaviour
     private bool canStop = true;
     private Simulation simulation;
 
-    private List<Junction> path;
-    private Junction currentJunc;
-    private Road currentRoad;
-    private int fromRoadTile, toRoadTile;
+    private List<Vector3> path;
+    private int pathIndex = 0;
+    private Vector3 from, to;
     private float acceptibleCompletionDist = 0.2f;
 
-    public void Initialize(List<Junction> path, int fromRoadTile, int toRoadTile)
+    public void Initialize(List<Vector3> path, Vector3 from, Vector3 to)
     {
-        this.path = path;
-        this.currentJunc = path[0];
-        this.currentRoad = Junction.GetCommonRoad(path[0], path[1]);
-        this.fromRoadTile = fromRoadTile;
-        this.toRoadTile = toRoadTile;
+        this.path = new List<Vector3>(path);
+        this.from = from;
+        this.to = to;
     }
 
     void Start()
@@ -63,14 +61,14 @@ public class Car : MonoBehaviour
         simulation = simulationObject.GetComponent<Simulation>();
 
         var collider = GetComponent<BoxCollider>();
-        bumperOffset = new Vector3(collider.center.x, collider.center.y, collider.size.z / 2 + collider.center.z);
+        bumperOffset = new Vector3(collider.center.x, collider.center.y, collider.center.z + collider.size.z / 2);
         
         status = Status.DRIVING;
     }
 
     void Update()
     {
-        if (IsOnLastRoad() && IsWithinCompletionDist())
+        if (IsWithinCompletionDist())
         {
             simulation.currentCars--;
             Destroy(this);
@@ -86,7 +84,7 @@ public class Car : MonoBehaviour
     {
         RaycastHit hit;
 
-        if (Physics.Raycast(transform.position + bumperOffset, Vector3.forward, out hit, lookDistance))
+        if (Physics.Raycast(transform.position + bumperOffset, transform.forward, out hit, lookDistance))
         {
             if (hit.collider != null)
             {
@@ -112,7 +110,7 @@ public class Car : MonoBehaviour
                         status = Status.DRIVING;
                 }
 
-                if (hit.collider.tag == "Junction")
+                else if (hit.collider.tag == "Junction")
                 {
                     var status = simulation.GetTrafficLightStatus(this, hit.collider.gameObject);
 
@@ -133,6 +131,11 @@ public class Car : MonoBehaviour
                         this.status = Status.DRIVING;
                     }
                 }
+
+                else if (hit.collider.tag == "Turn")
+                {
+                    
+                }
             }
             else
             {
@@ -144,11 +147,20 @@ public class Car : MonoBehaviour
 
     private void Move()
     {
-        velocity += CalculateAcceleration() * Time.deltaTime;
+        bumperOffset = transform.rotation * bumperOffset * Time.deltaTime;
+        if (pathIndex < path.Count - 1)
+        {
+            if (Vector3.Distance(transform.position, path[pathIndex + 1]) < 0.10f)
+                pathIndex++;
 
-        if (isAccelerating && velocity.magnitude >= maxSpeed)
-            velocity = maxSpeed * Vector3.forward;
-       
+            float turnSpeed = Mathf.Lerp(5.0f, 20.0f, velocity.magnitude / maxSpeed);
+            Quaternion targetRotation = Quaternion.LookRotation(path[pathIndex + 1] - transform.position);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 5.0f);
+        }
+
+        velocity += CalculateAcceleration() * Time.deltaTime;
+        velocity = Vector3.ClampMagnitude(velocity, maxSpeed);
+
         if (IsStopped())
             velocity.z = 0.0f;
 
@@ -164,38 +176,29 @@ public class Car : MonoBehaviour
 
         if (isAccelerating)
         {
-            Vector3 traction = Vector3.forward * torque;
+            Vector3 traction = transform.forward * torque;
             totalForce += traction;
         }
         else
         {
-            Vector3 braking = -Vector3.forward * brakingConstant * brakingFactor;
+            Vector3 braking = -transform.forward * brakingConstant * brakingFactor;
             totalForce += braking;
         }
 
         return totalForce / mass;
     }
 
-    private bool IsOnLastRoad()
-    {
-        return (
-            (currentRoad?.j1 == path?[path.Count - 2] && currentRoad?.j2 == path?[path.Count - 1]) ||
-            (currentRoad?.j2 == path?[path.Count - 2] && currentRoad?.j1 == path?[path.Count - 1])
-        );
-    }
-
     private bool IsWithinCompletionDist()
     {
-        if (currentRoad == null || currentRoad.path == null)
-            return false;
-
-        return Vector3.Distance(transform.position, currentRoad.path[toRoadTile]) <= acceptibleCompletionDist;
+        return Vector3.Distance(transform.position, to) <= acceptibleCompletionDist;
     }
 
     private float CalculateBrakingFactor(float distance)
     {
-        float requiredForce = ((mass * velocity.magnitude * velocity.magnitude) / 2) / distance;
-        return Mathf.Clamp01((requiredForce + dragConstant * velocity.magnitude + rrConstant * velocity.magnitude) / (brakingConstant * 1.0f));
+        float kineticEnergy = 0.5f * mass * velocity.magnitude * velocity.magnitude;
+        float requiredForce = kineticEnergy / distance;
+
+        return Mathf.Clamp01((requiredForce + (dragConstant + rrConstant) * velocity.magnitude) / brakingConstant);
     }
 
     private bool IsStopped()
@@ -209,11 +212,6 @@ public class Car : MonoBehaviour
         {
             canStop = false;
             isAccelerating = true;
-
-            if (collision.gameObject == currentRoad.j1.obj)
-                currentJunc = currentRoad.j1;
-            else if (collision.gameObject == currentRoad.j2.obj)
-                currentJunc = currentRoad.j2;
         }
     }
 
@@ -223,9 +221,6 @@ public class Car : MonoBehaviour
         {
             canStop = true;
             isAccelerating = true;
-
-            int juncIndex = path.FindIndex((j) => j.obj == collision.gameObject);
-            currentRoad = Junction.GetCommonRoad(path[juncIndex], path[juncIndex + 1]);
         }
     }
 
@@ -245,6 +240,15 @@ public class Car : MonoBehaviour
         Gizmos.DrawCube(transform.GetChild(0).transform.position + 3 * Vector3.up, Vector3.one);
 
         Gizmos.color = Color.magenta;
-        Gizmos.DrawSphere(transform.position + bumperOffset, 1);
+        Gizmos.DrawSphere(transform.position + bumperOffset, 0.8f);
+
+        Gizmos.color = Color.cyan;
+        var line = path.GetRange(pathIndex, path.Count - pathIndex);
+        for (int i = 0; i < line.Count; ++i)
+            line[i] += i * Vector3.up;
+        Gizmos.DrawLineStrip(line.ToArray(), false);
+
+        Gizmos.color = Color.grey;
+        Gizmos.DrawLine(transform.position + Vector3.up, transform.position + 5 * transform.forward + Vector3.up);
     }
 }

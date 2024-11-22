@@ -39,8 +39,11 @@ public class Generate : MonoBehaviour
     {
         grid = new RoadTile[gridSize, gridSize];
 
-        centerOffset = new Vector2((gridSize - 1) * cellSize / 2 - center.x, (gridSize - 1) * cellSize / 2 - center.y);
-        maxDistanceFromCenter = Vector2.Distance(-centerOffset, center) / (gridSize * cellSize * Mathf.Sqrt(2) / 2);
+        float cellsToCenter = (gridSize * (blockCells + 1) - blockCells) / 2.0f * cellSize;
+
+        centerOffset = new Vector2(cellsToCenter - center.x, cellsToCenter - center.y);
+        maxDistanceFromCenter = Mathf.Sqrt(2) * (cellSize * (gridSize / 2));
+
 
         // All possible road tiles for the algorithm
         tiles = new List<RoadTile>()
@@ -194,8 +197,9 @@ public class Generate : MonoBehaviour
         Dictionary<Vector2Int, Junction> juncsMap = new Dictionary<Vector2Int, Junction>();
 
         // Expands the grid by the number of blockCells
-        RoadTile[,] grid2 = new RoadTile[gridSize * (blockCells + 1), gridSize * (blockCells + 1)];
-        int grid2Size = gridSize * (blockCells + 1);
+        RoadTile[,] grid2 = new RoadTile[gridSize * (blockCells + 1) - 1, gridSize * (blockCells + 1) - 1];
+        int grid2Size = gridSize * (blockCells + 1) - 1;
+
         for (int i = 0; i < gridSize; i++)
             for (int j = 0; j < gridSize; j++)
                 grid2[i * (blockCells + 1), j * (blockCells + 1)] = grid[i, j];
@@ -237,7 +241,7 @@ public class Generate : MonoBehaviour
                 RoadTile tile = grid2[i, j];
                 if (tile == null) continue;
 
-                Vector3 pos = new Vector3((i * cellSize - centerOffset.x) - blockCells * cellSize, 0, (j * cellSize - centerOffset.y) - blockCells * cellSize);
+                Vector3 pos = new Vector3((i + 0.5f) * cellSize - centerOffset.x, 0, (j + 0.5f) * cellSize - centerOffset.y);
 
                 var obj = Instantiate(tile.prefab, pos, Quaternion.Euler(0, tile.rotY, 0));
                 obj.SetActive(true);
@@ -264,45 +268,30 @@ public class Generate : MonoBehaviour
 
                     GetFullRoad(ref grid2, ref roadTiles, ref juncs, ref visited, i, j, grid2Size);
 
-                    roads.Add(new Road(roadTiles.Select((r) => new Vector3(
-                            (r.Item1 * cellSize - centerOffset.x) - blockCells * cellSize,
+                    var roadPath = Utils.Math.OrderVectorPath(
+                        roadTiles.Select((r) => new Vector3(
+                            (r.Item1 + 0.5f) * cellSize - centerOffset.x,
                             0,
-                            (r.Item2 * cellSize - centerOffset.x) - blockCells * cellSize
-                        )).ToArray(),
-                        juncsMap[juncs[0]],
-                        juncsMap[juncs[1]])
+                            (r.Item2 + 0.5f) * cellSize - centerOffset.y
+                        )).ToList()
+                    );
+
+                    roads.Add(
+                        new Road(
+                            roadPath,
+                            juncsMap[juncs[0]],
+                            juncsMap[juncs[1]]
+                        )
                     );
                 }
             }
         }
 
         // Sets the references in the Junction and Road objects
-        Dictionary<Junction, List<Road>> junctionToRoadConnections = new Dictionary<Junction, List<Road>>();
-        foreach (var j in juncsMap.Values)
-            junctionToRoadConnections.Add(j, new List<Road>());
+        junctions = juncsMap.Values.ToList();
 
-        foreach (var r in roads)
-        {
-            junctionToRoadConnections[r.j1].Add(r);
-            junctionToRoadConnections[r.j2].Add(r);
-        }
-
-        foreach ((Junction junc, List<Road> roadsList) in junctionToRoadConnections)
-        {
-            junctions.Add(junc);
-            junc.SetRoads(roadsList);
-        }
-
-        // Debug messages
-        //foreach (var j in junctionToRoadConnections.Keys)
-        //{
-        //    Debug.Log($"Junction: {j.obj.transform.position}, {j.roads.Length}");
-        //}
-        
-        //foreach (var r in roads)
-        //{
-        //    Debug.Log($"Road: {r.j1.obj.transform.position} -> {string.Join(',', r.path)} -> {r.j2.obj.transform.position}");
-        //}
+        foreach (var j in junctions)
+            j.SetRoads(roads.FindAll((r) => r.j1 == j || r.j2 == j));
     }
 
     // Chooses a random tile depending on the distance from the center of the grid.
@@ -318,8 +307,8 @@ public class Generate : MonoBehaviour
         else if (y == gridSize - 1)
             return tiles[13];
 
-        float distanceFromCenter = Vector2.Distance(new Vector2(x * cellSize, y * cellSize) - centerOffset, center);
-        float factor = distanceFromCenter / (gridSize * cellSize * Mathf.Sqrt(2) / 2);
+        float distanceFromCenter = Vector2.Distance(new Vector2((x + 0.5f) * cellSize, (y + 0.5f) * cellSize), Vector2.one * gridSize / 2.0f * cellSize);
+        float factor = distanceFromCenter / maxDistanceFromCenter;
 
         // normalize
         var t = Mathf.InverseLerp(0, maxDistanceFromCenter, factor);

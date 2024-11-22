@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -14,6 +15,10 @@ public class UIHandler : MonoBehaviour
     private bool isPaused = false;
     private bool change = false;
 
+    private TextMeshProUGUI datetimeText;
+    private DateTime datetime;
+    private static readonly float clockRatio = 24;
+
     private void Awake()
     {
         SetTimeButtonsListeners();
@@ -23,10 +28,16 @@ public class UIHandler : MonoBehaviour
     private void Start()
     {
         playPauseButtonImage = transform.GetChild(1).GetComponent<Image>();
+
+        datetime = DateTime.UnixEpoch;
+        datetimeText = transform.GetChild(2).GetComponent<TextMeshProUGUI>();
     }
 
     void Update()
     {
+        datetime = datetime.AddSeconds(Time.deltaTime * clockRatio);
+        datetimeText.text = datetime.ToString("dd MMM yyyy HH:mm:ss");
+
         if (change)
         {
             if(isPaused)

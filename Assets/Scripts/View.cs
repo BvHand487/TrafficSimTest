@@ -56,6 +56,6 @@ public class View : MonoBehaviour
         else if (Input.GetAxis("Mouse ScrollWheel") < 0.0f && zoomFov < maxZoomFov)
             zoomFov += zoomSpeed;
 
-        cam.fieldOfView = Mathf.MoveTowards(cam.fieldOfView, zoomFov, 1000 * zoomSpeed * Time.deltaTime);
+        cam.fieldOfView = Mathf.MoveTowards(cam.fieldOfView, zoomFov, 1000 * zoomSpeed * Time.unscaledDeltaTime);
     }
 }

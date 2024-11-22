@@ -10,9 +10,9 @@ public class Road
     public Junction j2 { get; set; }
 
     // A lsit of points that describe the path of the road
-    public Vector3[] path { get; }
+    public List<Vector3> path { get; }
 
-    public Road(Vector3[] path, Junction j1 = null, Junction j2 = null)
+    public Road(List<Vector3> path, Junction j1 = null, Junction j2 = null)
     {
         this.path = path;
         this.j1 = j1;

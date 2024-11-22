@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
+using Utils;
 
 // General class that runs the simulation
 public class Simulation : MonoBehaviour
@@ -10,12 +12,13 @@ public class Simulation : MonoBehaviour
     public GameObject carPrefab;
     public int maxCars = 10;
 
+    [System.NonSerialized]
     public int currentCars = 0;
 
-    // All junctions
+    [System.NonSerialized]
     public List<Junction> junctions;
 
-    // All roads
+    [System.NonSerialized]
     public List<Road> roads;
 
     private List<Junction> path;
@@ -33,10 +36,10 @@ public class Simulation : MonoBehaviour
 
         if (Input.GetKeyDown("space"))
         {
-            Junction a = junctions[Random.Range(0, junctions.Count)];
-            Junction b = junctions[Random.Range(0, junctions.Count)];
+            Junction a = junctions[UnityEngine.Random.Range(0, junctions.Count)];
+            Junction b = junctions[UnityEngine.Random.Range(0, junctions.Count)];
 
-            path = Utils.Pathfinding.FindBestPath(a, b);
+            path = Pathfinding.FindBestPath(a, b);
         }
 
         if (currentCars < maxCars)
@@ -45,7 +48,7 @@ public class Simulation : MonoBehaviour
 
     public TrafficLight.Status GetTrafficLightStatus(Car car, GameObject junction)
     {
-        var junc = junctions.Find(j => j.obj == junction); ;
+        var junc = junctions.Find(j => j.obj == junction);
 
         TrafficLight closestLight = junc.lights[0];
         float minDist = float.MaxValue;
@@ -67,27 +70,32 @@ public class Simulation : MonoBehaviour
     {
         currentCars++;
 
-        Junction a = junctions[Random.Range(0, junctions.Count)];
-        Junction b = junctions[Random.Range(0, junctions.Count)];
+        Junction a = junctions[UnityEngine.Random.Range(0, junctions.Count)];
+        Junction b = junctions[UnityEngine.Random.Range(0, junctions.Count)];
 
-        var path_ = Utils.Pathfinding.FindBestPath(a, b);
+        var path_ = Pathfinding.JunctionToVectorPath(Pathfinding.FindBestPath(a, b));
 
-        Road startRoad = Junction.GetCommonRoad(path_[0], path_[1]);
-        Road endRoad = Junction.GetCommonRoad(path_[path_.Count - 2], path_[path_.Count - 1]);
-
-        InstantiateCar(startRoad.path[Random.Range(0, startRoad.path.Length)],
-            Quaternion.Euler(0, 0, 0),
+        InstantiateCar(
             path_,
-            Random.Range(0, startRoad.path.Length),
-            Random.Range(0, endRoad.path.Length)
+            path_[0],
+            path_[path_.Count - 1]
         );
     }
 
-    private void InstantiateCar(Vector3 pos, Quaternion rot, List<Junction> path, int fromRoadTile, int toRoadTile)
+    private void InstantiateCar(List<Vector3> path, Vector3 from, Vector3 to)
     {
-        var car = Instantiate(carPrefab, pos, rot);
+        var zAlignment = Vector3.Dot(Vector3.forward, (path[1] - from).normalized);
+        var xAlignment = Vector3.Dot(Vector3.right, (path[1] - from).normalized);
 
-        car.GetComponent<Car>().Initialize(path, fromRoadTile, toRoadTile);
+        Quaternion rot;
+        if (zAlignment > 0 && xAlignment == 0) rot = Quaternion.Euler(0, 0, 0);
+        else if (zAlignment < 0 && xAlignment == 0) rot = Quaternion.Euler(0, 180, 0);
+        else if (zAlignment == 0 && xAlignment > 0) rot = Quaternion.Euler(0, 90, 0);
+        else rot = Quaternion.Euler(0, 270, 0);
+
+        var car = Instantiate(carPrefab, from, rot);
+
+        car.GetComponent<Car>().Initialize(path, from, to);
 
         car.name = "Car";
         car.SetActive(true);

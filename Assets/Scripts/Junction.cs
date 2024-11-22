@@ -8,8 +8,8 @@ using UnityEngine;
 public class Junction
 {
     // Which roads are connected to the junction
-    public Road[] roads;
-    public TrafficLight[] lights;
+    public List<Road> roads;
+    public List<TrafficLight> lights;
     public GameObject obj;
 
     public Junction(GameObject obj)
@@ -20,15 +20,14 @@ public class Junction
     // Set junction's roads and create traffic lights
     public void SetRoads(List<Road> roads)
     {
-        this.roads = roads.ToArray();
+        this.roads = roads;
 
         if (roads.Count > 1)
         {
-            lights = new TrafficLight[roads.Count];
-            for (int i = 0; i < roads.Count; i++)
-            {
-                lights[i] = new TrafficLight(this, roads[i]);
-            }
+            lights = new List<TrafficLight>();
+            
+            for (int i = 0; i < roads.Count; ++i)
+                lights.Add(new TrafficLight(this, roads[i]));
         }
         else
             lights = null;   
