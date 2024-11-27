@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 // Straight roads and turns are considered a part of the road path
@@ -22,5 +23,20 @@ public class Road
     public Junction GetOtherJunction(Junction j)
     {
         return j == j1 ? j2 : j1;
+    }
+
+    public bool IsTurn(Vector3 point, float eps=0.01f)
+    {
+        if (!path.Contains(point) || path.First() == point || path.Last() == point)
+            return false;
+
+        var index = path.IndexOf(point);
+        var before = path[index - 1];
+        var after = path[index + 1];
+
+        var dir1 = (before - point).normalized;
+        var dir2 = (after - point).normalized;
+
+        return Mathf.Abs(Vector3.Dot(dir1, dir2)) < eps;
     }
 }

@@ -88,7 +88,23 @@ namespace Utils
 
                 if (Vector3.Distance(juncPos1, road.path[0]) > Vector3.Distance(juncPos2, road.path[0]))
                     road.path.Reverse();
-                vectorPath.AddRange(road.path);
+
+                vectorPath.Add(Math.GetMidpointVector(road.path.First(), juncPos1));
+
+                for (int k = 0; k < road.path.Count; ++k)
+                {
+                    if (road.IsTurn(road.path[k]))
+                    {
+                        vectorPath.Add(Math.GetMidpointVector(road.path[k - 1], road.path[k]));
+                        vectorPath.Add(road.path[k]);
+                        vectorPath.Add(Math.GetMidpointVector(road.path[k], road.path[k + 1]));
+                    }
+                    else
+                        vectorPath.Add(road.path[k]);
+                }
+
+                vectorPath.Add(Math.GetMidpointVector(road.path.Last(), juncPos2));
+
             }
 
             vectorPath.Add(junctionPath[junctionPath.Count - 1].obj.transform.position);
@@ -150,6 +166,11 @@ namespace Utils
             }
 
             return closest;
+        }
+
+        public static Vector3 GetMidpointVector(Vector3 a, Vector3 b)
+        {
+            return a + (b - a) / 2;
         }
     }
 }

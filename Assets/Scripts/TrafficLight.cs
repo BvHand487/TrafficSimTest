@@ -19,8 +19,8 @@ public class TrafficLight
     public Status status { get; private set; }
     Status prevStatus;
 
-    public float greenInterval = 3.0f;
-    public float redInterval = 20.0f;
+    public float greenInterval = 5.0f;
+    public float redInterval = 10.0f;
     public static readonly float yellowInterval = 2.0f;
 
     public float elapsedTime = 0.0f;

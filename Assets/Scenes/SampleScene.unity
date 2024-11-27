@@ -356,7 +356,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   carPrefab: {fileID: 8386076031356936012}
-  maxCars: 5
+  maxCars: 41
 --- !u!1 &176988570
 GameObject:
   m_ObjectHideFlags: 0
@@ -3476,17 +3476,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0c93bca6bccdf347a36d91d0088e082, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  carDistance: 12
-  lookDistance: 30
-  lightDistance: 20
-  stoppedGap: 3
-  maxSpeed: 25
-  mass: 1500
-  torque: 3500
-  dragConstant: 0.4257
-  rrConstant: 12.8
-  brakingConstant: 35000
-  simulationObject: {fileID: 143786618}
+  stopDistance: 20
+  stopGap: 1
+  maxSpeed: 20
+  rightTurnSpeed: 1
+  leftTurnSpeed: 2
+  acceleration: 4
+  deceleration: 12
 --- !u!65 &8386076031356936014
 BoxCollider:
   m_ObjectHideFlags: 0

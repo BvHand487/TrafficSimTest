@@ -10,7 +10,7 @@ using Utils;
 public class Simulation : MonoBehaviour
 {
     public GameObject carPrefab;
-    public int maxCars = 10;
+    public int maxCars = 20;
 
     [System.NonSerialized]
     public int currentCars = 0;
@@ -21,12 +21,14 @@ public class Simulation : MonoBehaviour
     [System.NonSerialized]
     public List<Road> roads;
 
-    private List<Junction> path;
+    [System.NonSerialized]
+    private List<Car> carSpawnList;
 
     public void Initialize(List<Junction> js, List<Road> rs)
     {
         junctions = new List<Junction>(js);
         roads = new List<Road>(rs);
+        carSpawnList = new List<Car>();
     }
 
     void Update()
@@ -34,16 +36,22 @@ public class Simulation : MonoBehaviour
         foreach (var junction in junctions)
             junction.Update();
 
-        if (Input.GetKeyDown("space"))
-        {
-            Junction a = junctions[UnityEngine.Random.Range(0, junctions.Count)];
-            Junction b = junctions[UnityEngine.Random.Range(0, junctions.Count)];
 
-            path = Pathfinding.FindBestPath(a, b);
-        }
-
-        if (currentCars < maxCars)
+        if (currentCars + carSpawnList.Count < maxCars)
             SpawnCar();
+
+
+        List<Car> toRemove = new List<Car>();
+        foreach (var car in carSpawnList)
+            if (CanActivateCar(car))
+            {
+                currentCars++;
+                car.gameObject.SetActive(true);
+                toRemove.Add(car);
+            }
+
+        foreach (var carToRemove in toRemove)
+            carSpawnList.Remove(carToRemove);
     }
 
     public TrafficLight.Status GetTrafficLightStatus(Car car, GameObject junction)
@@ -68,21 +76,45 @@ public class Simulation : MonoBehaviour
     // Spawns randomly for now
     private void SpawnCar()
     {
-        currentCars++;
+        var carPath = CreateRandomCarPath();
 
-        Junction a = junctions[UnityEngine.Random.Range(0, junctions.Count)];
-        Junction b = junctions[UnityEngine.Random.Range(0, junctions.Count)];
-
-        var path_ = Pathfinding.JunctionToVectorPath(Pathfinding.FindBestPath(a, b));
-
-        InstantiateCar(
-            path_,
-            path_[0],
-            path_[path_.Count - 1]
+        var car = InstantiateCar(
+            carPath,
+            carPath.First(),
+            carPath.Last()
         );
+
+        carSpawnList.Add(car);
     }
 
-    private void InstantiateCar(List<Vector3> path, Vector3 from, Vector3 to)
+    private bool CanActivateCar(Car car)
+    {
+        var cars = FindObjectsOfType<Car>();
+
+        foreach (var c in cars)
+            if (c != null && c.gameObject.activeInHierarchy && Vector3.Distance(c.transform.position, car.transform.position) < 20.0f)
+                return false;
+
+        return true;
+    }
+
+    private List<Vector3> CreateRandomCarPath()
+    {
+        Junction a, b;
+        List<Junction> path;
+
+        do
+        {
+            a = junctions[UnityEngine.Random.Range(0, junctions.Count)];
+            b = junctions[UnityEngine.Random.Range(0, junctions.Count)];
+            path = Pathfinding.FindBestPath(a, b);
+        }
+        while (path.Count <= 1);
+
+        return Pathfinding.JunctionToVectorPath(path);
+    }
+
+    private Car InstantiateCar(List<Vector3> path, Vector3 from, Vector3 to)
     {
         var zAlignment = Vector3.Dot(Vector3.forward, (path[1] - from).normalized);
         var xAlignment = Vector3.Dot(Vector3.right, (path[1] - from).normalized);
@@ -93,12 +125,10 @@ public class Simulation : MonoBehaviour
         else if (zAlignment == 0 && xAlignment > 0) rot = Quaternion.Euler(0, 90, 0);
         else rot = Quaternion.Euler(0, 270, 0);
 
-        var car = Instantiate(carPrefab, from, rot);
-
-        car.GetComponent<Car>().Initialize(path, from, to);
-
-        car.name = "Car";
-        car.SetActive(true);
+        var car = Instantiate(carPrefab, from, rot).GetComponent<Car>();
+        car.Initialize(path, from, to);
+        car.gameObject.name = "Car";
+        return car;
     }
 
     private void OnDrawGizmos()
@@ -112,13 +142,6 @@ public class Simulation : MonoBehaviour
                 Gizmos.color = light.GetStatusColor();
                 Gizmos.DrawSphere(light.pos, 2);
             }
-        }
-        
-        if (path != null)
-        {
-            Gizmos.color = Color.blue;
-            Vector3[] pointPath = path.Select((p) => p.obj.transform.position).ToArray();
-            Gizmos.DrawLineStrip(pointPath, false);
         }
     }
 }
