@@ -7,8 +7,8 @@ using UnityEngine;
 public class Road
 {
     // Both of the junctions at the road's ends
-    public Junction j1 { get; set; }
-    public Junction j2 { get; set; }
+    public Junction junctionStart { get; set; }
+    public Junction junctionEnd { get; set; }
 
     // A lsit of points that describe the path of the road
     public List<Vector3> path { get; }
@@ -16,13 +16,13 @@ public class Road
     public Road(List<Vector3> path, Junction j1 = null, Junction j2 = null)
     {
         this.path = path;
-        this.j1 = j1;
-        this.j2 = j2;
+        this.junctionStart = j1;
+        this.junctionEnd = j2;
     }
 
     public Junction GetOtherJunction(Junction j)
     {
-        return j == j1 ? j2 : j1;
+        return j == junctionStart ? junctionEnd : junctionStart;
     }
 
     public bool IsTurn(Vector3 point, float eps=0.01f)
