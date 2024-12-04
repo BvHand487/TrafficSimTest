@@ -291,7 +291,7 @@ public class Generate : MonoBehaviour
         junctions = juncsMap.Values.ToList();
 
         foreach (var j in junctions)
-            j.SetRoads(roads.FindAll((r) => r.junctionStart == j || r.junctionEnd == j));
+            j.Initialize(roads.FindAll((r) => r.junctionStart == j || r.junctionEnd == j), Junction.Type.Lights);
     }
 
     // Chooses a random tile depending on the distance from the center of the grid.

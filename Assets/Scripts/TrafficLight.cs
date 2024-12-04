@@ -19,9 +19,15 @@ public class TrafficLight
     public Status status { get; private set; }
     Status prevStatus;
 
-    public float greenInterval = 5.0f;
-    public float redInterval = 10.0f;
     public static readonly float yellowInterval = 2.0f;
+
+    public static readonly float minGreenInterval = 5.0f;
+    public float greenInterval = 5.0f;
+
+    public static readonly float minRedInterval = 5.0f;
+    public static readonly float redBufferTime = 4.0f;
+    public float redInterval = 10.0f;
+
 
     public float elapsedTime = 0.0f;
 
@@ -45,6 +51,17 @@ public class TrafficLight
 
         status = Status.Red;
         prevStatus = Status.Red;
+    }
+
+    public bool ConfigureInterval(float greenInterval, float redInterval)
+    {
+        if (greenInterval < minGreenInterval ||
+            redInterval < minRedInterval)
+            return false;
+
+        this.greenInterval = greenInterval;
+        this.redInterval = redInterval;
+        return true;
     }
 
     // Returns the traffic light color
@@ -78,7 +95,7 @@ public class TrafficLight
     }
 
     // Changes traffic light status and resets elapsed time
-    private void SetStatus(Status newStatus)
+    public void SetStatus(Status newStatus)
     {
         prevStatus = status;
         status = newStatus;

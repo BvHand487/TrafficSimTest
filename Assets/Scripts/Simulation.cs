@@ -137,10 +137,11 @@ public class Simulation : MonoBehaviour
         {
             if (junction.lights == null) continue;
 
-            foreach (var light in junction.lights)
+            for (int i = 0; i < junction.lights.Count; ++i)
             {
-                Gizmos.color = light.GetStatusColor();
-                Gizmos.DrawSphere(light.pos, 2);
+                Gizmos.color = junction.lights[i].GetStatusColor();
+                Gizmos.DrawSphere(junction.lights[i].pos, 1.6f);
+                Gizmos.DrawCube(junction.lights[i].pos + 3f * Vector3.up, (i * 1f + 1f) * Vector3.one);
             }
         }
     }

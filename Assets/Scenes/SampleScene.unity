@@ -2087,9 +2087,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee3282190d9478d469ca7101868c8d6e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridSize: 9
+  gridSize: 7
   cellSize: 15
-  blockCells: 3
+  blockCells: 5
   center: {x: 0, y: 0}
   roadStraightPrefab: {fileID: 5292725746652232525}
   roadTurnPrefab: {fileID: 1691464603931654719}

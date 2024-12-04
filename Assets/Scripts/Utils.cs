@@ -146,7 +146,6 @@ namespace Utils
             return orderedPoints;
         }
 
-
         public static Vector3 GetClosestVector(Vector3 target, List<Vector3> points)
         {
             float minDist = float.MaxValue;
