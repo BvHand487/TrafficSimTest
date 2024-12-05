@@ -127,7 +127,7 @@ public class Car : MonoBehaviour
         }
 
         // Update path progress
-        if (distanceToTarget < 6.5f)
+        if (distanceToTarget < 4.0f)
             pathIndex++;
     }
 
@@ -155,14 +155,14 @@ public class Car : MonoBehaviour
         //}
         //Gizmos.DrawCube(bumperPosition + transform.up - transform.forward, Vector3.one);
 
-        //var line = path.GetRange(pathIndex, path.Count - pathIndex);
-        //var lineDots = path.GetRange(pathIndex, path.Count - pathIndex);
-        //for (int i = 0; i < line.Count; ++i)
-        //{
-        //    line[i] += 0.1f * i * Vector3.up;
-        //    Gizmos.DrawSphere(lineDots[i], 0.8f);
-        //}
-        //Gizmos.DrawLineStrip(line.ToArray(), false);
+        var line = path.GetRange(pathIndex, path.Count - pathIndex);
+        var lineDots = path.GetRange(pathIndex, path.Count - pathIndex);
+        for (int i = 0; i < line.Count; ++i)
+        {
+            line[i] += 0.1f * i * Vector3.up;
+            Gizmos.DrawSphere(lineDots[i], 0.8f);
+        }
+        Gizmos.DrawLineStrip(line.ToArray(), false);
     }
 }
 

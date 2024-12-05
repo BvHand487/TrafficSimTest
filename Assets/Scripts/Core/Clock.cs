@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using UnityEngine;
 
 
@@ -59,6 +60,6 @@ public class Clock
 
     public string GetFormattedDatetime(string format)
     {
-        return datetime.ToString(format);
+        return datetime.ToString(format, new System.Globalization.CultureInfo("en-US"));
     }
 }
