@@ -15,18 +15,18 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 9
   m_Fog: 0
-  m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  m_FogColor: {r: 0.8235294, g: 0.8666667, b: 0.8626609, a: 1}
   m_FogMode: 3
   m_FogDensity: 0.01
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
-  m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
+  m_AmbientSkyColor: {r: 0.9100907, g: 0.98777765, b: 1, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 8e2cbe0dab5e7804abb6397adf4e1bff, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -203,7 +203,7 @@ GameObject:
   - component: {fileID: 78646253}
   - component: {fileID: 78646252}
   m_Layer: 5
-  m_Name: X100
+  m_Name: 100
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -272,7 +272,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 78646253}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1148875881}
+        m_TargetAssemblyTypeName: TimeSpeed, Assembly-CSharp
+        m_MethodName: SetTimeScale
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 78646250}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &78646253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -321,13 +333,14 @@ GameObject:
   m_Component:
   - component: {fileID: 143786619}
   - component: {fileID: 143786620}
+  - component: {fileID: 143786621}
   m_Layer: 0
   m_Name: Simulation
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &143786619
 Transform:
   m_ObjectHideFlags: 0
@@ -356,7 +369,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   carPrefab: {fileID: 8386076031356936012}
-  maxCars: 41
+  maxCars: 40
+--- !u!114 &143786621
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 143786618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ef0cede23f5e3b4e9dee72cf054c367, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sun: {fileID: 410087040}
+  preset: {fileID: 11400000, guid: 8ed9bb3d868a1c942965658016db7c65, type: 2}
 --- !u!1 &176988570
 GameObject:
   m_ObjectHideFlags: 0
@@ -368,8 +395,9 @@ GameObject:
   - component: {fileID: 176988571}
   - component: {fileID: 176988573}
   - component: {fileID: 176988572}
+  - component: {fileID: 176988574}
   m_Layer: 5
-  m_Name: Datetime
+  m_Name: DatetimeText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -414,7 +442,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 00:00:00 01-01-1970
+  m_text: 01 Jan 1970 00:00:00
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -491,6 +519,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 176988570}
   m_CullTransparentMesh: 1
+--- !u!114 &176988574
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 176988570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e7b6444db37d52d4e845b6b389f3b5aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  datetimeText: {fileID: 176988572}
 --- !u!1 &237157819
 GameObject:
   m_ObjectHideFlags: 0
@@ -504,7 +545,7 @@ GameObject:
   - component: {fileID: 237157822}
   - component: {fileID: 237157821}
   m_Layer: 5
-  m_Name: X1
+  m_Name: 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -573,7 +614,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 237157822}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1148875881}
+        m_TargetAssemblyTypeName: TimeSpeed, Assembly-CSharp
+        m_MethodName: SetTimeScale
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 237157819}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &237157822
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -762,9 +815,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a9bdff6d043d5f4c8ea216390e5bc98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  panSpeed: 80
-  moveSpeed: 0
-  zoomSpeed: 2
+  panSpeed: 40
+  zoomSpeed: 7500
+  minCameraY: 50
+  maxCameraY: 300
 --- !u!1 &335449278
 GameObject:
   m_ObjectHideFlags: 0
@@ -912,7 +966,7 @@ GameObject:
   - component: {fileID: 340805992}
   - component: {fileID: 340805991}
   m_Layer: 5
-  m_Name: X500
+  m_Name: 500
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -981,7 +1035,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 340805992}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1148875881}
+        m_TargetAssemblyTypeName: TimeSpeed, Assembly-CSharp
+        m_MethodName: SetTimeScale
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 340805989}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &340805992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1033,7 +1099,7 @@ GameObject:
   - component: {fileID: 388934051}
   - component: {fileID: 388934050}
   m_Layer: 5
-  m_Name: X25
+  m_Name: 25
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1102,7 +1168,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 388934051}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1148875881}
+        m_TargetAssemblyTypeName: TimeSpeed, Assembly-CSharp
+        m_MethodName: SetTimeScale
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 388934048}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &388934051
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1177,7 +1255,7 @@ Light:
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 1
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
@@ -1210,7 +1288,7 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RenderingLayerMask: 1
-  m_Lightmapping: 2
+  m_Lightmapping: 1
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
@@ -1229,7 +1307,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
+  m_LocalRotation: {x: 0.061628457, y: 0.70441604, z: -0.70441604, w: 0.061628457}
   m_LocalPosition: {x: 0, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1272,7 +1350,7 @@ GameObject:
   - component: {fileID: 484049656}
   - component: {fileID: 484049655}
   m_Layer: 5
-  m_Name: X5
+  m_Name: 5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1341,7 +1419,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 484049656}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1148875881}
+        m_TargetAssemblyTypeName: TimeSpeed, Assembly-CSharp
+        m_MethodName: SetTimeScale
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 484049653}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &484049656
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1393,7 +1483,7 @@ GameObject:
   - component: {fileID: 554313017}
   - component: {fileID: 554313016}
   m_Layer: 5
-  m_Name: X2
+  m_Name: 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1462,7 +1552,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 554313017}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1148875881}
+        m_TargetAssemblyTypeName: TimeSpeed, Assembly-CSharp
+        m_MethodName: SetTimeScale
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 554313014}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &554313017
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2088,7 +2190,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridSize: 7
-  cellSize: 15
   blockCells: 5
   center: {x: 0, y: 0}
   roadStraightPrefab: {fileID: 5292725746652232525}
@@ -2121,8 +2222,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1148875880}
+  - component: {fileID: 1148875881}
   m_Layer: 5
-  m_Name: TimeButtons
+  m_Name: TimeScaleButtons
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2153,6 +2255,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1148875881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1148875879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 55646974892ccdc48940453a308a29e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1166796739
 GameObject:
   m_ObjectHideFlags: 0
@@ -2165,6 +2279,7 @@ GameObject:
   - component: {fileID: 1166796743}
   - component: {fileID: 1166796742}
   - component: {fileID: 1166796741}
+  - component: {fileID: 1166796744}
   m_Layer: 5
   m_Name: PlayPauseButton
   m_TagString: Untagged
@@ -2234,7 +2349,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1166796742}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1166796744}
+        m_TargetAssemblyTypeName: PlayPauseButton, Assembly-CSharp
+        m_MethodName: TogglePaused
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 1166796742}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.UI.Image, UnityEngine.UI
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1166796742
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2248,7 +2375,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.5193174, g: 0.76729554, b: 0.4319053, a: 1}
+  m_Color: {r: 0.25581408, g: 1, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2273,6 +2400,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1166796739}
   m_CullTransparentMesh: 1
+--- !u!114 &1166796744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1166796739}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10e64a5bba1eb2d45b1dd9234b0438c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  imagePaused: {fileID: 21300000, guid: 2ea152890fe1b1a4194c3970ad3b2421, type: 3}
+  imageUnpaused: {fileID: 21300000, guid: 9905f5b1555437442a9577a4132916f6, type: 3}
 --- !u!1 &1442623325
 GameObject:
   m_ObjectHideFlags: 0
@@ -2421,9 +2562,8 @@ GameObject:
   - component: {fileID: 1775242290}
   - component: {fileID: 1775242289}
   - component: {fileID: 1775242288}
-  - component: {fileID: 1775242292}
   m_Layer: 5
-  m_Name: UI
+  m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2514,20 +2654,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!114 &1775242292
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1775242287}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 77d80b695fd6c1043adc192e152cfd23, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pause: {fileID: 21300000, guid: 9905f5b1555437442a9577a4132916f6, type: 3}
-  play: {fileID: 21300000, guid: 2ea152890fe1b1a4194c3970ad3b2421, type: 3}
 --- !u!1 &1963116814
 GameObject:
   m_ObjectHideFlags: 0

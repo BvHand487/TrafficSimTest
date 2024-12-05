@@ -8,15 +8,12 @@ using UnityEngine;
 
 public class Generate : MonoBehaviour
 {
-    [SerializeField]
-    private int gridSize = 50;
-
-    [SerializeField]
-    private float cellSize = 15;
+    [SerializeField] private int gridSize = 50;
 
     // Spacing of tiles on generating
-    [SerializeField]
-    private int blockCells = 5;
+    [SerializeField] private int blockCells = 5;
+
+    private static readonly float cellSize = 15;
 
     [SerializeField]
     private Vector2 center = Vector2.zero;
@@ -34,6 +31,18 @@ public class Generate : MonoBehaviour
 
     private List<Road> roads = new List<Road>();
     private List<Junction> junctions = new List<Junction>();
+
+    // Load data from main menu using the PlayerRrefs API
+    private void Awake()
+    {
+        if (PlayerPrefs.HasKey("Grid Size"))
+            gridSize = PlayerPrefs.GetInt("Grid Size");
+
+        if (PlayerPrefs.HasKey("Junction Gap"))
+            blockCells = PlayerPrefs.GetInt("Junction Gap");
+
+        PlayerPrefs.DeleteAll();
+    }
 
     void Start()
     {
@@ -245,7 +254,7 @@ public class Generate : MonoBehaviour
 
                 var obj = Instantiate(tile.prefab, pos, Quaternion.Euler(0, tile.rotY, 0));
                 obj.SetActive(true);
-                obj.name = $"{tile.prefab.name}_({i}, {j})";
+                obj.name = $"{tile.prefab.name}";
 
                 if (!tile.IsRoad())
                     juncsMap.Add(new Vector2Int(i, j), new Junction(obj));

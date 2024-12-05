@@ -4,26 +4,23 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using static UnityEditor.PlayerSettings;
 
+
 public class View : MonoBehaviour
 {
     public float panSpeed;
-    public float moveSpeed;
+
     public float zoomSpeed;
+    public float minCameraY = 300f;
+    public float maxCameraY = 300f;
 
     private Camera cam;
 
     private Vector3 panOrigin;
     private Vector3 posOrigin;
 
-    private float zoomFov;
-    private float minZoomFov = 16.0f;
-    private float maxZoomFov = 100.0f;
-
     void Start()
     {
         cam = GetComponent<Camera>();
-
-        zoomFov = cam.fieldOfView;
     }
 
     void Update()
@@ -44,18 +41,22 @@ public class View : MonoBehaviour
         else if (Input.GetMouseButton(0))
         {
             Vector3 pos = cam.ScreenToViewportPoint(panOrigin - Input.mousePosition);
-            Vector3 move = panSpeed * (zoomFov / minZoomFov) * new Vector3(pos.x, 0, pos.y);
+            Vector3 move = panSpeed * (transform.position.y / minCameraY) * new Vector3(pos.x, 0, pos.y);
             transform.position = posOrigin + move;
         }
     }
 
     private void HandleZoom()
     {
-        if (Input.GetAxis("Mouse ScrollWheel") > 0.0f && zoomFov > minZoomFov)
-            zoomFov -= zoomSpeed;
-        else if (Input.GetAxis("Mouse ScrollWheel") < 0.0f && zoomFov < maxZoomFov)
-            zoomFov += zoomSpeed;
+        float scrollWheel = Input.GetAxis("Mouse ScrollWheel");
 
-        cam.fieldOfView = Mathf.MoveTowards(cam.fieldOfView, zoomFov, 1000 * zoomSpeed * Time.unscaledDeltaTime);
+        if (scrollWheel != 0f)
+        {
+            transform.position = new Vector3(
+                transform.position.x,
+                Mathf.Clamp(transform.position.y - scrollWheel * zoomSpeed * Time.unscaledDeltaTime, minCameraY, maxCameraY),
+                transform.position.z
+            );
+        }
     }
 }

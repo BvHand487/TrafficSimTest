@@ -113,15 +113,6 @@ namespace Utils
         }
     }
 
-    public static class Time
-    {
-        // For speeding up time
-        public static void SetTimeScale(int timeScale)
-        {
-            UnityEngine.Time.timeScale = timeScale;
-        }
-    }
-
     public static class Math
     {
         // Orders a list of points so that each pair of points are nearest-neighbours

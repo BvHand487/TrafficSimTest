@@ -141,19 +141,19 @@ public class Car : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        Gizmos.color = Color.cyan;
-        Gizmos.DrawSphere(bumperPosition, 0.5f);
+        //Gizmos.color = Color.cyan;
+        //Gizmos.DrawSphere(bumperPosition, 0.5f);
 
-        switch (status)
-        {
-            case Status.DRIVING:
-                Gizmos.color = Color.green; break;
-            case Status.WAITING_ON_CAR:
-                Gizmos.color = Color.yellow; break;
-            case Status.WAITING_ON_RED:
-                Gizmos.color = Color.red; break;
-        }
-        Gizmos.DrawCube(bumperPosition + transform.up - transform.forward, Vector3.one);
+        //switch (status)
+        //{
+        //    case Status.DRIVING:
+        //        Gizmos.color = Color.green; break;
+        //    case Status.WAITING_ON_CAR:
+        //        Gizmos.color = Color.yellow; break;
+        //    case Status.WAITING_ON_RED:
+        //        Gizmos.color = Color.red; break;
+        //}
+        //Gizmos.DrawCube(bumperPosition + transform.up - transform.forward, Vector3.one);
 
         //var line = path.GetRange(pathIndex, path.Count - pathIndex);
         //var lineDots = path.GetRange(pathIndex, path.Count - pathIndex);

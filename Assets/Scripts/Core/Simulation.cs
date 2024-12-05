@@ -24,6 +24,9 @@ public class Simulation : MonoBehaviour
     [System.NonSerialized]
     private List<Car> carSpawnList;
 
+    [System.NonSerialized]
+    private Clock clock;
+
     public void Initialize(List<Junction> js, List<Road> rs)
     {
         junctions = new List<Junction>(js);
@@ -31,11 +34,19 @@ public class Simulation : MonoBehaviour
         carSpawnList = new List<Car>();
     }
 
+    private void Start()
+    {
+        clock = Clock.Instance;
+    }
+
     void Update()
     {
+        if (clock == null) return;
+        clock.Update();
+
+        if (junctions == null) return;
         foreach (var junction in junctions)
             junction.Update();
-
 
         if (currentCars + carSpawnList.Count < maxCars)
             SpawnCar();
@@ -133,6 +144,9 @@ public class Simulation : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        if (junctions == null)
+            return;
+
         foreach (var junction in junctions)
         {
             if (junction.lights == null) continue;
