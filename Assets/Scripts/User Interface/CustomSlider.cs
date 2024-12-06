@@ -1,18 +1,22 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class Slider : MonoBehaviour
+public class CustomSlider : MonoBehaviour
 {
     [SerializeField] private MainMenu menu;
     [SerializeField] private TextMeshProUGUI title;
 
     private TextMeshProUGUI sliderValueComp = null;
+    private Slider sliderComp;
 
-    private void Start()
+    public float minValue => sliderComp.minValue;
+    public float maxValue => sliderComp.maxValue;
+
+    private void Awake()
     {
         sliderValueComp = transform.GetChild(transform.childCount - 1).GetComponent<TextMeshProUGUI>();
+        sliderComp = GetComponent<Slider>();
     }
 
     public void UpdateSliderValue(float value)

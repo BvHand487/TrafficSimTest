@@ -1,8 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -52,7 +49,6 @@ public class Generate : MonoBehaviour
 
         centerOffset = new Vector2(cellsToCenter - center.x, cellsToCenter - center.y);
         maxDistanceFromCenter = Mathf.Sqrt(2) * (cellSize * (gridSize / 2));
-
 
         // All possible road tiles for the algorithm
         tiles = new List<RoadTile>()
@@ -206,8 +202,8 @@ public class Generate : MonoBehaviour
         Dictionary<Vector2Int, Junction> juncsMap = new Dictionary<Vector2Int, Junction>();
 
         // Expands the grid by the number of blockCells
-        RoadTile[,] grid2 = new RoadTile[gridSize * (blockCells + 1) - 1, gridSize * (blockCells + 1) - 1];
-        int grid2Size = gridSize * (blockCells + 1) - 1;
+        int grid2Size = (gridSize - 1) * blockCells + gridSize;
+        RoadTile[,] grid2 = new RoadTile[grid2Size, grid2Size];
 
         for (int i = 0; i < gridSize; i++)
             for (int j = 0; j < gridSize; j++)
@@ -300,7 +296,18 @@ public class Generate : MonoBehaviour
         junctions = juncsMap.Values.ToList();
 
         foreach (var j in junctions)
-            j.Initialize(roads.FindAll((r) => r.junctionStart == j || r.junctionEnd == j), Junction.Type.Lights);
+            j.Initialize(roads.FindAll((r) => r.junctionStart == j || r.junctionEnd == j), ChooseRandomJunctionType(j));
+    }
+
+    Junction.Type ChooseRandomJunctionType(Junction j)
+    {
+        var maxDistFromCenter = Mathf.Sqrt(2f) * 0.5f * (cellSize * ((gridSize - 1) * blockCells + gridSize) - cellSize);
+        var distFromCenter = Vector3.Distance(j.obj.transform.position, new Vector3(center.x, 0, center.y));
+
+        if (Utils.Math.NormalDistribution(distFromCenter / maxDistanceFromCenter, 2.4f) > Random.value)
+            return Junction.Type.Lights;
+        else
+            return Junction.Type.Stops;
     }
 
     // Chooses a random tile depending on the distance from the center of the grid.

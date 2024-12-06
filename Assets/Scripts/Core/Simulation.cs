@@ -1,8 +1,5 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using Utils;
 
@@ -65,19 +62,20 @@ public class Simulation : MonoBehaviour
             carSpawnList.Remove(carToRemove);
     }
 
-    public TrafficLight.Status GetTrafficLightStatus(Car car, GameObject junction)
+    public TrafficLight.Status GetTrafficLightStatus(Car car, Junction junction)
     {
-        var junc = junctions.Find(j => j.obj == junction);
+        var trafficLights = junction.trafficLights;
 
-        TrafficLight closestLight = junc.lights[0];
+        TrafficLight closestLight = trafficLights.First();
         float minDist = float.MaxValue;
-        foreach (var l in junc.lights)
+
+        foreach (var tl in trafficLights)
         {
-            float dist = Vector3.Distance(l.pos, car.transform.position);
+            float dist = Vector3.Distance(tl.pos, car.transform.position);
             if (dist < minDist)
             {
                 minDist = dist;
-                closestLight = l;
+                closestLight = tl;
             }
         }
 
@@ -149,13 +147,12 @@ public class Simulation : MonoBehaviour
 
         foreach (var junction in junctions)
         {
-            if (junction.lights == null) continue;
+            if (junction.trafficLights == null) continue;
 
-            for (int i = 0; i < junction.lights.Count; ++i)
+            for (int i = 0; i < junction.trafficLights.Count; ++i)
             {
-                Gizmos.color = junction.lights[i].GetStatusColor();
-                Gizmos.DrawSphere(junction.lights[i].pos, 1.6f);
-                Gizmos.DrawCube(junction.lights[i].pos + 3f * Vector3.up, (i * 1f + 1f) * Vector3.one);
+                Gizmos.color = junction.trafficLights[i].GetStatusColor();
+                Gizmos.DrawSphere(junction.trafficLights[i].pos, 1.5f);
             }
         }
     }

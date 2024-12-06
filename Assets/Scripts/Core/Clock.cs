@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using UnityEngine;
 
 
@@ -22,7 +21,7 @@ public class Clock
 
     public float timeScale
     {
-        get { return Time.timeScale; }
+        get => Time.timeScale;
         set
         {
             if (Time.timeScale != 0f)

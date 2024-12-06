@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -26,7 +24,7 @@ public class Road
         return j == junctionStart ? junctionEnd : junctionStart;
     }
 
-    public bool IsTurn(Vector3 point, float eps=0.01f)
+    public bool IsTurn(Vector3 point, float eps = 0.01f)
     {
         if (!path.Contains(point) || path.First() == point || path.Last() == point)
             return false;
@@ -49,27 +47,55 @@ public class Road
         return junctionsA.Intersect(junctionsB).First();
     }
 
-    public static List<Road> OrderRoadsAntiClockwise(List<Road> roads)
+    // Orders roads around the intersection sequentially
+    // If it's a 4-way intersection it orders them anticlockwise
+    public static List<Road> OrderRoads(List<Road> roads)
     {
-        if (roads.Count == 1)
-            return roads;
-
         Vector3 junctionPos = Road.GetCommonJunction(roads.First(), roads.Last()).obj.transform.position;
-        Dictionary<Road, float> anglesInWorld = new Dictionary<Road, float>();
 
-        foreach (var road in roads)
+        switch (roads.Count)
         {
-            var roadPos = Utils.Math.GetClosestVector(junctionPos, road.path);
-            Vector3 roadDir = (roadPos - junctionPos).normalized;
+            case 1:
+                return roads;
 
-            var angle = Vector3.Angle(roadDir, Vector3.right);
-            if (Vector3.Dot(roadDir, Vector3.forward) < 0.1f)
-                angle = 360f - angle;
-            angle = Unity.Mathematics.math.fmod(angle, 360f);
+            case 3:
+                int IndexOfRoadThatSticksOut = 1;
 
-            anglesInWorld.Add(road, angle);
+                for (int i = 0; i < roads.Count; ++i)
+                    if (roads.Count(r => Utils.Math.CompareFloat(
+                            Vector3.Dot(
+                                r.path.First() - junctionPos,
+                                roads[i].path.First() - junctionPos
+                            ), 0.0f)) == 2)
+                    {
+                        IndexOfRoadThatSticksOut = i;
+                        break;
+                    }
+
+                var temp = roads[1];
+                roads[1] = roads[IndexOfRoadThatSticksOut];
+                roads[IndexOfRoadThatSticksOut] = temp;
+
+                return roads;
+
+
+            default:
+                Dictionary<Road, float> anglesInWorld = new Dictionary<Road, float>();
+
+                foreach (var road in roads)
+                {
+                    var roadPos = Utils.Math.GetClosestVector(junctionPos, road.path);
+                    Vector3 roadDir = (roadPos - junctionPos).normalized;
+
+                    var angle = Vector3.Angle(roadDir, Vector3.right);
+                    if (Vector3.Dot(roadDir, Vector3.forward) < 0.1f)
+                        angle = 360f - angle;
+                    angle = Unity.Mathematics.math.fmod(angle, 360f);
+
+                    anglesInWorld.Add(road, angle);
+                }
+
+                return anglesInWorld.OrderBy(e => e.Value).Select(pair => pair.Key).ToList();
         }
-
-        return anglesInWorld.OrderBy(e => e.Value).Select(pair => pair.Key).ToList();
     }
 }

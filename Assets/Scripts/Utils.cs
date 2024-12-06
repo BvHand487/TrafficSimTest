@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Utils
@@ -82,18 +80,16 @@ namespace Utils
             for (int k = 0; k < road.path.Count; ++k)
             {
                 if (road.IsTurn(road.path[k]))
-                {
                     vectorPath.AddRange(
                         Math.GetBezier(
                             new List<Vector3>() {
-                                    road.path[k - 1],
-                                    road.path[k],
-                                    road.path[k + 1]
+                                road.path[k - 1],
+                                road.path[k],
+                                road.path[k + 1]
                             },
-                            segments: 3
-                        )
+                            segments: 7
+                       )
                     );
-                }
                 else
                     vectorPath.Add(road.path[k]);
             }
@@ -101,34 +97,47 @@ namespace Utils
             return vectorPath;
         }
 
-        public static List<Vector3> JunctionToVectorPath(List<Junction> junctionPath)
+        public static List<Vector3> DiscretizeJunction(Junction junction, Road from, Road to)
         {
             List<Vector3> vectorPath = new List<Vector3>();
-            Road prevRoad, road;
-            prevRoad = road = Junction.GetCommonRoad(junctionPath[0], junctionPath[1]);
+            Vector3 junctionPos = junction.obj.transform.position;
 
-            for (int i = 1; i < junctionPath.Count; ++i)
-            {
-                var juncPos1 = junctionPath[i - 1].obj.transform.position;
-                var juncPos2 = junctionPath[i].obj.transform.position;
-                road = Junction.GetCommonRoad(junctionPath[i - 1], junctionPath[i]);
-
-                if (Vector3.Distance(juncPos1, road.path[0]) > Vector3.Distance(juncPos2, road.path[0]))
-                    road.path.Reverse();
-
+            if (from != null &&
+                to != null &&
+                new Road(new List<Vector3>() { from.path.Last(), junctionPos, to.path.First() }).IsTurn(junctionPos))
                 vectorPath.AddRange(
                     Math.GetBezier(
                         new List<Vector3>() {
-                            Math.GetMidpointVector(prevRoad.path.Last(), juncPos1),
-                            juncPos1,
-                            Math.GetMidpointVector(juncPos1, road.path.First())
+                            Math.GetMidpointVector(from.path.Last(), junctionPos),
+                            junctionPos,
+                            Math.GetMidpointVector(junctionPos, to.path.First())
                         },
-                        segments: 3
+                        segments: 7
                     )
                 );
+            else
+                vectorPath.Add(junctionPos);
 
-                vectorPath.AddRange(DiscretizeRoad(road));
-                prevRoad = road;
+            return vectorPath;
+        }
+
+        public static List<Vector3> JunctionToVectorPath(List<Junction> junctionPath)
+        {
+            List<Vector3> vectorPath = new List<Vector3>();
+
+            Road prevRoad = null, nextRoad = null;
+
+            for (int i = 0; i < junctionPath.Count - 1; ++i)
+            {
+                nextRoad = Junction.GetCommonRoad(junctionPath[i], junctionPath[i + 1]);
+                if (Vector3.Distance(junctionPath[i].obj.transform.position, nextRoad.path[0]) >
+                    Vector3.Distance(junctionPath[i + 1].obj.transform.position, nextRoad.path[0]))
+                    nextRoad.path.Reverse();
+
+                vectorPath.AddRange(DiscretizeJunction(junctionPath[i], prevRoad, nextRoad));
+                vectorPath.AddRange(DiscretizeRoad(nextRoad));
+
+                prevRoad = nextRoad;
             }
 
             vectorPath.Add(junctionPath.Last().obj.transform.position);
@@ -181,10 +190,7 @@ namespace Utils
             return closest;
         }
 
-        public static Vector3 GetMidpointVector(Vector3 a, Vector3 b)
-        {
-            return a + (b - a) / 2;
-        }
+        public static Vector3 GetMidpointVector(Vector3 a, Vector3 b) => a + (b - a) / 2;
 
 
         // De Casteljau's algorithm for calculating a point on a bezier based on a parameter t.
@@ -211,18 +217,6 @@ namespace Utils
             for (float t = 0.0f; t < 1.0f; t += tStep)
                 bezierPoints.Add(EvaluateBezier(controlPoints, t));
 
-            var msg = "";
-            foreach (var p in controlPoints)
-            {
-                msg += $"{p.ToShortString()}, ";
-            }
-
-            foreach (var p in bezierPoints)
-            {
-                msg += $" -> {p.ToShortString()}";
-            }
-            Debug.Log(msg);
-
             return bezierPoints;
         }
 
@@ -230,5 +224,11 @@ namespace Utils
         {
             return null;
         }
+
+        public static bool CompareFloat(float x, float cmp, float eps = 0.005f) => IsWithinFloat(x, cmp - eps, cmp + eps);
+
+        public static bool IsWithinFloat(float x, float lo, float hi) => x > lo && x < hi;
+
+        public static float NormalDistribution(float x, float sigma=1.0f) => Mathf.Exp(-(x * x) / (2 * sigma * sigma));
     }
 }
