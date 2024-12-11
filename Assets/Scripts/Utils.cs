@@ -229,6 +229,11 @@ namespace Utils
 
         public static bool IsWithinFloat(float x, float lo, float hi) => x > lo && x < hi;
 
-        public static float NormalDistribution(float x, float sigma=1.0f) => Mathf.Exp(-(x * x) / (2 * sigma * sigma));
+        public static float NormalDistribution(float x, float sigma=1.0f, float mean = 0.0f)
+        {
+            float dx = x - mean;
+
+            return Mathf.Exp(-(dx * dx) / (2 * sigma * sigma));
+        }
     }
 }

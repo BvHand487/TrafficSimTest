@@ -61,4 +61,9 @@ public class Clock
     {
         return datetime.ToString(format, new System.Globalization.CultureInfo("en-US"));
     }
+
+    public float GetFractionOfDay()
+    {
+        return (datetime.Hour + datetime.Minute / 60f) / 24f;
+    }
 }

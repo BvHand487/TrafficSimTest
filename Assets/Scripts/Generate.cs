@@ -18,7 +18,7 @@ public class Generate : MonoBehaviour
     private float maxDistanceFromCenter = 1.0f;
 
     [SerializeField]
-    public GameObject roadStraightPrefab, roadTurnPrefab, roadJoinPrefab, roadCrossPrefab, roadEndPrefab, simulation;
+    public GameObject roadStraightPrefab, roadTurnPrefab, roadJoinPrefab, roadCrossPrefab, roadEndPrefab, buildingPrefab, simulation;
 
     private float straightChance = 0, turnChance = 0, joinChance = 0, crossChance = 0, endChance = 0;
 
@@ -68,6 +68,7 @@ public class Generate : MonoBehaviour
             new RoadTile(roadEndPrefab, 90, new[] { 'E' }, new[] { 'S', 'N', 'W' }),
             new RoadTile(roadEndPrefab, 180, new[] { 'S' }, new[] { 'N', 'E', 'W' }),
             new RoadTile(roadEndPrefab, 270, new[] { 'W' }, new[] { 'S', 'E', 'N' }),
+            new RoadTile(buildingPrefab, 0, new[] { 'N', 'E', 'S', 'W' }, new char [] { }),
         };
 
         possibilities = new List<RoadTile>[gridSize, gridSize];
@@ -244,10 +245,10 @@ public class Generate : MonoBehaviour
             for (int j = 0; j < grid2Size; ++j)
             {
                 RoadTile tile = grid2[i, j];
-                if (tile == null) continue;
+                if (tile == null)
+                    continue;
 
                 Vector3 pos = new Vector3((i + 0.5f) * cellSize - centerOffset.x, 0, (j + 0.5f) * cellSize - centerOffset.y);
-
                 var obj = Instantiate(tile.prefab, pos, Quaternion.Euler(0, tile.rotY, 0));
                 obj.SetActive(true);
                 obj.name = $"{tile.prefab.name}";
@@ -359,7 +360,7 @@ public class Generate : MonoBehaviour
                 return tiles[i];
 
         // Select randomly if we get here
-        return possibilities[x, y][UnityEngine.Random.Range(0, possibilities[x, y].Count)];
+        return possibilities[x, y][Random.Range(0, possibilities[x, y].Count)];
     }
 
     // The chances for a type of tile is based on sine functions
