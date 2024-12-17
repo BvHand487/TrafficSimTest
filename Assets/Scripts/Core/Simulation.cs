@@ -29,10 +29,11 @@ public class Simulation : MonoBehaviour
     [System.NonSerialized]
     private Clock clock;
 
-    public void Initialize(List<Junction> js, List<Road> rs)
+    public void Initialize(List<Junction> js, List<Road> rs, List<Building> bs)
     {
         junctions = new List<Junction>(js);
         roads = new List<Road>(rs);
+        buildings = new List<Building>(bs);
         carSpawnList = new List<Car>();
     }
 

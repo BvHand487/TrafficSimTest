@@ -34,7 +34,7 @@ public class Junction
     }
 
     // Set junction's roads and create traffic lights
-    public void Initialize(List<Road> roads, Type type)
+    public void Initialize(List<Road> roads, Type type = Type.None)
     {
         this.roads = Road.OrderRoads(roads);
 

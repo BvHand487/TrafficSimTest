@@ -369,7 +369,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   carPrefab: {fileID: 8386076031356936012}
-  maxCars: 50
+  maxCars: 40
 --- !u!114 &143786621
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2190,7 +2190,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridSize: 7
-  blockCells: 5
+  blockCells: 3
   center: {x: 0, y: 0}
   roadStraightPrefab: {fileID: 5292725746652232525}
   roadTurnPrefab: {fileID: 1691464603931654719}
@@ -2849,7 +2849,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 8a4d49fa4c4ae5f4cbf978e4b8543c2c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2888,9 +2888,9 @@ Transform:
   m_GameObject: {fileID: 2112248143}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 10, y: 10, z: 10}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: 0, y: 4, z: 0}
+  m_LocalScale: {x: 10, y: 8, z: 10}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2981,7 +2981,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2994,7 +2994,7 @@ Transform:
   m_GameObject: {fileID: 8386076031356936012}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 270, y: 0, z: 30}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3014,7 +3014,7 @@ Transform:
   m_GameObject: {fileID: 4058687898470350023}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.9025276, y: 0.5930263, z: 2.422488}
+  m_LocalPosition: {x: 0.8425276, y: 0.5930263, z: 2.422488}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3056,7 +3056,7 @@ Transform:
   m_GameObject: {fileID: 7467549312153948927}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.29, y: 1.1, z: -0.4819001}
+  m_LocalPosition: {x: 2.23, y: 1.1, z: -0.4819001}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3255,7 +3255,7 @@ Transform:
   m_GameObject: {fileID: 7804030453207590628}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.6897144, y: 0.59302586, z: -2.048642}
+  m_LocalPosition: {x: 3.6297143, y: 0.59302586, z: -2.048642}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3654,7 +3654,7 @@ Transform:
   m_GameObject: {fileID: 6863934060828436208}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.9025276, y: 0.59302586, z: -2.04864}
+  m_LocalPosition: {x: 0.8425276, y: 0.59302586, z: -2.04864}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3709,12 +3709,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   stopDistance: 20
-  stopGap: 2
+  stopGap: 3
   maxSpeed: 20
-  rightTurnSpeed: 1
-  leftTurnSpeed: 2
-  acceleration: 4
-  deceleration: 12
+  speedUp: 5
   carEventEffect: {fileID: 0}
 --- !u!65 &8386076031356936014
 BoxCollider:
@@ -3746,7 +3743,7 @@ Transform:
   m_GameObject: {fileID: 3566330698738761132}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.6897144, y: 0.5930262, z: 2.422488}
+  m_LocalPosition: {x: 3.6297143, y: 0.5930262, z: 2.422488}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_ConstrainProportionsScale: 0
   m_Children: []
