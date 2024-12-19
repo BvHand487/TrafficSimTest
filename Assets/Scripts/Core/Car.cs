@@ -87,7 +87,7 @@ public class Car : MonoBehaviour
             switch (hit.collider.tag)
             {
                 case "Junction":
-                    Junction junction = simulation.junctions.Find(j => j.obj == hit.collider.gameObject);
+                    Junction junction = simulation.junctionsDict[hit.collider.gameObject];
 
                     switch (junction.type)
                     {

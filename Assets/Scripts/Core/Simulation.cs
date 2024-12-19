@@ -16,6 +16,7 @@ public class Simulation : MonoBehaviour
 
     [System.NonSerialized]
     public List<Junction> junctions;
+    public Dictionary<GameObject, Junction> junctionsDict;
 
     [System.NonSerialized]
     public List<Road> roads;
@@ -32,6 +33,8 @@ public class Simulation : MonoBehaviour
     public void Initialize(List<Junction> js, List<Road> rs, List<Building> bs)
     {
         junctions = new List<Junction>(js);
+        junctionsDict = junctions.ToDictionary(j => j.obj, j => j);
+
         roads = new List<Road>(rs);
         buildings = new List<Building>(bs);
         carSpawnList = new List<Car>();
@@ -94,7 +97,7 @@ public class Simulation : MonoBehaviour
     private void SpawnCar()
     {
         // Spawn a car going to work/home
-        if (Random.value < directedTrafficChance)
+        if (UnityEngine.Random.value < directedTrafficChance)
         {
             var carPath = CreateDirectedCarPath();
 
@@ -164,8 +167,8 @@ public class Simulation : MonoBehaviour
 
         do
         {
-            a = junctions[Random.Range(0, junctions.Count)];
-            b = junctions[Random.Range(0, junctions.Count)];
+            a = junctions[UnityEngine.Random.Range(0, junctions.Count)];
+            b = junctions[UnityEngine.Random.Range(0, junctions.Count)];
             path = Pathfinding.FindBestPath(a, b);
         }
         while (path.Count <= 1);
@@ -180,8 +183,8 @@ public class Simulation : MonoBehaviour
 
         do
         {
-            a = junctions[Random.Range(0, junctions.Count)];
-            b = junctions[Random.Range(0, junctions.Count)];
+            a = junctions[UnityEngine.Random.Range(0, junctions.Count)];
+            b = junctions[UnityEngine.Random.Range(0, junctions.Count)];
             path = Pathfinding.FindBestPath(a, b);
         }
         while (path.Count <= 1);
@@ -201,8 +204,10 @@ public class Simulation : MonoBehaviour
         else rot = Quaternion.Euler(0, 270, 0);
 
         var car = Instantiate(carPrefab, from, rot).GetComponent<Car>();
-        car.Initialize(path, from, to);
+        car.gameObject.SetActive(false);
         car.gameObject.name = "Car";
+        car.Initialize(path, from, to);
+
         return car;
     }
 

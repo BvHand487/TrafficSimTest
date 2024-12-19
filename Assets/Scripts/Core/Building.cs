@@ -18,7 +18,7 @@ public class Building
     {
         this.obj = obj;
 
-        var mat = obj.GetComponent<Renderer>().material;
+        var mat = obj.GetComponentInChildren<Renderer>().material;
         switch (type)
         {
              case Type.Work:

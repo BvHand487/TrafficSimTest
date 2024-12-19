@@ -1,6 +1,5 @@
 using UnityEngine;
 
-
 public class View : MonoBehaviour
 {
     public float panSpeed;
