@@ -44,7 +44,32 @@ public class Road
         var junctionsA = new List<Junction>() { a.junctionStart, a.junctionEnd };
         var junctionsB = new List<Junction>() { b.junctionStart, b.junctionEnd };
 
-        return junctionsA.Intersect(junctionsB).First();
+        return junctionsA.Intersect(junctionsB)?.First();
+    }
+
+    public List<Vector3> SplitPath(Junction from, Vector3 at)
+    {
+        Vector3 pointClosestToJunction = Utils.Math.GetClosestVector(from.obj.transform.position, this.path);
+        int targetIndex = this.path.IndexOf(at);
+
+        if (pointClosestToJunction == this.path.First())
+            return this.path.GetRange(0, targetIndex + 1);
+        else
+            return this.path.GetRange(targetIndex, this.path.Count - targetIndex);
+    }
+
+    public List<Vector3> SplitPath(Vector3 from, Vector3 to)
+    {
+        if (from == to)
+            return new List<Vector3>() { from };
+
+        int fromIndex = this.path.IndexOf(from);
+        int toIndex = this.path.IndexOf(to);
+
+        if (fromIndex < toIndex)
+            return this.path.GetRange(fromIndex, toIndex - fromIndex - 1);
+        else
+            return this.path.GetRange(toIndex, fromIndex - toIndex - 1);
     }
 
     // Orders roads around the intersection sequentially

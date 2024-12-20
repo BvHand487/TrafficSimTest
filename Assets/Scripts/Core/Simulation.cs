@@ -7,9 +7,13 @@ using Utils;
 public class Simulation : MonoBehaviour
 {
     public GameObject carPrefab;
+
+    public float minCarTravelDistance = 75.0f;
     public int maxCars = 20;
     private int simulatedMaxCars;
-    private float directedTrafficChance = 1.0f;
+
+    private float homeToWorkTrafficChance = 1.0f;
+    private float workToHomeTrafficChance = 1.0f;
 
     [System.NonSerialized]
     public int currentCars = 0;
@@ -47,7 +51,7 @@ public class Simulation : MonoBehaviour
 
     void Update()
     {
-        simulatedMaxCars = CalculateTrafficFlowFromTime();
+        simulatedMaxCars = Modeling.CalculateTrafficFlowFromTime(24f * clock.GetFractionOfDay(), ref homeToWorkTrafficChance, ref workToHomeTrafficChance, maxCars);
         
         if (clock == null) return;
         clock.Update();
@@ -96,57 +100,34 @@ public class Simulation : MonoBehaviour
     // Spawns randomly for now
     private void SpawnCar()
     {
-        // Spawn a car going to work/home
-        if (UnityEngine.Random.value < directedTrafficChance)
+        if (buildings == null || buildings.Count <= 1)
+            return;
+
+        float rand = UnityEngine.Random.value;
+        List<Vector3> carPath;
+
+        // Spawn a car going from home to work
+        if (rand < homeToWorkTrafficChance)
+            carPath = CreateDirectedCarPath();
+
+        // Spawn a car going from work to home
+        else if (rand < workToHomeTrafficChance)
         {
-            var carPath = CreateDirectedCarPath();
-
-            var car = InstantiateCar(
-                carPath,
-                carPath.First(),
-                carPath.Last()
-            );
-
-            carSpawnList.Add(car);
+            carPath = CreateDirectedCarPath();
+            carPath.Reverse();
         }
-        // Spawn a completely random car
+
+        // Spawn a car going randomly
         else
-        {
-            var carPath = CreateRandomCarPath();
+            carPath = CreateRandomCarPath();
 
-            var car = InstantiateCar(
-                carPath,
-                carPath.First(),
-                carPath.Last()
-            );
+        var car = InstantiateCar(
+            carPath,
+            carPath.First(),
+            carPath.Last()
+        );
 
-            carSpawnList.Add(car);
-        }
-    }
-
-    private int CalculateTrafficFlowFromTime()
-    {
-        // Get time as a value in [0, 24)
-        float time = 24f * clock.GetFractionOfDay();
-
-        // Models traffic flow during peak hours - 8AM, 18PM
-        float offsetY = 0.1f;
-        float directedTrafficProportion = (7f - offsetY) * Math.NormalDistribution(time, 1.5f, 8f) + (9f - offsetY) * Math.NormalDistribution(time, 2f, 17f) + offsetY;
-
-        // Models random traffic during the day & night - more traffic during the day, less during the night
-        offsetY = 1.0f;
-        float randomTrafficProportion = (3f - offsetY) * Math.NormalDistribution(time, 6, 12) + offsetY;
-
-        float totalTraffic = directedTrafficProportion + randomTrafficProportion;
-        directedTrafficChance = directedTrafficProportion / totalTraffic;
-
-        // Combines the terms above to get the max number of cars during this time
-        int simulatedCarCount = (int)(totalTraffic * maxCars / 10.0f);
-
-        // Normalizes car count value
-        int simulatedCarCountNormalized = maxCars * (simulatedCarCount) / Mathf.Max(simulatedCarCount, maxCars);
-
-        return simulatedCarCountNormalized;
+        carSpawnList.Add(car);
     }
 
     private bool CanActivateCar(Car car)
@@ -162,34 +143,33 @@ public class Simulation : MonoBehaviour
 
     private List<Vector3> CreateRandomCarPath()
     {
-        Junction a, b;
-        List<Junction> path;
+        Building start, end;
 
         do
         {
-            a = junctions[UnityEngine.Random.Range(0, junctions.Count)];
-            b = junctions[UnityEngine.Random.Range(0, junctions.Count)];
-            path = Pathfinding.FindBestPath(a, b);
+            start = Utils.Random.Select(buildings);
+            end = Utils.Random.Select(buildings);
         }
-        while (path.Count <= 1);
+        while (Vector3.Distance(start.obj.transform.position, end.obj.transform.position) < minCarTravelDistance);
 
-        return Pathfinding.JunctionToVectorPath(path);
+        return Pathfinding.FindCarPath(start, end);
     }
 
     private List<Vector3> CreateDirectedCarPath()
     {
-        Junction a, b;
-        List<Junction> path;
+        var homeBuildings = buildings.FindAll(b => b.type == Building.Type.Home);
+        var workBuildings = buildings.FindAll(b => b.type == Building.Type.Work);
+
+        Building start, end;
 
         do
         {
-            a = junctions[UnityEngine.Random.Range(0, junctions.Count)];
-            b = junctions[UnityEngine.Random.Range(0, junctions.Count)];
-            path = Pathfinding.FindBestPath(a, b);
+            start = Utils.Random.Select(homeBuildings);
+            end = Utils.Random.Select(workBuildings);
         }
-        while (path.Count <= 1);
+        while (Vector3.Distance(start.obj.transform.position, end.obj.transform.position) < minCarTravelDistance);
 
-        return Pathfinding.JunctionToVectorPath(path);
+        return Pathfinding.FindCarPath(start, end);
     }
 
     private Car InstantiateCar(List<Vector3> path, Vector3 from, Vector3 to)

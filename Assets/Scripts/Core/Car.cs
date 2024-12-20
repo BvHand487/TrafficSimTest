@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions.Must;
 using UnityEngine.UIElements;
@@ -260,7 +261,14 @@ public class Car : MonoBehaviour
 
     void OnDrawGizmos()
     {
+        if (path != null)
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLineStrip(path.ToArray(), false);
 
+            foreach (var p in path)
+                Gizmos.DrawSphere(p, 0.2f);
+        }
     }
 
     void PlayEffect()

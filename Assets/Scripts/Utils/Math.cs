@@ -28,6 +28,11 @@ namespace Utils
             return orderedPoints;
         }
 
+        public static List<Vector3> SmoothVectorPath(List<Vector3> points, float turnRadius, int resolution)
+        {
+            return null;
+        }
+
         public static Vector3 GetClosestVector(Vector3 target, List<Vector3> points)
         {
             float minDist = float.MaxValue;
@@ -77,11 +82,6 @@ namespace Utils
                 bezierPoints.Add(EvaluateBezier(controlPoints, t));
 
             return bezierPoints;
-        }
-
-        public static List<Vector3> GetBSpline(List<Vector3> controlPoints, int resolution = 5)
-        {
-            return null;
         }
 
         public static bool CompareFloat(float x, float cmp, float eps = 0.005f) => IsWithinFloat(x, cmp - eps, cmp + eps);

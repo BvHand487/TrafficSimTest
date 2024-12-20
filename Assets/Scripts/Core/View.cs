@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class View : MonoBehaviour
 {
@@ -26,14 +28,14 @@ public class View : MonoBehaviour
 
     private void HandlePan()
     {
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             panOrigin = Input.mousePosition;
             posOrigin = transform.position;
             return;
         }
 
-        else if (Input.GetMouseButton(0))
+        else if (Input.GetKey(KeyCode.Mouse0))
         {
             Vector3 pos = cam.ScreenToViewportPoint(panOrigin - Input.mousePosition);
             Vector3 move = panSpeed * (transform.position.y / minCameraY) * new Vector3(pos.x, 0, pos.y);

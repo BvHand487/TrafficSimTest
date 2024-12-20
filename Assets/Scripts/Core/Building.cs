@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class Building
@@ -17,6 +18,7 @@ public class Building
     public Building(GameObject obj, Type type)
     {
         this.obj = obj;
+        this.type = type;
 
         var mat = obj.GetComponentInChildren<Renderer>().material;
         switch (type)
@@ -31,6 +33,24 @@ public class Building
             default:
             mat.color = Color.black;
             break;
+        }
+    }
+
+    public static Junction GetClosestJunction(Building b)
+    {
+        if (b.adjacentRoads.Count == 2)
+            return Road.GetCommonJunction(b.adjacentRoads.First(), b.adjacentRoads.Last());
+        else
+        {
+            Road road = b.adjacentRoads.First();
+            Vector3 buildingPos = b.obj.transform.position;
+
+            // If junctionStart is closer to the building than junctionEnd
+            if (Vector3.Distance(buildingPos, road.junctionStart.obj.transform.position) <=
+                Vector3.Distance(buildingPos, road.junctionEnd.obj.transform.position))
+                return road.junctionStart;
+            else
+                return road.junctionEnd;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Generation;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -14,7 +13,9 @@ namespace Generation
 
         [SerializeField] private int minBuildingHeight;
         [SerializeField] private int maxBuildingHeight;
+        [SerializeField] private float buildingHeightStep = 2.0f;
         [SerializeField] private float buildingHeightDecay;
+        [SerializeField] private float buildingHeightRandomness = 2.0f;
 
         [SerializeField] public Vector2 center = Vector2.zero;
 
@@ -104,7 +105,7 @@ namespace Generation
 
             current.ForNeighbours(neighbour =>
             {
-                if (neighbour.IsValidTile() && current.CanConnectThroughRoad(current.GetDirectionToTile(neighbour), neighbour))
+                if (neighbour.IsValidTile() && current.CanConnectThroughRoad(current.GetDirectionToTile(neighbour), neighbour) || neighbour.type == GridTile.Type.Building)
                     GetFullRoad(neighbour, road, juncs, builds, visited);
             });
         }
@@ -188,7 +189,9 @@ namespace Generation
                     {
                         var factor = tile.DistanceToCenter() / expandedGrid.MaxDistanceFromCenter();
                         var buildingHeight = Utils.Modeling.BuildingHeightFromDistance(factor, minBuildingHeight, maxBuildingHeight, buildingHeightDecay);
-                        Debug.Log(buildingHeight);
+                        buildingHeight += buildingHeightRandomness * (Random.value - 0.5f);
+                        buildingHeight = Mathf.Clamp(Mathf.Ceil((buildingHeight) / buildingHeightStep) * buildingHeightStep, minBuildingHeight, maxBuildingHeight);
+
                         var scale = obj.transform.localScale;
                         scale.y = buildingHeight;
                         obj.transform.localScale = scale;
@@ -229,6 +232,9 @@ namespace Generation
                     }
                 }
             }
+
+            foreach (var b in buildings)
+                Debug.Log(b.adjacentRoads.Count);
 
             // Sets the references in the Junction and Road objects
             junctions = juncsMap.Values.ToList();
