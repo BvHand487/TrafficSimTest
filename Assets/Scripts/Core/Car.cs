@@ -34,21 +34,17 @@ public class Car : MonoBehaviour
     private Simulation simulation;
     private BoxCollider carCollider;
 
-    private List<Vector3> path; 
-    private Vector3 from, to;
-    private int pathIndex = 0;
+    public CarPath carPath;
     
     public ParticleSystem carEventEffect;
 
-    public void Initialize(List<Vector3> path, Vector3 from, Vector3 to)
+    public void Initialize(CarPath carPath)
     {
         simulation = FindObjectOfType<Simulation>().GetComponent<Simulation>();
         carCollider = GetComponent<BoxCollider>();
         bumperOffset = new Vector3(carCollider.center.x, carCollider.center.y, carCollider.center.z + carCollider.size.z / 2);
 
-        this.path = path;
-        this.from = from;
-        this.to = to;
+        this.carPath = carPath;
 
         status = Status.DRIVING;
 
@@ -58,7 +54,7 @@ public class Car : MonoBehaviour
 
     void Update()
     {
-        if (pathIndex >= path.Count)
+        if (carPath.Done())
         {
             simulation.currentCars--;
             Destroy(gameObject);
@@ -70,8 +66,8 @@ public class Car : MonoBehaviour
             Check();
         Move();
 
-        if (Vector3.Distance(transform.position, path[pathIndex]) < 1.0f)
-            pathIndex++;
+        if (Vector3.Distance(transform.position,carPath.Next()) < 1.0f)
+            carPath.Advance();
 
         //CheckObstacles();
         //UpdateMovement();
@@ -152,8 +148,8 @@ public class Car : MonoBehaviour
                 break;
         }
 
-        Vector3 direction = (path[pathIndex] - transform.position).normalized;
-        float distanceToTarget = Vector3.Distance(transform.position, path[pathIndex]);
+        Vector3 direction = (carPath.points.First() - transform.position).normalized;
+        float distanceToTarget = Vector3.Distance(transform.position, carPath.Next());
         if (distanceToTarget >= 0.05f)
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), 10f * Time.deltaTime);
 
@@ -256,18 +252,6 @@ public class Car : MonoBehaviour
         if (collision.gameObject.tag == "Junction")
         {
             canStop = true;
-        }
-    }
-
-    void OnDrawGizmos()
-    {
-        if (path != null)
-        {
-            Gizmos.color = Color.blue;
-            Gizmos.DrawLineStrip(path.ToArray(), false);
-
-            foreach (var p in path)
-                Gizmos.DrawSphere(p, 0.2f);
         }
     }
 

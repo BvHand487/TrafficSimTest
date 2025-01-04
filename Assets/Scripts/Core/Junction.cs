@@ -70,4 +70,9 @@ public class Junction
     {
         return a?.roads?.Intersect(b?.roads)?.First();
     }
+
+    override public string ToString()
+    {
+        return $"({obj.name}, at: {obj.transform.position}, type: {type})";
+    }
 }

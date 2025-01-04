@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 namespace Generation
@@ -120,8 +121,7 @@ namespace Generation
             GridTile HorizontalRoadTile = tiles.Find(t => t.prefab == roadStraightPrefab && t.rotY == 90);
             GridTile VerticalStraightRoadTile = tiles.Find(t => t.prefab == roadStraightPrefab && t.rotY == 0);
 
-            // Expands the grid by the number of blockCells
-            // gridSize = (gridSize - 1) * blockCells + gridSize + 2;
+            // Expands the grid by the junctionGap
             Grid expandedGrid = new Grid((gridSize - 1) * junctionGap + gridSize + 2, center);
 
             for (int i = 0; i < gridSize; i++)
@@ -219,22 +219,18 @@ namespace Generation
                         GetFullRoad(tile, roadTiles, juncs, builds, visited);
 
                         var roadPath = Utils.Math.OrderVectorPath(roadTiles.Select(r => r.physicalPos).ToList());
-                        var roadToAdd = new Road(roadPath, juncsMap[juncs[0]], juncsMap[juncs[1]]);
+                        Road roadToAdd = new Road(roadPath, juncsMap[juncs[0]], juncsMap[juncs[1]]);
                         roads.Add(roadToAdd);
 
-                        foreach (Building building in builds.Select(tile => buildsMap[tile]))
+                        foreach (Building building in builds.FindAll(tile => roadTiles.Any(rt => GridTile.IsNeighbours(rt, tile))).Select(tile => buildsMap[tile]))
                         {
-                            building.adjacentRoads.Add(roadToAdd);
-
+                            building.spawnPoints.TryAdd(roadToAdd, Utils.Math.GetClosestVector(building.obj.transform.position, roadToAdd.path));   
                             if (!buildings.Contains(building))
                                 buildings.Add(building);
                         }
                     }
                 }
             }
-
-            foreach (var b in buildings)
-                Debug.Log(b.adjacentRoads.Count);
 
             // Sets the references in the Junction and Road objects
             junctions = juncsMap.Values.ToList();

@@ -10,7 +10,7 @@ namespace Utils
     {
         public static List<Vector3> FindCarPath(Building start, Building end)
         {
-            List<Road> commonRoads = start.adjacentRoads.Intersect(end.adjacentRoads).ToList();
+            List<Road> commonRoads = start.spawnPoints.Keys.Intersect(end.spawnPoints.Keys).ToList();
 
             if (commonRoads.Count == 0)
             {
@@ -26,17 +26,17 @@ namespace Utils
                     roadEnds[0] = Junction.GetCommonRoad(junctionPath.First(), junctionPath[1]);
                     roadEnds[1] = Junction.GetCommonRoad(junctionPath[junctionPath.Count - 2], junctionPath.Last());
 
-                    if (end.adjacentRoads.Contains(roadEnds.Last()))
+                    if (end.spawnPoints.Keys.Contains(roadEnds.Last()))
                         junctionPath.RemoveAt(junctionPath.Count - 1);
 
-                    if (start.adjacentRoads.Contains(roadEnds.First()))
+                    if (start.spawnPoints.Keys.Contains(roadEnds.First()))
                         junctionPath.RemoveAt(0);
                 };
 
                 List<Vector3> path = JunctionToVectorPath(junctionPath);
 
-                roadEnds[0] = start.adjacentRoads.Intersect(junctionPath.First().roads).First();
-                roadEnds[roadEnds.Count() - 1] = end.adjacentRoads.Intersect(junctionPath.Last().roads).First();
+                roadEnds[0] = start.spawnPoints.Keys.Intersect(junctionPath.First().roads).First();
+                roadEnds[roadEnds.Count() - 1] = end.spawnPoints.Keys.Intersect(junctionPath.Last().roads).First();
 
 
                 var buildingExitPoint = Math.GetClosestVector(start.obj.transform.position, roadEnds.First().path);

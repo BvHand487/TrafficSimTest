@@ -13,7 +13,7 @@ public class Building
 
     public Type type { get; private set; }
     public GameObject obj;
-    public List<Road> adjacentRoads = new List<Road>();
+    public Dictionary<Road, Vector3> spawnPoints = new Dictionary<Road, Vector3>();
 
     public Building(GameObject obj, Type type)
     {
@@ -38,11 +38,13 @@ public class Building
 
     public static Junction GetClosestJunction(Building b)
     {
-        if (b.adjacentRoads.Count == 2)
-            return Road.GetCommonJunction(b.adjacentRoads.First(), b.adjacentRoads.Last());
+        List<Road> adjacentRoads = b.spawnPoints.Keys.ToList();
+
+        if (adjacentRoads.Count == 2)
+            return Road.GetCommonJunction(adjacentRoads.First(), adjacentRoads.Last());
         else
         {
-            Road road = b.adjacentRoads.First();
+            Road road = adjacentRoads.First();
             Vector3 buildingPos = b.obj.transform.position;
 
             // If junctionStart is closer to the building than junctionEnd

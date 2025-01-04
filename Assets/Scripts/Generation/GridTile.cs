@@ -163,5 +163,16 @@ namespace Generation
             foreach (var n in neighbours)
                 lambda(n);
         }
+
+        public static bool IsNeighbours(GridTile tile1, GridTile tile2)
+        {
+            if (tile1 is not null && tile2 is not null &&
+                tile1.grid == tile2.grid && tile1 != tile2 &&
+                (tile1.coords.x + 1 == tile2.coords.x || tile1.coords.x - 1 == tile2.coords.x ||
+                tile1.coords.y + 1 == tile2.coords.x || tile1.coords.y - 1 == tile2.coords.y))
+                return true;
+
+            return false;
+        }
     }
 }

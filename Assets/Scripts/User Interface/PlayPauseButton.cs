@@ -6,27 +6,35 @@ public class PlayPauseButton : MonoBehaviour
     [SerializeField] private Sprite imagePaused;
     [SerializeField] private Sprite imageUnpaused;
 
-    private bool isPaused = false;
+    private Image image;
     private Clock clock;
+    private bool isPaused = false;
 
     private void Start()
     {
+        image = GetComponent<Image>();
         clock = Clock.Instance;
     }
 
-    public void TogglePaused(Image buttonImage)
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.P))
+            TogglePaused();
+    }
+
+    public void TogglePaused()
     {
         isPaused = !isPaused;
 
         if (isPaused)
         {
             clock.SetPaused(true);
-            buttonImage.sprite = imagePaused;
+            image.sprite = imagePaused;
         }
         else
         {
             clock.SetPaused(false);
-            buttonImage.sprite = imageUnpaused;
+            image.sprite = imageUnpaused;
         }
     }
 }

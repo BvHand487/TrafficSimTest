@@ -104,7 +104,7 @@ public class Simulation : MonoBehaviour
             return;
 
         float rand = UnityEngine.Random.value;
-        List<Vector3> carPath;
+        CarPath carPath;
 
         // Spawn a car going from home to work
         if (rand < homeToWorkTrafficChance)
@@ -114,18 +114,15 @@ public class Simulation : MonoBehaviour
         else if (rand < workToHomeTrafficChance)
         {
             carPath = CreateDirectedCarPath();
-            carPath.Reverse();
+            carPath.points.Reverse();
+            (carPath.from, carPath.to) = (carPath.to, carPath.from);
         }
 
         // Spawn a car going randomly
         else
             carPath = CreateRandomCarPath();
 
-        var car = InstantiateCar(
-            carPath,
-            carPath.First(),
-            carPath.Last()
-        );
+        var car = InstantiateCar(carPath);
 
         carSpawnList.Add(car);
     }
@@ -141,7 +138,7 @@ public class Simulation : MonoBehaviour
         return true;
     }
 
-    private List<Vector3> CreateRandomCarPath()
+    private CarPath CreateRandomCarPath()
     {
         Building start, end;
 
@@ -152,10 +149,10 @@ public class Simulation : MonoBehaviour
         }
         while (Vector3.Distance(start.obj.transform.position, end.obj.transform.position) < minCarTravelDistance);
 
-        return Pathfinding.FindCarPath(start, end);
+        return new CarPath(start, end, Pathfinding.FindCarPath(start, end));
     }
 
-    private List<Vector3> CreateDirectedCarPath()
+    private CarPath CreateDirectedCarPath()
     {
         var homeBuildings = buildings.FindAll(b => b.type == Building.Type.Home);
         var workBuildings = buildings.FindAll(b => b.type == Building.Type.Work);
@@ -169,24 +166,15 @@ public class Simulation : MonoBehaviour
         }
         while (Vector3.Distance(start.obj.transform.position, end.obj.transform.position) < minCarTravelDistance);
 
-        return Pathfinding.FindCarPath(start, end);
+        return new CarPath(start, end, Pathfinding.FindCarPath(start, end));
     }
 
-    private Car InstantiateCar(List<Vector3> path, Vector3 from, Vector3 to)
+    private Car InstantiateCar(CarPath carPath)
     {
-        var zAlignment = Vector3.Dot(Vector3.forward, (path[1] - from).normalized);
-        var xAlignment = Vector3.Dot(Vector3.right, (path[1] - from).normalized);
-
-        Quaternion rot;
-        if (zAlignment > 0 && xAlignment == 0) rot = Quaternion.Euler(0, 0, 0);
-        else if (zAlignment < 0 && xAlignment == 0) rot = Quaternion.Euler(0, 180, 0);
-        else if (zAlignment == 0 && xAlignment > 0) rot = Quaternion.Euler(0, 90, 0);
-        else rot = Quaternion.Euler(0, 270, 0);
-
-        var car = Instantiate(carPrefab, from, rot).GetComponent<Car>();
+        var car = Instantiate(carPrefab, carPath.from.obj.transform.position, Quaternion.identity).GetComponent<Car>();
         car.gameObject.SetActive(false);
         car.gameObject.name = "Car";
-        car.Initialize(path, from, to);
+        car.Initialize(carPath);
 
         return car;
     }
