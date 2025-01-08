@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Assertions.Must;
@@ -20,13 +22,12 @@ public class Car : MonoBehaviour
     public float stopGap = 3.0f;
 
     public float maxSpeed = 25.0f;
-    public float speedUp = 5.0f;
+    public float accelerationRate = 5.0f;
+    public float decelerationRate = 10.0f;
 
     private float velocity = 0.0f;
     private float acceleration = 0.0f;
-    // private float brakingFactor = 0.0f;
     private bool canStop = true;
-
 
     private Vector3 bumperOffset;
     private Vector3 bumperPosition;
@@ -35,7 +36,7 @@ public class Car : MonoBehaviour
     private BoxCollider carCollider;
 
     public CarPath carPath;
-    
+
     public ParticleSystem carEventEffect;
 
     public void Initialize(CarPath carPath)
@@ -51,7 +52,6 @@ public class Car : MonoBehaviour
         PlayEffect();
     }
 
-
     void Update()
     {
         if (carPath.Done())
@@ -62,20 +62,17 @@ public class Car : MonoBehaviour
         }
 
         bumperPosition = transform.position + transform.TransformVector(bumperOffset);
+
         if (canStop)
             Check();
+
         Move();
-
-        if (Vector3.Distance(transform.position,carPath.Next()) < 1.0f)
-            carPath.Advance();
-
-        //CheckObstacles();
-        //UpdateMovement();
     }
 
     private void Check()
     {
         status = Status.DRIVING;
+        acceleration = accelerationRate;
 
         if (Physics.Raycast(bumperPosition, transform.forward, out RaycastHit hit, stopDistance))
         {
@@ -93,14 +90,18 @@ public class Car : MonoBehaviour
                             if (trafficLightStatus != TrafficLight.Status.Green)
                             {
                                 status = Status.STOPPING;
-                                acceleration = 2f * (trueDistance - maxSpeed * 3f) / 9f;
+
+                                float timeToStop = velocity / decelerationRate;
+                                float stoppingDistance = velocity * timeToStop - 0.5f * decelerationRate * timeToStop * timeToStop;
+
+                                if (stoppingDistance >= trueDistance)
+                                    acceleration = -decelerationRate;
+                                else
+                                    acceleration = -Mathf.Clamp((velocity * velocity) / (2 * trueDistance), 0, decelerationRate);
 
                                 if (IsStopped())
                                     status = Status.WAITING_RED;
                             }
-                            break;
-
-                        case Junction.Type.Stops:
                             break;
                     }
                     break;
@@ -117,7 +118,7 @@ public class Car : MonoBehaviour
                     if (hitCar.status != Status.DRIVING)
                     {
                         status = Status.STOPPING;
-                        acceleration = 2f * (trueDistance - maxSpeed * 3f) / 9f;
+                        acceleration = -decelerationRate;
 
                         if (IsStopped() && (hitCar.status == Status.WAITING_RED || hitCar.status == Status.WAITING_CAR))
                             status = hitCar.status;
@@ -125,13 +126,7 @@ public class Car : MonoBehaviour
 
                     if (IsStopped() && hitCar.IsStopped() && trueDistance < 0.0f)
                     {
-                        Car carWithPriority;
-
-                        if (transform.position.x > hitCar.transform.position.x)
-                            carWithPriority = this;
-                        else
-                            carWithPriority = hitCar;
-
+                        Car carWithPriority = transform.position.x > hitCar.transform.position.x ? this : hitCar;
                         carWithPriority.status = Status.DRIVING;
                     }
                     break;
@@ -141,102 +136,35 @@ public class Car : MonoBehaviour
 
     private void Move()
     {
-        switch (status)
+        float deltaTime = Time.deltaTime;
+        float distanceThisFrame = velocity * deltaTime + 0.5f * acceleration * deltaTime * deltaTime;
+        velocity = Mathf.Clamp(velocity + acceleration * deltaTime, 0.0f, maxSpeed);
+
+        while (distanceThisFrame > 0 && !carPath.Done())
         {
-            case Status.DRIVING:
-                acceleration = speedUp;
-                break;
+            Vector3 nextPoint = carPath.Next();
+            float distanceToNext = Vector3.Distance(transform.position, nextPoint);
+
+            if (distanceThisFrame >= distanceToNext)
+            {
+                transform.position = nextPoint;
+                carPath.Advance();
+                distanceThisFrame -= distanceToNext;
+            }
+            else
+            {
+                Vector3 direction = (nextPoint - transform.position).normalized;
+                transform.position += direction * velocity * Time.deltaTime;
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), 10f * deltaTime);
+                distanceThisFrame = 0;
+            }
         }
-
-        Vector3 direction = (carPath.points.First() - transform.position).normalized;
-        float distanceToTarget = Vector3.Distance(transform.position, carPath.Next());
-        if (distanceToTarget >= 0.05f)
-            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), 10f * Time.deltaTime);
-
-        velocity = Mathf.Clamp(velocity + acceleration * Time.deltaTime, 0.0f, maxSpeed);
-        transform.position += transform.forward * velocity * Time.deltaTime;
     }
 
     private bool IsStopped()
     {
-        return Utils.Math.CompareFloat(velocity, 0.0f, 0.2f);
+        return Mathf.Abs(velocity) < 0.01f;
     }
-
-    //private void CheckObstacles()
-    //{
-    //    status = Status.DRIVING;
-
-    //    if (Physics.Raycast(bumperPosition, transform.forward, out RaycastHit hit, stopDistance))
-    //    {
-    //        if (hit.collider.CompareTag("Junction"))
-    //        {
-    //            Junction junction = simulation.junctions.Find(j => j.obj == hit.collider.gameObject);
-
-    //            if (junction.type == Junction.Type.Lights)
-    //            {
-    //                TrafficLight.Status trafficLightStatus = simulation.GetTrafficLightStatus(this, junction);
-    //                if (trafficLightStatus == TrafficLight.Status.Red)
-    //                    status = Status.WAITING_RED;
-    //            }
-    //            else if (junction.type == Junction.Type.Stops)
-    //            {
-
-    //            }
-    //        }
-
-    //        else if (hit.collider.CompareTag("Car"))
-    //        {
-    //            Car hitCar = hit.collider.gameObject.GetComponent<Car>();
-                
-    //            status = Status.WAITING_CAR;
-
-    //            if (hitCar.status == Status.WAITING_RED)
-    //                status = Status.WAITING_RED;
-    //        }
-    //    }
-    //}
-
-    //private void UpdateMovement()
-    //{
-    //    if (pathIndex >= path.Count)
-    //    {
-    //        simulation.currentCars--;
-    //        PlayEffect();
-    //        Destroy(gameObject);
-    //        return;
-    //    }
-
-    //    Vector3 target = path[pathIndex];
-    //    Vector3 direction = (target - transform.position).normalized;
-    //    float distanceToTarget = Vector3.Distance(transform.position, target);
-
-    //    float targetSpeed = maxSpeed;
-    //    if (status != Status.DRIVING)
-    //        targetSpeed = 0.0f;
-    //    else if (pathIndex + 2 < path.Count && Vector3.Dot(transform.forward, path[pathIndex + 2] - path[pathIndex + 1]) <= 0.02f)  // entering turn
-    //    {
-    //        //if (Vector3.Dot(transform.right, path[pathIndex + 1] - path[pathIndex]) > 0.02f)
-    //            //targetSpeed = rightTurnSpeed;
-    //        // else
-    //           // targetSpeed = leftTurnSpeed;
-    //    }
-
-    //    // Smoothly adjust velocity
-    //    float speedDifference = targetSpeed - velocity.magnitude;
-    //    float accelerationRate = speedDifference > 0 ? acceleration : deceleration;
-    //    velocity = transform.forward * velocity.magnitude;
-    //    velocity += direction * Mathf.Clamp(speedDifference, -accelerationRate * Time.deltaTime, accelerationRate * Time.deltaTime);
-
-    //    // Move car
-    //    transform.position += velocity * Time.deltaTime;
-
-    //    // Rotate towards target
-    //    if (distanceToTarget > 0.05f)
-    //    {
-    //        Quaternion targetRotation = Quaternion.LookRotation(direction);
-    //        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, 10.0f * Time.deltaTime);
-    //    }
-    //}
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -252,6 +180,18 @@ public class Car : MonoBehaviour
         if (collision.gameObject.tag == "Junction")
         {
             canStop = true;
+        }
+    }
+
+    void OnDrawGizmos()
+    {
+        if (carPath.points != null)
+        {
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLineStrip(carPath.points.ToArray(), false);
+
+            foreach (var p in carPath.points)
+                Gizmos.DrawSphere(p, 0.2f);
         }
     }
 

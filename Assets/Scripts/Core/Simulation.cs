@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using Utils;
 
@@ -7,6 +8,7 @@ using Utils;
 public class Simulation : MonoBehaviour
 {
     public GameObject carPrefab;
+    public Color homeColor, workColor;
 
     public float minCarTravelDistance = 75.0f;
     public int maxCars = 20;
@@ -156,6 +158,11 @@ public class Simulation : MonoBehaviour
     {
         var homeBuildings = buildings.FindAll(b => b.type == Building.Type.Home);
         var workBuildings = buildings.FindAll(b => b.type == Building.Type.Work);
+
+        foreach (var hb in homeBuildings)
+        {
+
+        }
 
         Building start, end;
 

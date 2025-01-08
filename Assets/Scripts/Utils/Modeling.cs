@@ -36,9 +36,20 @@ namespace Utils
             return simulatedCarCountNormalized;
         }
 
-        public static float JunctionTypeFromDistance(float distance)
+        public static Building.Type ChooseRandomBuildingType(float normDistance)
         {
-            return 0.0f;
+            if (Utils.Math.NormalDistribution(normDistance, 0.32f) > UnityEngine.Random.value)
+                return Building.Type.Work;
+            else
+                return Building.Type.Home;
+        }
+
+        public static Junction.Type ChooseRandomJunctionType(float normDistance)
+        {
+            if (Utils.Math.NormalDistribution(normDistance, 0.65f) > UnityEngine.Random.value)
+                return Junction.Type.Lights;
+            else
+                return Junction.Type.Stops;
         }
     }
 }

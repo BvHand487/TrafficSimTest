@@ -7,10 +7,12 @@ using UnityEngine.EventSystems;
 
 public class View : MonoBehaviour
 {
-    private Simulation simulation;
     private Camera cam;
+    private Simulation simulation;
     private LineRenderer carPathRenderer;
     private int carPathLength;
+    private Material buildingMaterial;
+    private Material selectionMaterial;
 
     public float panSpeed;
     private Vector3 panOrigin;
@@ -21,6 +23,8 @@ public class View : MonoBehaviour
     public float maxCameraY = 300f;
 
     private Car selectedCar;
+    private MeshRenderer carFromBuildingRenderer = default;
+    private MeshRenderer carToBuildingRenderer = default;
     private Junction selectedJunction;
 
     void Start()
@@ -28,6 +32,9 @@ public class View : MonoBehaviour
         simulation = FindObjectOfType<Simulation>().GetComponent<Simulation>();
         cam = GetComponent<Camera>();
         carPathRenderer = GetComponent<LineRenderer>();
+
+        buildingMaterial = carPathRenderer.material;
+        selectionMaterial = carPathRenderer.material;
     }
 
     void Update()
@@ -51,15 +58,36 @@ public class View : MonoBehaviour
                 List<Vector3> path = new List<Vector3>();
                 path.Add(selectedCar.transform.position);
                 path.AddRange(selectedCar.carPath.points);
+                for (int i = 0; i < path.Count; ++i)
+                    path[i] += 0.35f * Vector3.up;
                 carPathRenderer.SetPositions(path.ToArray());
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Mouse0) || Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (carFromBuildingRenderer != null && carToBuildingRenderer != null)
+            {
+                carFromBuildingRenderer.material = buildingMaterial;
+                carToBuildingRenderer.material = buildingMaterial;
+            }
+            selectedCar = null;
+            carPathRenderer.positionCount = 0; 
+
+            selectedJunction = null;
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
                 return;
 
+            if (carFromBuildingRenderer != null && carToBuildingRenderer != null)
+            {
+                carFromBuildingRenderer.material = buildingMaterial;
+                carToBuildingRenderer.material = buildingMaterial;
+            }
             selectedCar = null;
             carPathRenderer.positionCount = 0;
 
@@ -68,6 +96,11 @@ public class View : MonoBehaviour
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
+                if (hit.collider.CompareTag("Junction"))
+                {
+                    selectedJunction = simulation.junctionsDict[hit.collider.gameObject];
+                }
+
                 if (hit.collider.CompareTag("Car"))
                 {
                     selectedCar = hit.collider.gameObject.GetComponent<Car>();
@@ -78,11 +111,14 @@ public class View : MonoBehaviour
                     List<Vector3> path = new List<Vector3>();
                     path.Add(selectedCar.transform.position);
                     path.AddRange(selectedCar.carPath.points);
+                    for (int i = 0; i < path.Count; ++i)
+                        path[i] += 0.35f * Vector3.up;
                     carPathRenderer.SetPositions(path.ToArray());
-                }
-                else if (hit.collider.CompareTag("Junction"))
-                {
-                    selectedJunction = simulation.junctionsDict[hit.collider.gameObject];
+
+                    carFromBuildingRenderer = selectedCar.carPath.from.obj.GetComponentInChildren<MeshRenderer>();
+                    carToBuildingRenderer = selectedCar.carPath.to.obj.GetComponentInChildren<MeshRenderer>();
+                    carFromBuildingRenderer.material = selectionMaterial;
+                    carToBuildingRenderer.material = selectionMaterial;
                 }
             }
         }

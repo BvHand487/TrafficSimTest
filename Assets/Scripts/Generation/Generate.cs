@@ -2,6 +2,7 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+using static UnityEditor.ObjectChangeEventStream;
 
 
 namespace Generation
@@ -20,16 +21,17 @@ namespace Generation
 
         [SerializeField] public Vector2 center = Vector2.zero;
 
-        [SerializeField] public GameObject roadStraightPrefab, roadTurnPrefab, roadJoinPrefab, roadCrossPrefab, roadEndPrefab, buildingPrefab, simulation;
+        [SerializeField] public GameObject roadStraightPrefab, roadTurnPrefab, roadJoinPrefab, roadCrossPrefab, roadEndPrefab, buildingPrefab;
 
         private Grid grid;
         private WFC wfc;
 
         private List<GridTile> tiles;
 
+        public Simulation simulation;
         private List<Road> roads = new List<Road>();
-        private List<Junction> junctions = new List<Junction>();
-        private List<Building> buildings = new List<Building>();
+        private HashSet<Junction> junctions = new HashSet<Junction>();
+        private HashSet<Building> buildings = new HashSet<Building>();
 
         // Load data from main menu using the PlayerRrefs API
         private void Awake()
@@ -75,8 +77,9 @@ namespace Generation
             // Spawn prefabs
             GeneratePrefabs();
 
-            simulation.GetComponent<Simulation>().Initialize(junctions, roads, buildings);
-            simulation.SetActive(true);
+            Debug.Log($"j: {junctions.Count}, r: {roads.Count}, b: {buildings.Count}");
+            simulation.Initialize(junctions.ToList(), roads.ToList(), buildings.ToList());
+            simulation.gameObject.SetActive(true);
 
             Destroy(this.gameObject);
         }
@@ -160,11 +163,11 @@ namespace Generation
             {
                 for (int j = 0; j < expandedGrid.size; ++j)
                 {
-                    GridTile tile = expandedGrid.tiles[i, j];
+                    GridTile tile = expandedGrid.GetTile(i, j);
                     if (!tile.IsValidTile())
                     {
                         if (tile.GetNeighbours().Any(n => n.IsValidTile() && n.validConnections.Count <= 2))
-                            expandedGrid.tiles[i, j].SetTile(buildingTile);
+                            expandedGrid.GetTile(i, j).SetTile(buildingTile);
                     }
                 }
             }
@@ -174,7 +177,7 @@ namespace Generation
             {
                 for (int j = 0; j < expandedGrid.size; ++j)
                 {
-                    GridTile tile = expandedGrid.tiles[i, j];
+                    GridTile tile = expandedGrid.GetTile(i, j);
                     if (!tile.IsValidTile()) continue;
 
                     Vector3 pos = tile.physicalPos;
@@ -183,7 +186,7 @@ namespace Generation
                     obj.name = $"{tile.prefab.name}";
 
                     if (tile.type == GridTile.Type.Junction)
-                        juncsMap.Add(expandedGrid.tiles[i, j], new Junction(obj));
+                        juncsMap.Add(tile, new Junction(obj));
 
                     else if (tile.type == GridTile.Type.Building)
                     {
@@ -196,7 +199,7 @@ namespace Generation
                         scale.y = buildingHeight;
                         obj.transform.localScale = scale;
 
-                        buildsMap.Add(expandedGrid.tiles[i, j], new Building(obj, ChooseRandomBuildingType(obj.transform, expandedGrid)));
+                        buildsMap.Add(tile, new Building(obj));
                     }
                 }
             }
@@ -207,7 +210,7 @@ namespace Generation
             {
                 for (int j = 0; j < expandedGrid.size; ++j)
                 {
-                    GridTile tile = expandedGrid.tiles[i, j];
+                    GridTile tile = expandedGrid.GetTile(i, j);
                     if (!tile.IsValidTile()) continue;
 
                     if (tile.type == GridTile.Type.Road && !visited[i, j] && expandedGrid.tiles[i, j] != null)
@@ -232,33 +235,43 @@ namespace Generation
                 }
             }
 
+            for (int i = 0; i < expandedGrid.size; ++i)
+            {
+                for (int j = 0; j < expandedGrid.size; ++j)
+                {
+                    GridTile tile = expandedGrid.GetTile(i, j);
+                    if (!tile.IsValidTile()) continue;
+
+                    if (tile.type == GridTile.Type.Junction && tile.validConnections.Count <= 2)
+                    {
+                        foreach (Building building in tile.GetNeighbours().FindAll(n => n.type == GridTile.Type.Building).Select(tile => buildsMap[tile]))
+                        {
+                            Road road = roads.Find(r => r.junctionStart == juncsMap[tile] || r.junctionEnd == juncsMap[tile]);
+
+                            building.spawnPoints.TryAdd(road, tile.physicalPos);
+                            if (!buildings.Contains(building))
+                                buildings.Add(building);
+                        }
+                    }
+                }
+            }
+
             // Sets the references in the Junction and Road objects
-            junctions = juncsMap.Values.ToList();
+            junctions = juncsMap.Values.ToHashSet();
 
             foreach (var j in junctions)
-                j.Initialize(roads.FindAll((r) => r.junctionStart == j || r.junctionEnd == j), ChooseRandomJunctionType(j.obj.transform, expandedGrid));
-        }
+            {
+                var maxDistFromCenter = expandedGrid.MaxDistanceFromCenter();
+                var distFromCenter = Vector3.Distance(j.obj.transform.position, new Vector3(center.x, 0, center.y));
+                j.Initialize(roads.FindAll((r) => r.junctionStart == j || r.junctionEnd == j), Utils.Modeling.ChooseRandomJunctionType(distFromCenter / maxDistFromCenter));
+            }
 
-        Building.Type ChooseRandomBuildingType(Transform b, Grid g)
-        {
-            var maxDistFromCenter = g.MaxDistanceFromCenter();
-            var distFromCenter = Vector3.Distance(b.position, new Vector3(center.x, 0, center.y));
-
-            if (Utils.Math.NormalDistribution(distFromCenter / maxDistFromCenter, 0.32f) > UnityEngine.Random.value)
-                return Building.Type.Work;
-            else
-                return Building.Type.Home;
-        }
-
-        Junction.Type ChooseRandomJunctionType(Transform j, Grid g)
-        {
-            var maxDistFromCenter = g.MaxDistanceFromCenter();
-            var distFromCenter = Vector3.Distance(j.position, new Vector3(center.x, 0, center.y));
-
-            if (Utils.Math.NormalDistribution(distFromCenter / maxDistFromCenter, 0.65f) > UnityEngine.Random.value)
-                return Junction.Type.Lights;
-            else
-                return Junction.Type.Stops;
+            foreach (var b in buildings)
+            {
+                var maxDistFromCenter = expandedGrid.MaxDistanceFromCenter();
+                var distFromCenter = Vector3.Distance(b.obj.transform.position, new Vector3(center.x, 0, center.y));
+                b.Initialize(Utils.Modeling.ChooseRandomBuildingType(distFromCenter / maxDistFromCenter));
+            }
         }
     }
 

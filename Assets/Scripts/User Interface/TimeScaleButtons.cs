@@ -43,6 +43,7 @@ public class TimeScaleButtons : MonoBehaviour
 
     private void Update()
     {
+        // speed up time
         if (Input.GetKeyDown(KeyCode.Period))
         {
             if (currentButtonIndex < buttons.Count - 1)
@@ -58,6 +59,7 @@ public class TimeScaleButtons : MonoBehaviour
             buttons[currentButtonIndex].SetSelected(true);
         }
 
+        // slow up time
         if (Input.GetKeyDown(KeyCode.Comma))
         {
             if (currentButtonIndex > 0)
@@ -96,11 +98,12 @@ public class TimeScaleButtons : MonoBehaviour
         public void SetSelected(bool isSelected)
         {
             if (isSelected)
+            {
                 image.color = selectedColor;
+                clock.timeScale = timeScale;
+            }
             else
                 image.color = normalColor;
-
-            clock.timeScale = timeScale;
         }
 
         public void SetDisabled(bool isDisabled)

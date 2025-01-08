@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using UnityEngine;
 
@@ -28,9 +29,87 @@ namespace Utils
             return orderedPoints;
         }
 
-        public static List<Vector3> SmoothVectorPath(List<Vector3> points, float turnRadius, int resolution)
+        public static List<Vector3> SmoothVectorPath(List<Vector3> path, float radius, int resolution)
         {
-            return null;
+            if (path == null || path.Count < 3)
+            {
+                Debug.LogWarning("Path must have at least 3 points to smooth.");
+                return path;
+            }
+
+            List<Vector3> smoothedPath = new List<Vector3>();
+
+            // Add the first point (it remains unchanged)
+            smoothedPath.Add(path.First());
+
+            for (int i = 1; i < path.Count - 1; i++)
+            {
+                Vector3 prev = path[i - 1];
+                Vector3 current = path[i];
+                Vector3 next = path[i + 1];
+
+                // Calculate directions
+                Vector3 dirToPrev = (prev - current).normalized;
+                Vector3 dirToNext = (next - current).normalized;
+
+                // Calculate the angle between the two directions
+                float angle = Vector3.Angle(dirToPrev, dirToNext);
+
+                // If the angle is approximately 90 degrees, create a curve
+                if (Mathf.Abs(angle - 90f) < 1e-2f)
+                {
+                    // Calculate arc points
+                    List<Vector3> arcPoints = GenerateArcPointsPerpendicular(prev, current, next, radius, resolution);
+
+                    // Add the arc points to the smoothed path
+                    smoothedPath.AddRange(arcPoints);
+                }
+                else
+                {
+                    // Otherwise, keep the current point
+                    smoothedPath.Add(current);
+                }
+            }
+
+            // Add the last point (it remains unchanged)
+            smoothedPath.Add(path.Last());
+
+            return smoothedPath;
+        }
+
+        private static List<Vector3> GenerateArcPointsPerpendicular(Vector3 prev, Vector3 current, Vector3 next, float radius, int resolution)
+        {
+            List<Vector3> arcPoints = new List<Vector3>();
+
+            // Calculate perpendicular bisectors of the two segments
+            Vector3 prevDir = (prev - current).normalized;
+            Vector3 nextDir = (next - current).normalized;
+
+            Vector3 bisector = (prevDir + nextDir).normalized;
+            Vector3 arcCenter = current + bisector * radius / Mathf.Sin(Vector3.Angle(prevDir, bisector) * Mathf.Deg2Rad);
+
+            Vector3 startDir = (current + radius * prevDir - arcCenter).normalized;
+            Vector3 endDir = (current + radius * nextDir - arcCenter).normalized;
+
+            // Generate points along the arc
+            Vector3 cross = Vector3.Cross(startDir, endDir);
+            bool clockwise = cross.y < 0;
+
+            for (int i = 0; i <= resolution; i++)
+            {
+                float t = (float)i / resolution;
+                float angle = t * 90f;
+
+                if (clockwise)
+                    angle = -angle;
+
+                Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.up);
+                Vector3 pointOnArc = arcCenter + rotation * startDir * radius;
+
+                arcPoints.Add(pointOnArc);
+            }
+
+            return arcPoints;
         }
 
         public static Vector3 GetClosestVector(Vector3 target, List<Vector3> points)

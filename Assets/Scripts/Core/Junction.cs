@@ -68,7 +68,8 @@ public class Junction
 
     public static Road GetCommonRoad(Junction a, Junction b)
     {
-        return a?.roads?.Intersect(b?.roads)?.First();
+        return a?.roads?.Intersect(b?.roads ?? Enumerable.Empty<Road>())?.FirstOrDefault();
+
     }
 
     override public string ToString()

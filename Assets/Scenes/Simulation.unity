@@ -359,8 +359,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   carPrefab: {fileID: 4664414865074881819, guid: faf35ecf27ee6e247ae90e695d4d8123,
     type: 3}
+  homeColor: {r: 0.3920879, g: 0.8396226, b: 0.44294417, a: 0}
+  workColor: {r: 0.35555357, g: 0.8867924, b: 0.87029433, a: 0}
   minCarTravelDistance: 45
-  maxCars: 20
+  maxCars: 10
 --- !u!114 &143786621
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2215,8 +2217,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8aa329b8a4f37324ebf316fcdece5701, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridSize: 6
-  junctionGap: 3
+  gridSize: 3
+  junctionGap: 2
   minBuildingHeight: 4
   maxBuildingHeight: 28
   buildingHeightStep: 2
@@ -2235,7 +2237,7 @@ MonoBehaviour:
     type: 3}
   buildingPrefab: {fileID: 3529599447628414491, guid: 7789e01f12e96704197780e34dc3fe3f,
     type: 3}
-  simulation: {fileID: 143786618}
+  simulation: {fileID: 143786620}
 --- !u!1 &1148875879
 GameObject:
   m_ObjectHideFlags: 0

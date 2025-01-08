@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -11,12 +12,17 @@ public class Road
 
     // A lsit of points that describe the path of the road
     public List<Vector3> path { get; }
+    public float length;
 
     public Road(List<Vector3> path, Junction j1 = null, Junction j2 = null)
     {
         this.path = path;
         this.junctionStart = j1;
         this.junctionEnd = j2;
+
+        for (int i = 0; i < path.Count - 1; ++i)
+            length += Vector3.Distance(path[i], path[i + 1]);
+        length += Generation.Generate.tileSize;
     }
 
     public Junction GetOtherJunction(Junction j)
@@ -65,11 +71,10 @@ public class Road
 
         int fromIndex = this.path.IndexOf(from);
         int toIndex = this.path.IndexOf(to);
+        if (fromIndex > toIndex)
+            (fromIndex, toIndex) = (toIndex, fromIndex);
 
-        if (fromIndex < toIndex)
-            return this.path.GetRange(fromIndex, toIndex - fromIndex - 1);
-        else
-            return this.path.GetRange(toIndex, fromIndex - toIndex - 1);
+        return path.Skip(fromIndex).Take(toIndex - fromIndex + 1).ToList();
     }
 
     // Orders roads around the intersection sequentially

@@ -66,7 +66,7 @@ namespace Utils
                 path.InsertRange(0, startToRoadPath);
                 path.AddRange(endToRoadPath);
 
-                return path;
+                return Math.SmoothVectorPath(path, 5, 5);
             }
             else
             {
@@ -81,6 +81,7 @@ namespace Utils
                 startToEndPath.Add(roadStart);
 
                 var roadToRoadPath = commonRoad.SplitPath(roadStart, roadEnd);
+
                 if (roadToRoadPath.First() == roadEnd)
                     roadToRoadPath.Reverse();
                 startToEndPath.AddRange(roadToRoadPath);
@@ -90,7 +91,7 @@ namespace Utils
 
                 path.AddRange(startToEndPath);
 
-                return path;
+                return Math.SmoothVectorPath(path, 5, 5);
             }
         }
 
@@ -142,10 +143,7 @@ namespace Utils
         // Heuristic function: Straight-line distance between two junctions
         private static float Heuristic(Junction a, Junction b)
         {
-            Vector3 posA = a.obj.transform.position;
-            Vector3 posB = b.obj.transform.position;
-
-            return Vector3.Distance(posA, posB);
+            return Junction.GetCommonRoad(a, b)?.length ?? Vector3.Distance(a.obj.transform.position, b.obj.transform.position);
         }
 
         // Reconstructs the path from end to start by tracing the cameFrom dictionary

@@ -15,24 +15,29 @@ public class Building
     public GameObject obj;
     public Dictionary<Road, Vector3> spawnPoints = new Dictionary<Road, Vector3>();
 
-    public Building(GameObject obj, Type type)
+    public Building(GameObject obj)
     {
         this.obj = obj;
+    }
+
+    public void Initialize(Type type = Type.None)
+    {
         this.type = type;
 
         var mat = obj.GetComponentInChildren<Renderer>().material;
         switch (type)
         {
-             case Type.Work:
-                mat.color = Color.HSVToRGB(0.5f, 0.5f, 0.8f);
+            case Type.Home:
+                mat.color = Color.green;
                 break;
-             case Type.Home:
-                mat.color = Color.HSVToRGB(0.3f, 0.5f, 0.7f);
+
+            case Type.Work:
+                mat.color = Color.cyan;
                 break;
 
             default:
-            mat.color = Color.black;
-            break;
+                mat.color = Color.black;
+                break;
         }
     }
 
