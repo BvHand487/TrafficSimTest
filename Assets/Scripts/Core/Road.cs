@@ -11,7 +11,7 @@ public class Road
     public Junction junctionEnd { get; set; }
 
     // A lsit of points that describe the path of the road
-    public List<Vector3> path { get; }
+    public List<Vector3> path;
     public float length;
 
     public Road(List<Vector3> path, Junction j1 = null, Junction j2 = null)
@@ -53,30 +53,49 @@ public class Road
         return junctionsA.Intersect(junctionsB)?.First();
     }
 
+    // Returns a segment of the path from a junction to a point (inclusive) on the road.
     public List<Vector3> SplitPath(Junction from, Vector3 at)
     {
-        Vector3 pointClosestToJunction = Utils.Math.GetClosestVector(from.obj.transform.position, this.path);
-        int targetIndex = this.path.IndexOf(at);
+        // Get the index of the point closest to the junction
+        int fromIndex =
+            Vector3.Distance(from.obj.transform.position, path.First()) <=
+            Vector3.Distance(from.obj.transform.position, path.Last()) ?
+            0 :
+            path.Count - 1;
 
-        if (pointClosestToJunction == this.path.First())
-            return this.path.GetRange(0, targetIndex + 1);
-        else
-            return this.path.GetRange(targetIndex, this.path.Count - targetIndex);
-    }
+        int toIndex = path.IndexOf(at);
+        if (toIndex == -1)
+            toIndex =
+                Vector3.Distance(at, path.First()) <=
+                Vector3.Distance(at, path.Last()) ?
+                0 :
+                path.Count - 1;
 
-    public List<Vector3> SplitPath(Vector3 from, Vector3 to)
-    {
-        if (from == to)
-            return new List<Vector3>() { from };
-
-        int fromIndex = this.path.IndexOf(from);
-        int toIndex = this.path.IndexOf(to);
         if (fromIndex > toIndex)
             (fromIndex, toIndex) = (toIndex, fromIndex);
 
         return path.Skip(fromIndex).Take(toIndex - fromIndex + 1).ToList();
     }
 
+    // Returns a segment of the path from a start point (inclusive) to an end point (inclusive) on the road.
+    public List<Vector3> SplitPath(Vector3 from, Vector3 to)
+    {
+        if (from == to)
+            return new List<Vector3>() { from };
+
+        int fromIndex = path.IndexOf(from);
+        int toIndex = path.IndexOf(to);
+        fromIndex = Mathf.Clamp(fromIndex, 0, path.Count - 1);
+        toIndex = Mathf.Clamp(toIndex, 0, path.Count - 1);
+
+        if (fromIndex > toIndex)
+            (fromIndex, toIndex) = (toIndex, fromIndex);
+
+        return path.Skip(fromIndex).Take(toIndex - fromIndex + 1).ToList();
+    }
+
+    public bool IsCyclic() => junctionStart == junctionEnd;
+    
     // Orders roads around the intersection sequentially
     // If it's a 4-way intersection it orders them anticlockwise
     public static List<Road> OrderRoads(List<Road> roads)
@@ -102,19 +121,21 @@ public class Road
                         break;
                     }
 
-                var temp = roads[1];
-                roads[1] = roads[IndexOfRoadThatSticksOut];
-                roads[IndexOfRoadThatSticksOut] = temp;
-
+                (roads[1], roads[IndexOfRoadThatSticksOut]) = (roads[IndexOfRoadThatSticksOut], roads[1]);
                 return roads;
 
 
             default:
                 Dictionary<Road, float> anglesInWorld = new Dictionary<Road, float>();
 
-                foreach (var road in roads)
+                Road cycleRoad = roads.Find(rd => roads.Count(r => r == rd) == 2);
+
+                for (int i = 0; i < roads.Count; ++i)
                 {
-                    var roadPos = Utils.Math.GetClosestVector(junctionPos, road.path);
+                    var roadPos = roads[i].IsCyclic() ?
+                        roads[i].path.First() :
+                        Utils.Math.GetClosestVector(junctionPos, roads[i].path);
+
                     Vector3 roadDir = (roadPos - junctionPos).normalized;
 
                     var angle = Vector3.Angle(roadDir, Vector3.right);
@@ -122,7 +143,7 @@ public class Road
                         angle = 360f - angle;
                     angle = Unity.Mathematics.math.fmod(angle, 360f);
 
-                    anglesInWorld.Add(road, angle);
+                    anglesInWorld.Add(roads[i], angle);
                 }
 
                 return anglesInWorld.OrderBy(e => e.Value).Select(pair => pair.Key).ToList();

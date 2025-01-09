@@ -178,7 +178,7 @@ public class Simulation : MonoBehaviour
 
     private Car InstantiateCar(CarPath carPath)
     {
-        var car = Instantiate(carPrefab, carPath.from.obj.transform.position, Quaternion.identity).GetComponent<Car>();
+        var car = Instantiate(carPrefab, carPath.from.obj.transform.position, Quaternion.identity, this.transform).GetComponent<Car>();
         car.gameObject.SetActive(false);
         car.gameObject.name = "Car";
         car.Initialize(carPath);

@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 
 public class TrafficLight
@@ -36,17 +37,9 @@ public class TrafficLight
         this.trafficController = controller;
         this.road = road;
 
-        Vector3 closestPoint = new Vector3();
-        float minDist = float.MaxValue;
-        foreach (Vector3 p in road.path)
-        {
-            float dist = Vector3.Distance(junction.obj.transform.position, p);
-            if (dist < minDist)
-            {
-                minDist = dist;
-                closestPoint = p;
-            }
-        }
+        Vector3 closestPoint = road.IsCyclic() ?
+            road.path.First() :
+            Utils.Math.GetClosestVector(junction.obj.transform.position, road.path);
 
         this.pos = Utils.Math.GetMidpointVector(junction.obj.transform.position, closestPoint);
         status = Status.Red;

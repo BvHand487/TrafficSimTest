@@ -339,7 +339,7 @@ Transform:
   m_GameObject: {fileID: 143786618}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -393.5451, y: 381.58798, z: -160.90211}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -362,7 +362,7 @@ MonoBehaviour:
   homeColor: {r: 0.3920879, g: 0.8396226, b: 0.44294417, a: 0}
   workColor: {r: 0.35555357, g: 0.8867924, b: 0.87029433, a: 0}
   minCarTravelDistance: 45
-  maxCars: 10
+  maxCars: 100
 --- !u!114 &143786621
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -800,7 +800,7 @@ MonoBehaviour:
   panSpeed: 40
   zoomSpeed: 7500
   minCameraY: 50
-  maxCameraY: 500
+  maxCameraY: 950
 --- !u!120 &330585549
 LineRenderer:
   serializedVersion: 2
@@ -1639,89 +1639,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 554313014}
   m_CullTransparentMesh: 1
---- !u!1 &803224173
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 803224177}
-  - component: {fileID: 803224176}
-  - component: {fileID: 803224175}
-  m_Layer: 0
-  m_Name: Plane
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!23 &803224175
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 803224173}
-  m_Enabled: 1
-  m_CastShadows: 0
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: d2bf9e905138462448100046f187e38e, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &803224176
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 803224173}
-  m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
---- !u!4 &803224177
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 803224173}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.01, z: 0}
-  m_LocalScale: {x: 500, y: 500, z: 500}
-  m_ConstrainProportionsScale: 1
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -2224,7 +2141,6 @@ MonoBehaviour:
   buildingHeightStep: 2
   buildingHeightDecay: 3
   buildingHeightRandomness: 5
-  center: {x: 0, y: 0}
   roadStraightPrefab: {fileID: 1403695168228775630, guid: 913a28887a4acfb44b805fa9dc49bf85,
     type: 3}
   roadTurnPrefab: {fileID: 4530936968969859911, guid: 21801a83f95179f4592071b502463ec1,
@@ -2236,6 +2152,8 @@ MonoBehaviour:
   roadEndPrefab: {fileID: 6189875272714880639, guid: e469e56d5102a4f41b1ee3a35416188f,
     type: 3}
   buildingPrefab: {fileID: 3529599447628414491, guid: 7789e01f12e96704197780e34dc3fe3f,
+    type: 3}
+  groundPrefab: {fileID: 3692733373902369275, guid: 87c3867b845097947a3ce954e446c77e,
     type: 3}
   simulation: {fileID: 143786620}
 --- !u!1 &1148875879
@@ -2825,6 +2743,5 @@ SceneRoots:
   - {fileID: 832575519}
   - {fileID: 1144462525}
   - {fileID: 143786619}
-  - {fileID: 803224177}
   - {fileID: 1775242291}
   - {fileID: 55800862}

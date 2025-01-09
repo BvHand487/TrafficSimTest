@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
-using static UnityEditor.ObjectChangeEventStream;
 
 
 namespace Generation
@@ -19,9 +18,7 @@ namespace Generation
         [SerializeField] private float buildingHeightDecay;
         [SerializeField] private float buildingHeightRandomness = 2.0f;
 
-        [SerializeField] public Vector2 center = Vector2.zero;
-
-        [SerializeField] public GameObject roadStraightPrefab, roadTurnPrefab, roadJoinPrefab, roadCrossPrefab, roadEndPrefab, buildingPrefab;
+        [SerializeField] public GameObject roadStraightPrefab, roadTurnPrefab, roadJoinPrefab, roadCrossPrefab, roadEndPrefab, buildingPrefab, groundPrefab;
 
         private Grid grid;
         private WFC wfc;
@@ -66,7 +63,7 @@ namespace Generation
                 new GridTile(GridTile.Type.Road, roadTurnPrefab, 270, "WN", null, -Vector2Int.one),
             };
 
-            grid = new Grid(gridSize, center);
+            grid = new Grid(gridSize);
 
             wfc = new WFC(tiles, grid, this);
             wfc.Run();
@@ -125,11 +122,22 @@ namespace Generation
             GridTile VerticalStraightRoadTile = tiles.Find(t => t.prefab == roadStraightPrefab && t.rotY == 0);
 
             // Expands the grid by the junctionGap
-            Grid expandedGrid = new Grid((gridSize - 1) * junctionGap + gridSize + 2, center);
+            Grid expandedGrid = new Grid((gridSize - 1) * junctionGap + gridSize + 2);
 
             for (int i = 0; i < gridSize; i++)
                 for (int j = 0; j < gridSize; j++)
                     expandedGrid.tiles[i * (junctionGap + 1) + 1, j * (junctionGap + 1) + 1].SetTile(grid.tiles[i, j]);
+
+            // Spawn ground
+            {
+                var ground = Instantiate(groundPrefab, Vector3.zero, Quaternion.identity, simulation.transform);
+                ground.name = groundPrefab.name;
+            
+                var scale = ground.transform.localScale;
+                var groundSize = expandedGrid.size + 2;
+                scale.Scale(new Vector3(groundSize, 1f, groundSize));
+                ground.transform.localScale = scale;
+            }
 
             // Fill gap between spaced out tiles with straight roads
             List<(int, int, GridTile)> toAdd = new List<(int, int, GridTile)>();
@@ -181,7 +189,7 @@ namespace Generation
                     if (!tile.IsValidTile()) continue;
 
                     Vector3 pos = tile.physicalPos;
-                    var obj = Instantiate(tile.prefab, pos, Quaternion.Euler(0, tile.rotY, 0));
+                    var obj = Instantiate(tile.prefab, pos, Quaternion.Euler(0, tile.rotY, 0), simulation.transform);
                     obj.SetActive(true);
                     obj.name = $"{tile.prefab.name}";
 
@@ -222,8 +230,15 @@ namespace Generation
                         GetFullRoad(tile, roadTiles, juncs, builds, visited);
 
                         var roadPath = Utils.Math.OrderVectorPath(roadTiles.Select(r => r.physicalPos).ToList());
-                        Road roadToAdd = new Road(roadPath, juncsMap[juncs[0]], juncsMap[juncs[1]]);
+                        Road roadToAdd = new Road(roadPath, juncsMap[juncs.First()], juncsMap[juncs.Last()]);
                         roads.Add(roadToAdd);
+
+                        if (roadToAdd.junctionStart == roadToAdd.junctionEnd)
+                        {
+                            Road sameRoadCopy = new Road(roadToAdd.path, roadToAdd.junctionEnd, roadToAdd.junctionStart);
+                            sameRoadCopy.path.Reverse();
+                            roads.Add(sameRoadCopy);
+                        }
 
                         foreach (Building building in builds.FindAll(tile => roadTiles.Any(rt => GridTile.IsNeighbours(rt, tile))).Select(tile => buildsMap[tile]))
                         {
@@ -248,9 +263,16 @@ namespace Generation
                         {
                             Road road = roads.Find(r => r.junctionStart == juncsMap[tile] || r.junctionEnd == juncsMap[tile]);
 
-                            building.spawnPoints.TryAdd(road, tile.physicalPos);
+                            Vector3 closestPoint = Utils.Math.GetClosestVector(building.obj.transform.position, road.path);
+                            int closestPointIndex = road.path.IndexOf(closestPoint);
+                            int nextPointIndex = closestPointIndex == 0 ? 1 : road.path.Count - 2;
+
+                            Vector3 continuationDir = closestPoint - road.path[nextPointIndex];
+                            building.spawnPoints.TryAdd(road, closestPoint + continuationDir);
                             if (!buildings.Contains(building))
                                 buildings.Add(building);
+
+                            Debug.Log($"road: {road.junctionStart} - {road.junctionEnd}, b: {building.obj.transform.position}, b-dict:\n{string.Join('\n', building.spawnPoints)}");
                         }
                     }
                 }
@@ -262,14 +284,14 @@ namespace Generation
             foreach (var j in junctions)
             {
                 var maxDistFromCenter = expandedGrid.MaxDistanceFromCenter();
-                var distFromCenter = Vector3.Distance(j.obj.transform.position, new Vector3(center.x, 0, center.y));
+                var distFromCenter = j.obj.transform.position.magnitude;
                 j.Initialize(roads.FindAll((r) => r.junctionStart == j || r.junctionEnd == j), Utils.Modeling.ChooseRandomJunctionType(distFromCenter / maxDistFromCenter));
             }
 
             foreach (var b in buildings)
             {
                 var maxDistFromCenter = expandedGrid.MaxDistanceFromCenter();
-                var distFromCenter = Vector3.Distance(b.obj.transform.position, new Vector3(center.x, 0, center.y));
+                var distFromCenter = b.obj.transform.position.magnitude;
                 b.Initialize(Utils.Modeling.ChooseRandomBuildingType(distFromCenter / maxDistFromCenter));
             }
         }

@@ -6,9 +6,9 @@ namespace Utils
     public static class Modeling
     {
         // Returns the height of a building given the normalized distance from the center of the city (0, 1)
-        public static float BuildingHeightFromDistance(float distance, float minHeight=1f, float maxHeight=10f, float decay=3f)
+        public static float BuildingHeightFromDistance(float normDistance, float minHeight=1f, float maxHeight=10f, float decay=3f)
         {
-            return minHeight + (maxHeight - minHeight) * ((float) System.Math.Exp((double) (-decay * distance)));
+            return minHeight + (maxHeight - minHeight) * ((float) System.Math.Exp((double) (-decay * normDistance)));
         }
 
         // time is a value in the range [0; 24)

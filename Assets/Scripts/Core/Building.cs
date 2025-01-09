@@ -14,6 +14,7 @@ public class Building
     public Type type { get; private set; }
     public GameObject obj;
     public Dictionary<Road, Vector3> spawnPoints = new Dictionary<Road, Vector3>();
+    public Junction closestJunction;
 
     public Building(GameObject obj)
     {
@@ -39,6 +40,8 @@ public class Building
                 mat.color = Color.black;
                 break;
         }
+
+        this.closestJunction = Building.GetClosestJunction(this);
     }
 
     public static Junction GetClosestJunction(Building b)
@@ -50,11 +53,19 @@ public class Building
         else
         {
             Road road = adjacentRoads.First();
-            Vector3 buildingPos = b.obj.transform.position;
+
+            // If one of the junctions is an end road return the other one
+            if (road.junctionStart.roads.Count == 1)
+                return road.junctionEnd;
+
+            if (road.junctionEnd.roads.Count == 1)
+                return road.junctionStart;
+
+            Vector3 spawnPos = b.spawnPoints[road];
 
             // If junctionStart is closer to the building than junctionEnd
-            if (Vector3.Distance(buildingPos, road.junctionStart.obj.transform.position) <=
-                Vector3.Distance(buildingPos, road.junctionEnd.obj.transform.position))
+            if (Vector3.Distance(spawnPos, road.junctionStart.obj.transform.position) <=
+                Vector3.Distance(spawnPos, road.junctionEnd.obj.transform.position))
                 return road.junctionStart;
             else
                 return road.junctionEnd;

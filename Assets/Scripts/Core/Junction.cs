@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -17,7 +18,6 @@ public class Junction
     public Type type;
     public List<Road> roads;
     public GameObject obj;
-
 
     // If the junction is controlled with lights
     public TrafficController trafficController;
@@ -37,6 +37,10 @@ public class Junction
     public void Initialize(List<Road> roads, Type type = Type.None)
     {
         this.roads = Road.OrderRoads(roads);
+
+        var cyclicRoads = roads.FindAll(r => r.IsCyclic());
+        if (cyclicRoads.Count != 0 && cyclicRoads.First().path.First() == cyclicRoads.Last().path.First()) 
+            cyclicRoads.Last().path.Reverse();
 
         if (this.roads.Count == 1)
         {

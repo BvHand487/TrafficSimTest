@@ -7,11 +7,10 @@ namespace Generation
     public class Grid
     {
         public int size;
-        public Vector2 center;
-        public Vector2 centerOffset;
         public GridTile[,] tiles;
+        public Vector2 centerOffset;
 
-        public Grid(int size, Vector2 center)
+        public Grid(int size)
         {
             this.size = size;
 
@@ -25,8 +24,7 @@ namespace Generation
                 }
             }
 
-            this.center = center;
-            this.centerOffset = center - new Vector2((size / 2.0f) * Generate.tileSize, (size / 2.0f) * Generate.tileSize);
+            this.centerOffset = - new Vector2((size / 2.0f) * Generate.tileSize, (size / 2.0f) * Generate.tileSize);
         }
 
         public static float DistanceOfTiles(GridTile tile1, GridTile tile2)

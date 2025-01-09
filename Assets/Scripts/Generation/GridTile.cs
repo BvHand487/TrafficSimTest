@@ -129,7 +129,7 @@ namespace Generation
             return this.type != Type.None && this.prefab != null && this.validConnections != null;
         }
 
-        public float DistanceToCenter() => Vector3.Distance(physicalPos, new Vector3(grid.center.x, 0f, grid.center.y));
+        public float DistanceToCenter() => physicalPos.magnitude;
 
         public List<GridTile> GetConnectedNeighbours()
         {

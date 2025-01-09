@@ -56,7 +56,7 @@ namespace Utils
                 float angle = Vector3.Angle(dirToPrev, dirToNext);
 
                 // If the angle is approximately 90 degrees, create a curve
-                if (Mathf.Abs(angle - 90f) < 1e-2f)
+                if (Mathf.Abs(angle - 90f) < 0.01f)
                 {
                     // Calculate arc points
                     List<Vector3> arcPoints = GenerateArcPointsPerpendicular(prev, current, next, radius, resolution);
@@ -117,16 +117,16 @@ namespace Utils
             float minDist = float.MaxValue;
             Vector3 closest = Vector3.zero;
 
-            foreach (var point in points)
+            for (int i = 0; i < points.Count; ++i)
             {
-                if (point == target)
+                if (points[i] == target)
                     continue;
 
-                var dist = Vector3.Distance(target, point);
+                var dist = Vector3.Distance(target, points[i]);
                 if (dist < minDist)
                 {
                     minDist = dist;
-                    closest = point;
+                    closest = points[i];
                 }
             }
 
