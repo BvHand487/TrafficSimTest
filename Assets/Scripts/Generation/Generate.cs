@@ -235,7 +235,7 @@ namespace Generation
 
                         if (roadToAdd.junctionStart == roadToAdd.junctionEnd)
                         {
-                            Road sameRoadCopy = new Road(roadToAdd.path, roadToAdd.junctionEnd, roadToAdd.junctionStart);
+                            Road sameRoadCopy = new Road(new List<Vector3>(roadToAdd.path), roadToAdd.junctionEnd, roadToAdd.junctionStart);
                             sameRoadCopy.path.Reverse();
                             roads.Add(sameRoadCopy);
                         }

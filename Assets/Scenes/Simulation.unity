@@ -660,6 +660,7 @@ GameObject:
   - component: {fileID: 330585544}
   - component: {fileID: 330585547}
   - component: {fileID: 330585548}
+  - component: {fileID: 330585550}
   m_Layer: 0
   m_Name: Camera
   m_TagString: MainCamera
@@ -735,7 +736,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 300, z: 0}
+  m_LocalPosition: {x: 0, y: 100, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -903,6 +904,20 @@ LineRenderer:
   m_UseWorldSpace: 1
   m_Loop: 0
   m_ApplyActiveColorSpace: 1
+--- !u!114 &330585550
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330585543}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 462a09f58ed63fb4a812a8e7a6ad1f86, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlineMaterial: {fileID: 2100000, guid: f6fb410719c92fb4790e34c9a6ef80d0, type: 2}
+  selectionMaterial: {fileID: 2100000, guid: 6c406680f0dbb0e46a7fbd515584969b, type: 2}
 --- !u!1 &335449278
 GameObject:
   m_ObjectHideFlags: 0
@@ -2134,8 +2149,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8aa329b8a4f37324ebf316fcdece5701, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridSize: 3
-  junctionGap: 2
+  gridSize: 5
+  junctionGap: 3
   minBuildingHeight: 4
   maxBuildingHeight: 28
   buildingHeightStep: 2

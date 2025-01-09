@@ -71,6 +71,9 @@ public class Road
                 0 :
                 path.Count - 1;
 
+        if (IsCyclic() && toIndex > path.Count / 2)
+            fromIndex = path.Count - 1 - fromIndex;
+
         if (fromIndex > toIndex)
             (fromIndex, toIndex) = (toIndex, fromIndex);
 
