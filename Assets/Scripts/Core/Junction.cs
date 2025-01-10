@@ -1,3 +1,4 @@
+using Generation;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.VisualScripting;
@@ -74,6 +75,17 @@ public class Junction
     {
         return a?.roads?.Intersect(b?.roads ?? Enumerable.Empty<Road>())?.FirstOrDefault();
 
+    }
+
+    public bool IsPointInside(Vector3 point)
+    {
+        float halfTile = Generate.tileSize / 2;
+        float low_x = obj.transform.position.x - halfTile;
+        float high_x = obj.transform.position.x + halfTile;
+        float low_z = obj.transform.position.z - halfTile;
+        float high_z = obj.transform.position.z + halfTile;
+
+        return low_x < point.x && point.x < high_x && low_z < point.z && point.z < high_z;
     }
 
     override public string ToString()

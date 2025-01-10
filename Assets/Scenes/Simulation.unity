@@ -357,11 +357,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78edd414b04292d4cba4c76d8707052a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  carPrefab: {fileID: 4664414865074881819, guid: faf35ecf27ee6e247ae90e695d4d8123,
+  carPrefab: {fileID: 5966912864227686815, guid: faf35ecf27ee6e247ae90e695d4d8123,
     type: 3}
   homeColor: {r: 0.3920879, g: 0.8396226, b: 0.44294417, a: 0}
   workColor: {r: 0.35555357, g: 0.8867924, b: 0.87029433, a: 0}
   minCarTravelDistance: 45
+  carTurnRadius: 7.5
+  carTurnResolution: 7
   maxCars: 100
 --- !u!114 &143786621
 MonoBehaviour:
@@ -2149,7 +2151,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8aa329b8a4f37324ebf316fcdece5701, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridSize: 5
+  gridSize: 4
   junctionGap: 3
   minBuildingHeight: 4
   maxBuildingHeight: 28

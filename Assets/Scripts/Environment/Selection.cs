@@ -20,8 +20,8 @@ public class Selection : MonoBehaviour
     public Material selectionMaterial;
 
     private Car selectedCar;
-    private MeshRenderer carFromBuildingRenderer = default;
-    private MeshRenderer carToBuildingRenderer = default;
+    // private MeshRenderer carFromBuildingRenderer = default;
+    // private MeshRenderer carToBuildingRenderer = default;
     private Junction selectedJunction;
 
 
@@ -65,19 +65,20 @@ public class Selection : MonoBehaviour
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
+                if (hit.collider.CompareTag("Car"))
+                    SelectCar(hit.collider.gameObject.GetComponent<Car>());
+
                 if (hit.collider.CompareTag("Junction"))
                 {
-                    if (Physics.Raycast(hit.point, ray.direction, out RaycastHit repeatedHit))
+                    Vector3 offset = 0.01f * ray.direction.normalized;
+                    if (Physics.Raycast(hit.point + offset, ray.direction, out RaycastHit repeatedHit))
                     {
-                        if (hit.collider.CompareTag("Car"))
-                            SelectCar(hit.collider.gameObject.GetComponent<Car>());
+                        if (repeatedHit.collider.CompareTag("Car"))
+                            SelectCar(repeatedHit.collider.gameObject.GetComponent<Car>());
                         else
                             selectedJunction = simulation.junctionsDict[hit.collider.gameObject];
                     }
                 }
-
-                if (hit.collider.CompareTag("Car"))
-                    SelectCar(hit.collider.gameObject.GetComponent<Car>());
             }
         }
     }

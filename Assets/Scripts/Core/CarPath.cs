@@ -22,10 +22,9 @@ public struct CarPath
         return points.Count == 0;
     }
 
-    public Vector3 Next()
-    {
-        return points.First();
-    }
+    public Vector3 First() => points.First();
+    public Vector3 Last() => points.Last();
+    public Vector3 Next(int idx=0) => points[idx];
 
     public int Length()
     {

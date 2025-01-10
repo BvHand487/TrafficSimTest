@@ -81,57 +81,86 @@ public class Car : MonoBehaviour
             switch (hit.collider.tag)
             {
                 case "Junction":
-                    Junction junction = simulation.junctionsDict[hit.collider.gameObject];
-
-                    switch (junction.type)
-                    {
-                        case Junction.Type.Lights:
-                            TrafficLight.Status trafficLightStatus = simulation.GetTrafficLightStatus(this, junction);
-                            if (trafficLightStatus != TrafficLight.Status.Green)
-                            {
-                                status = Status.STOPPING;
-
-                                float timeToStop = velocity / decelerationRate;
-                                float stoppingDistance = velocity * timeToStop - 0.5f * decelerationRate * timeToStop * timeToStop;
-
-                                if (stoppingDistance >= trueDistance)
-                                    acceleration = -decelerationRate;
-                                else
-                                    acceleration = -Mathf.Clamp((velocity * velocity) / (2 * trueDistance), 0, decelerationRate);
-
-                                if (IsStopped())
-                                    status = Status.WAITING_RED;
-                            }
-                            break;
-                    }
+                    HandleJunction(hit, trueDistance);
                     break;
 
                 case "Car":
-                    Car hitCar = hit.collider.gameObject.GetComponent<Car>();
-
-                    if (trueDistance < 0.0f)
-                    {
-                        acceleration = 0f;
-                        velocity = 0f;
-                    }
-
-                    if (hitCar.status != Status.DRIVING)
-                    {
-                        status = Status.STOPPING;
-                        acceleration = -decelerationRate;
-
-                        if (IsStopped() && (hitCar.status == Status.WAITING_RED || hitCar.status == Status.WAITING_CAR))
-                            status = hitCar.status;
-                    }
-
-                    if (IsStopped() && hitCar.IsStopped() && trueDistance < 0.0f)
-                    {
-                        Car carWithPriority = transform.position.x > hitCar.transform.position.x ? this : hitCar;
-                        carWithPriority.status = Status.DRIVING;
-                    }
+                    HandleCar(hit, trueDistance);
                     break;
             }
         }
+    }
+
+    private void HandleJunction(RaycastHit hit, float trueDistance)
+    {
+        Junction junction = simulation.junctionsDict[hit.collider.gameObject];
+        bool isClear = IsExitClear(junction);
+        bool shouldStop = ShouldStop(trueDistance);
+        bool isStopped = IsStopped();
+
+        if (junction.type == Junction.Type.Lights)
+        {
+            TrafficLight.Status trafficLightStatus = simulation.GetTrafficLightStatus(this, junction);
+            if (trafficLightStatus != TrafficLight.Status.Green || !isClear)
+            {
+                status = Status.STOPPING;
+
+                if (shouldStop)
+                    acceleration = StopAccel();
+
+                if (isStopped)
+                    status = Status.WAITING_RED;
+            }
+        }
+        else
+        {
+            // For uncontrolled junctions, only check for exit clearance
+            if (!isClear)
+            {
+                status = Status.STOPPING;
+
+                if (shouldStop)
+                    acceleration = StopAccel();
+
+                if (isStopped)
+                    status = Status.WAITING_CAR;
+            }
+        }
+    }
+
+    private void HandleCar(RaycastHit hit, float trueDistance)
+    {
+        Car hitCar = hit.collider.gameObject.GetComponent<Car>();
+
+        if (trueDistance < 0.0f)
+        {
+            acceleration = 0f;
+            velocity = 0f;
+        }
+
+        if (hitCar.status != Status.DRIVING)
+        {
+            status = Status.STOPPING;
+
+            if (ShouldStop(trueDistance))
+                acceleration = StopAccel();
+
+            if (IsStopped() && (hitCar.status == Status.WAITING_RED || hitCar.status == Status.WAITING_CAR))
+                status = hitCar.status;
+        }
+    }
+
+    private float StopAccel()
+    {
+        return -decelerationRate;
+    }
+
+    private bool ShouldStop(float trueDistance)
+    {
+        float timeToStop = velocity / decelerationRate;
+        float stoppingDistance = velocity * timeToStop - 0.5f * decelerationRate * timeToStop * timeToStop;
+
+        return stoppingDistance >= trueDistance || trueDistance < stopGap;
     }
 
     private void Move()
@@ -154,8 +183,12 @@ public class Car : MonoBehaviour
             else
             {
                 Vector3 direction = (nextPoint - transform.position).normalized;
-                transform.position += direction * velocity * Time.deltaTime;
-                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), 10f * deltaTime);
+                transform.position += direction * velocity * deltaTime;
+
+                Vector3 lookDirection = carPath.points.Count() > 2 ?
+                    (carPath.Next(1) - transform.position).normalized :
+                    (carPath.Last() - transform.position).normalized;
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDirection), 10f * deltaTime);
                 distanceThisFrame = 0;
             }
         }
@@ -164,6 +197,41 @@ public class Car : MonoBehaviour
     private bool IsStopped()
     {
         return Mathf.Abs(velocity) < 0.01f;
+    }
+
+    //public Vector3 exitHit;
+    //public Vector3 dir;
+
+    private bool IsExitClear(Junction junction)
+    {
+        //bool enteredJunction = false;
+        //Vector3 exitPosition = Vector3.zero;
+        //Vector3 exitDirection = Vector3.zero;
+
+        //for (int i = 0; i < carPath.points.Count; ++i)
+        //{
+        //    if (junction.IsPointInside(carPath.points[i]))
+        //        enteredJunction = true;
+
+        //    if (enteredJunction && !junction.IsPointInside(carPath.points[i]))
+        //    {
+        //        exitHit = carPath.points[i - 1];
+        //        dir = carPath.points[i] - exitPosition;
+        //        exitPosition = carPath.points[i - 1];
+        //        exitDirection = carPath.points[i] - exitPosition;
+        //        break;
+        //    }
+        //}
+
+        //Vector3 forward = exitDirection.normalized;
+        //Vector3 right = Vector3.Cross(Vector3.up, forward).normalized;
+        //Vector3 worldOffset = forward * bumperOffset.z + right * bumperOffset.x;
+
+        //if (Physics.Raycast(exitPosition + worldOffset, forward, out RaycastHit hit, stopDistance))
+        //    if (hit.collider.CompareTag("Car") && hit.collider.GetComponent<Car>().IsStopped())
+        //        return false;
+
+        return true;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -185,14 +253,27 @@ public class Car : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        if (carPath.points != null)
-        {
-            Gizmos.color = Color.blue;
-            Gizmos.DrawLineStrip(carPath.points.ToArray(), false);
+        //if (exitHit != null)
+        //{
+        //    Vector3 forward = dir.normalized;
+        //    Vector3 right = Vector3.Cross(Vector3.up, forward).normalized;
+        //    Vector3 worldOffset = forward * bumperOffset.z + right * bumperOffset.x;
+        //    Vector3 start = exitHit + worldOffset;
+        //    Vector3 end = exitHit + worldOffset + dir;
+        //    Gizmos.color = Color.magenta;
+        //    Gizmos.DrawSphere(start, 1);
+        //    Gizmos.DrawLine(start, end);
+        //    Gizmos.DrawSphere(end, 1);
+        //}
 
-            foreach (var p in carPath.points)
-                Gizmos.DrawSphere(p, 0.2f);
-        }
+        //if (carPath.points != null)
+        //{
+        //    Gizmos.color = Color.blue;
+        //    Gizmos.DrawLineStrip(carPath.points.ToArray(), false);
+
+        //    foreach (var p in carPath.points)
+        //        Gizmos.DrawSphere(p, 0.2f);
+        //}
     }
 
     void PlayEffect()

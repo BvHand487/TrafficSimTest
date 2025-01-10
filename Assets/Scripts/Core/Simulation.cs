@@ -11,6 +11,8 @@ public class Simulation : MonoBehaviour
     public Color homeColor, workColor;
 
     public float minCarTravelDistance = 75.0f;
+    public float carTurnRadius = 7.5f;
+    public int carTurnResolution = 5;
     public int maxCars = 20;
     private int simulatedMaxCars;
 
@@ -81,22 +83,8 @@ public class Simulation : MonoBehaviour
 
     public TrafficLight.Status GetTrafficLightStatus(Car car, Junction junction)
     {
-        var trafficLights = junction.trafficLights;
-
-        TrafficLight closestLight = trafficLights.First();
-        float minDist = float.MaxValue;
-
-        foreach (var tl in trafficLights)
-        {
-            float dist = Vector3.Distance(tl.pos, car.transform.position);
-            if (dist < minDist)
-            {
-                minDist = dist;
-                closestLight = tl;
-            }
-        }
-
-        return closestLight.status;
+        var map = junction.trafficController.trafficLightDict;
+        return map[Utils.Math.GetClosestVector(car.transform.position, map.Keys.ToList())].status;
     }
 
     // Spawns randomly for now
@@ -134,7 +122,7 @@ public class Simulation : MonoBehaviour
         var cars = FindObjectsOfType<Car>();
 
         foreach (var c in cars)
-            if (c != null && c.gameObject.activeInHierarchy && Vector3.Distance(c.transform.position, car.transform.position) < 20.0f)
+            if (c != null && c.gameObject.activeInHierarchy && Vector3.Distance(c.transform.position, car.transform.position) < 30.0f)
                 return false;
 
         return true;
@@ -151,7 +139,7 @@ public class Simulation : MonoBehaviour
         }
         while (Vector3.Distance(start.obj.transform.position, end.obj.transform.position) < minCarTravelDistance);
 
-        return new CarPath(start, end, Pathfinding.FindCarPath(start, end));
+        return new CarPath(start, end, Pathfinding.FindCarPath(start, end, carTurnRadius, carTurnResolution));
     }
 
     private CarPath CreateDirectedCarPath()
@@ -173,7 +161,7 @@ public class Simulation : MonoBehaviour
         }
         while (Vector3.Distance(start.obj.transform.position, end.obj.transform.position) < minCarTravelDistance);
 
-        return new CarPath(start, end, Pathfinding.FindCarPath(start, end));
+        return new CarPath(start, end, Pathfinding.FindCarPath(start, end, carTurnRadius, carTurnResolution));
     }
 
     private Car InstantiateCar(CarPath carPath)

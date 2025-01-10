@@ -38,7 +38,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Fade_Distance: 150
+    - _Fade_Distance: 1000
     - _Outline_Thickness: 0.025
     - _QueueControl: 0
     - _QueueOffset: 0

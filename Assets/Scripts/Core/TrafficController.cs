@@ -17,6 +17,7 @@ public class TrafficController
 
     public int activeLight = 0;
 
+    public Dictionary<Vector3, TrafficLight> trafficLightDict;
     public Junction junction;
     public List<Road> roads => junction.roads;
 
@@ -25,17 +26,16 @@ public class TrafficController
 
     public TrafficController(Junction junction, List<float> greenIntervals = null, Mode mode = Mode.Double)
     {
-        var rs = junction.roads.FindAll(r => r.IsCyclic());
-
-        Debug.Log($"duplicate cnt: {rs.Count}");
-        for (int i = 0; i < rs.Count; ++i)
-            Debug.Log($"duplicate: {rs[i].path[0]}, idx: {i}");
-
         this.junction = junction;
 
         lights = new List<TrafficLight>();
+        trafficLightDict = new Dictionary<Vector3, TrafficLight>();
         for (int i = 0; i < junction.roads.Count; ++i)
-            lights.Add(new TrafficLight(this, junction.roads[i]));
+        {
+            var tf = new TrafficLight(this, junction.roads[i]);
+            trafficLightDict.Add(tf.pos, tf);
+            lights.Add(tf);
+        }
 
         if (greenIntervals == null)
             greenIntervals = new List<float>() { 20f, 20f, 20f, 20f };

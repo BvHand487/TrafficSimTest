@@ -74,7 +74,6 @@ namespace Generation
             // Spawn prefabs
             GeneratePrefabs();
 
-            Debug.Log($"j: {junctions.Count}, r: {roads.Count}, b: {buildings.Count}");
             simulation.Initialize(junctions.ToList(), roads.ToList(), buildings.ToList());
             simulation.gameObject.SetActive(true);
 
@@ -272,7 +271,10 @@ namespace Generation
                             if (!buildings.Contains(building))
                                 buildings.Add(building);
 
-                            Debug.Log($"road: {road.junctionStart} - {road.junctionEnd}, b: {building.obj.transform.position}, b-dict:\n{string.Join('\n', building.spawnPoints)}");
+                            string msg = $"road: {closestPoint}, {closestPoint + continuationDir}\n";
+                            for (int k = 0; k < road.path.Count; ++k)
+                                msg += $"{road.path[k]}\n";
+                            Debug.Log(msg);
                         }
                     }
                 }

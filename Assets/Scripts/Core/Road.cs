@@ -54,22 +54,10 @@ public class Road
     }
 
     // Returns a segment of the path from a junction to a point (inclusive) on the road.
-    public List<Vector3> SplitPath(Junction from, Vector3 at)
+    public List<Vector3> SplitPath(Junction junction, Vector3 at)
     {
-        // Get the index of the point closest to the junction
-        int fromIndex =
-            Vector3.Distance(from.obj.transform.position, path.First()) <=
-            Vector3.Distance(from.obj.transform.position, path.Last()) ?
-            0 :
-            path.Count - 1;
-
-        int toIndex = path.IndexOf(at);
-        if (toIndex == -1)
-            toIndex =
-                Vector3.Distance(at, path.First()) <=
-                Vector3.Distance(at, path.Last()) ?
-                0 :
-                path.Count - 1;
+        int fromIndex = GetClosestPathIndex(junction.obj.transform.position);
+        int toIndex = GetClosestPathIndex(at);
 
         if (IsCyclic() && toIndex > path.Count / 2)
             fromIndex = path.Count - 1 - fromIndex;
@@ -86,10 +74,8 @@ public class Road
         if (from == to)
             return new List<Vector3>() { from };
 
-        int fromIndex = path.IndexOf(from);
-        int toIndex = path.IndexOf(to);
-        fromIndex = Mathf.Clamp(fromIndex, 0, path.Count - 1);
-        toIndex = Mathf.Clamp(toIndex, 0, path.Count - 1);
+        int fromIndex = GetClosestPathIndex(from);
+        int toIndex = GetClosestPathIndex(to);
 
         if (fromIndex > toIndex)
             (fromIndex, toIndex) = (toIndex, fromIndex);
@@ -97,8 +83,27 @@ public class Road
         return path.Skip(fromIndex).Take(toIndex - fromIndex + 1).ToList();
     }
 
+    public int GetClosestPathIndex(Vector3 point)
+    {
+        int idx = path.IndexOf(point);
+        if (idx == -1)
+            if (Vector3.Distance(point, path.First()) <= Vector3.Distance(point, path.Last()))
+                return 0;
+            else
+                return path.Count - 1;
+
+        return idx;
+    }
+
     public bool IsCyclic() => junctionStart == junctionEnd;
     
+    public bool IsOnRoadPath(Vector3 point)
+    {
+        return path.Contains(point) ||
+            point == 2 * path[path.Count - 1] - path[path.Count - 2] ||
+            point == 2 * path[0] - path[1];
+    }
+
     // Orders roads around the intersection sequentially
     // If it's a 4-way intersection it orders them anticlockwise
     public static List<Road> OrderRoads(List<Road> roads)

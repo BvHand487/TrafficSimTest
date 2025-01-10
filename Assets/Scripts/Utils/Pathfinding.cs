@@ -8,7 +8,7 @@ namespace Utils
 {
     public static class Pathfinding
     {
-        public static List<Vector3> FindCarPath(Building start, Building end)
+        public static List<Vector3> FindCarPath(Building start, Building end, float radius, int resolution)
         {
             List<Road> commonRoads = start.spawnPoints.Keys.Intersect(end.spawnPoints.Keys).ToList();
 
@@ -42,11 +42,7 @@ namespace Utils
 
                 var pathToStartJunction = roadEnds.First().SplitPath(junctionPath.First(), buildingExitPoint);
                 if (!pathToStartJunction.Contains(buildingExitPoint))
-                    if (Vector3.Distance(buildingExitPoint, pathToStartJunction.First()) <
-                        Vector3.Distance(buildingExitPoint, pathToStartJunction.Last()))
-                        pathToStartJunction.Insert(0, buildingExitPoint);
-                    else
-                        pathToStartJunction.Add(buildingExitPoint);
+                    ExtendPath(pathToStartJunction, buildingExitPoint);
 
                 if (pathToStartJunction.Last() == buildingExitPoint)
                     pathToStartJunction.Reverse();
@@ -59,11 +55,7 @@ namespace Utils
 
                 var pathToEndJunction = roadEnds.Last().SplitPath(junctionPath.Last(), buildingExitPoint);
                 if (!pathToEndJunction.Contains(buildingExitPoint))
-                    if (Vector3.Distance(buildingExitPoint, pathToEndJunction.First()) <
-                        Vector3.Distance(buildingExitPoint, pathToEndJunction.Last()))
-                        pathToEndJunction.Insert(0, buildingExitPoint);
-                    else
-                        pathToEndJunction.Add(buildingExitPoint);
+                    ExtendPath(pathToEndJunction, buildingExitPoint);
 
                 if (pathToEndJunction.First() == buildingExitPoint)
                     pathToEndJunction.Reverse();
@@ -74,14 +66,14 @@ namespace Utils
                 path.InsertRange(0, startToRoadPath);
                 path.AddRange(endToRoadPath);
 
-                return Math.SmoothVectorPath(path, 5, 5);
+                return Math.SmoothVectorPath(path, radius, resolution);
             }
             else
             {
                 Road commonRoad = commonRoads.First();
 
-                Vector3 roadStart = Utils.Random.Select(start.spawnPoints.Values.Where(p => commonRoad.path.Contains(p)));
-                Vector3 roadEnd = Utils.Random.Select(end.spawnPoints.Values.Where(p => commonRoad.path.Contains(p)));
+                Vector3 roadStart = Utils.Random.Select(start.spawnPoints.Values.Where(p => commonRoad.IsOnRoadPath(p)));
+                Vector3 roadEnd = Utils.Random.Select(end.spawnPoints.Values.Where(p => commonRoad.IsOnRoadPath(p)));
 
                 List<Vector3> startToEndPath = new List<Vector3>();
                 startToEndPath.Add(start.obj.transform.position);
@@ -89,18 +81,10 @@ namespace Utils
                 var roadToRoadPath = commonRoad.SplitPath(roadStart, roadEnd);
                 
                 if (!roadToRoadPath.Contains(roadStart))
-                    if (Vector3.Distance(roadStart, roadToRoadPath.First()) <
-                        Vector3.Distance(roadStart, roadToRoadPath.Last()))
-                        roadToRoadPath.Insert(0, roadStart);
-                    else
-                        roadToRoadPath.Add(roadStart);
+                    ExtendPath(roadToRoadPath, roadStart);
 
                 if (!roadToRoadPath.Contains(roadEnd))
-                    if (Vector3.Distance(roadEnd, roadToRoadPath.First()) <
-                        Vector3.Distance(roadEnd, roadToRoadPath.Last()))
-                        roadToRoadPath.Insert(0, roadEnd);
-                    else
-                        roadToRoadPath.Add(roadEnd);
+                    ExtendPath(roadToRoadPath, roadEnd);
 
                 if (roadToRoadPath.First() == roadEnd)
                     roadToRoadPath.Reverse();
@@ -108,8 +92,19 @@ namespace Utils
                 startToEndPath.AddRange(roadToRoadPath);
                 startToEndPath.Add(end.obj.transform.position);
 
-                return Math.SmoothVectorPath(startToEndPath, 5, 5);
+                return Math.SmoothVectorPath(startToEndPath, radius, resolution);
             }
+        }
+
+        private static List<Vector3> ExtendPath(List<Vector3> path, Vector3 point)
+        {
+            if (Vector3.Distance(point, path.First()) <
+                Vector3.Distance(point, path.Last()))
+                path.Insert(0, point);
+            else
+                path.Add(point);
+
+            return path;
         }
 
         // A* algorithm for best path
