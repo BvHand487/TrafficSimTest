@@ -139,7 +139,7 @@ public class Simulation : MonoBehaviour
         }
         while (Vector3.Distance(start.obj.transform.position, end.obj.transform.position) < minCarTravelDistance);
 
-        return new CarPath(start, end, Pathfinding.FindCarPath(start, end, carTurnRadius, carTurnResolution));
+        return new CarPath(start, end, Pathfinding.FindCarPath(start, end, carTurnRadius, carTurnResolution), carTurnResolution);
     }
 
     private CarPath CreateDirectedCarPath()
@@ -161,7 +161,7 @@ public class Simulation : MonoBehaviour
         }
         while (Vector3.Distance(start.obj.transform.position, end.obj.transform.position) < minCarTravelDistance);
 
-        return new CarPath(start, end, Pathfinding.FindCarPath(start, end, carTurnRadius, carTurnResolution));
+        return new CarPath(start, end, Pathfinding.FindCarPath(start, end, carTurnRadius, carTurnResolution), carTurnResolution);
     }
 
     private Car InstantiateCar(CarPath carPath)

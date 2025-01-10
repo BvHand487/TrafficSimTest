@@ -270,11 +270,6 @@ namespace Generation
                             building.spawnPoints.TryAdd(road, closestPoint + continuationDir);
                             if (!buildings.Contains(building))
                                 buildings.Add(building);
-
-                            string msg = $"road: {closestPoint}, {closestPoint + continuationDir}\n";
-                            for (int k = 0; k < road.path.Count; ++k)
-                                msg += $"{road.path[k]}\n";
-                            Debug.Log(msg);
                         }
                     }
                 }

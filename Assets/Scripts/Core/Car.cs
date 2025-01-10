@@ -1,11 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Assertions.Must;
-using UnityEngine.UIElements;
-using static UnityEngine.GraphicsBuffer;
 
 public class Car : MonoBehaviour
 {
@@ -27,6 +21,7 @@ public class Car : MonoBehaviour
 
     private float velocity = 0.0f;
     private float acceleration = 0.0f;
+    private bool invisible = false;
     private bool canStop = true;
 
     private Vector3 bumperOffset;
@@ -62,10 +57,6 @@ public class Car : MonoBehaviour
         }
 
         bumperPosition = transform.position + transform.TransformVector(bumperOffset);
-
-        if (canStop)
-            Check();
-
         Move();
     }
 
@@ -131,6 +122,9 @@ public class Car : MonoBehaviour
     private void HandleCar(RaycastHit hit, float trueDistance)
     {
         Car hitCar = hit.collider.gameObject.GetComponent<Car>();
+        foreach (var j in simulation.junctions)
+            if (j.IsPointInside(hitCar.transform.position))
+                return;
 
         if (trueDistance < 0.0f)
         {
@@ -234,9 +228,35 @@ public class Car : MonoBehaviour
         return true;
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Junction"))
+        {
+            status = Status.DRIVING;
+            canStop = false;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Junction"))
+        {
+            canStop = true;
+        }
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.tag == "Junction")
+        if (collision.gameObject.CompareTag("Junction"))
+        {
+            status = Status.DRIVING;
+            canStop = false;
+        }
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Junction"))
         {
             status = Status.DRIVING;
             canStop = false;
@@ -245,7 +265,7 @@ public class Car : MonoBehaviour
 
     private void OnCollisionExit(Collision collision)
     {
-        if (collision.gameObject.tag == "Junction")
+        if (collision.gameObject.CompareTag("Junction"))
         {
             canStop = true;
         }
@@ -253,6 +273,7 @@ public class Car : MonoBehaviour
 
     void OnDrawGizmos()
     {
+        // car junction exit check
         //if (exitHit != null)
         //{
         //    Vector3 forward = dir.normalized;
@@ -266,6 +287,7 @@ public class Car : MonoBehaviour
         //    Gizmos.DrawSphere(end, 1);
         //}
 
+        // car path
         //if (carPath.points != null)
         //{
         //    Gizmos.color = Color.blue;
@@ -274,6 +296,25 @@ public class Car : MonoBehaviour
         //    foreach (var p in carPath.points)
         //        Gizmos.DrawSphere(p, 0.2f);
         //}
+
+        // car status check
+        switch (status)
+        {
+            case Status.DRIVING:
+                Gizmos.color = Color.green;
+                break;
+            case Status.STOPPING:
+                Gizmos.color = Color.yellow;
+                break;
+            case Status.WAITING_CAR:
+                Gizmos.color = Color.black;
+                break;
+            case Status.WAITING_RED:
+                Gizmos.color = Color.red;
+                break;
+        }
+
+        Gizmos.DrawCube(bumperPosition + Vector3.up, Vector3.one);
     }
 
     void PlayEffect()

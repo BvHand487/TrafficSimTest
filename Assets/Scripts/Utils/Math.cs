@@ -163,6 +163,14 @@ namespace Utils
             return bezierPoints;
         }
 
+        public static bool AreCollinear(Vector3 a, Vector3 b, Vector3 c)
+        {
+            Vector3 ab = b - a;
+            Vector3 ac = c - a;
+
+            return Vector3.Cross(ab, ac).sqrMagnitude < 0.0001f;
+        }
+
         public static bool CompareFloat(float x, float cmp, float eps = 0.005f) => IsWithinFloat(x, cmp - eps, cmp + eps);
 
         public static bool IsWithinFloat(float x, float lo, float hi) => x > lo && x < hi;
