@@ -364,7 +364,7 @@ MonoBehaviour:
   buildingHeightRandomness: 2
   vehicleTypes:
   - {fileID: 11400000, guid: 86c489ece8c5ef249a23849b27f12cc7, type: 2}
-  vehicleCount: 25
+  vehicleCount: 5
   simulationCopies: 0
 --- !u!4 &80862059
 Transform:

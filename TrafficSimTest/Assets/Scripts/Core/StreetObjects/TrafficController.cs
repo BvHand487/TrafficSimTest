@@ -78,7 +78,7 @@ public class TrafficController
         if (IsGreenOver(current))
         {
             current.status = TrafficLight.Status.Yellow;
-            current.queueLength = 0;
+            current.queue.Clear();
             elapsedTime = 0.0f;
         }
         else if (IsYellowOver(current))
@@ -109,7 +109,7 @@ public class TrafficController
         if (IsGreenOver(current))
         {
             current.status = opposite.status = TrafficLight.Status.Yellow;
-            current.queueLength = 0;
+            current.queue.Clear();
             elapsedTime = 0.0f;
         }
         else if (IsYellowOver(current))

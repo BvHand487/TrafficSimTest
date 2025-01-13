@@ -99,6 +99,10 @@ public class Road
 
         return idx;
     }
+    public Vector3 GetClosestPathPoint(Vector3 point)
+    {
+        return path[GetClosestPathIndex(point)];
+    }
 
     public bool IsCyclic() => junctionStart == junctionEnd;
     
@@ -114,6 +118,7 @@ public class Road
     public static List<Road> OrderRoads(List<Road> roads)
     {
         Vector3 junctionPos = Road.GetCommonJunction(roads.First(), roads.Last()).obj.transform.localPosition;
+        Dictionary<float, Road> anglesInWorld = new Dictionary<float, Road>();
 
         switch (roads.Count)
         {
@@ -121,28 +126,29 @@ public class Road
                 return roads;
 
             case 3:
-                int IndexOfRoadThatSticksOut = 1;
+                Vector3 dirToIndex0 = roads[0].GetClosestPathPoint(junctionPos) - junctionPos;
+                Vector3 dirToIndex1 = roads[1].GetClosestPathPoint(junctionPos) - junctionPos;
+                Vector3 dirToIndex2 = roads[2].GetClosestPathPoint(junctionPos) - junctionPos;
 
-                for (int i = 0; i < roads.Count; ++i)
-                    if (roads.Count(r => Utils.Math.CompareFloat(
-                            Vector3.Dot(
-                                r.path.First() - junctionPos,
-                                roads[i].path.First() - junctionPos
-                            ), 0.0f)) == 2)
-                    {
-                        IndexOfRoadThatSticksOut = i;
-                        break;
-                    }
+                if (Vector3.Dot(dirToIndex0, dirToIndex1) <= -0.95)
+                {
+                    return new List<Road>() { roads[0], roads[2], roads[1] };
+                }
 
-                (roads[1], roads[IndexOfRoadThatSticksOut]) = (roads[IndexOfRoadThatSticksOut], roads[1]);
-                return roads;
+                if (Vector3.Dot(dirToIndex0, dirToIndex2) <= -0.95)
+                {
+                    return new List<Road>() { roads[0], roads[1], roads[2] };
+                }
 
+                if (Vector3.Dot(dirToIndex1, dirToIndex2) <= -0.95)
+                {
+                    return new List<Road>() { roads[1], roads[0], roads[2] };
+                }
+
+                Debug.Log("null in order roads");
+                return null;
 
             default:
-                Dictionary<Road, float> anglesInWorld = new Dictionary<Road, float>();
-
-                Road cycleRoad = roads.Find(rd => roads.Count(r => r == rd) == 2);
-
                 for (int i = 0; i < roads.Count; ++i)
                 {
                     var roadPos = roads[i].IsCyclic() ?
@@ -156,10 +162,10 @@ public class Road
                         angle = 360f - angle;
                     angle = Unity.Mathematics.math.fmod(angle, 360f);
 
-                    anglesInWorld.Add(roads[i], angle);
+                    anglesInWorld.Add(angle, roads[i]);
                 }
 
-                return anglesInWorld.OrderBy(e => e.Value).Select(pair => pair.Key).ToList();
+                return anglesInWorld.OrderBy(e => e.Key).Select(pair => pair.Value).ToList();
         }
     }
 }

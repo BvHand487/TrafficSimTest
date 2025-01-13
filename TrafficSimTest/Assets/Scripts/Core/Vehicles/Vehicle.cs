@@ -29,6 +29,9 @@ public abstract class Vehicle : MonoBehaviour
     protected float velocity;
     protected float acceleration;
 
+    public bool invisible;
+    public Collider vehicleCollider;
+
     public void Initialize(VehicleManager vehicleManager, VehiclePreset preset, VehiclePath path)
     {
         this.vehicleManager = vehicleManager;
@@ -40,6 +43,7 @@ public abstract class Vehicle : MonoBehaviour
     protected void Start()
     {
         bumperOffset = GetBumperOffset();
+        vehicleCollider = GetComponent<Collider>();
     }
 
     private void FixedUpdate()
@@ -52,6 +56,7 @@ public abstract class Vehicle : MonoBehaviour
         }
 
         bumperPosition = transform.localPosition + transform.TransformVector(bumperOffset);
+        vehicleCollider.enabled = !invisible;
         HandleVehicle();
     }
 
@@ -59,6 +64,8 @@ public abstract class Vehicle : MonoBehaviour
     {
         return Physics.Raycast(bumperPosition, transform.forward, out hit, preset.lookAheadDistance);
     }
+
+    TrafficLight tlight;
 
     private void HandleVehicle()
     {
@@ -85,6 +92,8 @@ public abstract class Vehicle : MonoBehaviour
                         if (junction.type == Junction.Type.Lights && trafficLight.status != TrafficLight.Status.Green)
                         {
                             status = Status.WAITING_RED;
+                            tlight = trafficLight;
+                            tlight.AddVehicleToQueue(this);
                             velocity = 0.0f;
                         }
                         else if (IsJunctionExitBlocked(junction))
@@ -97,8 +106,14 @@ public abstract class Vehicle : MonoBehaviour
                     {
                         Vehicle vehicleInFront = hit.collider.GetComponent<Vehicle>();
 
-                        status = vehicleInFront.status;
                         velocity = 0.0f;
+                        status = vehicleInFront.status;
+                        
+                        if (status == Status.WAITING_RED)
+                        {
+                            tlight = vehicleInFront.tlight;
+                            tlight.AddVehicleToQueue(this);
+                        }
                     }
                 }
             }
@@ -138,6 +153,25 @@ public abstract class Vehicle : MonoBehaviour
         return false;
     }
 
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.CompareTag("Junction"))
+        {
+            Debug.Log("junction enter");
+            invisible = true;
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.collider.CompareTag("Junction"))
+        {
+            Debug.Log("junction exit");
+            invisible = false;
+        }
+    }
+
+
     public abstract Vector3 GetBumperOffset();
 
     protected virtual bool IsStopped()
@@ -157,8 +191,8 @@ public abstract class Vehicle : MonoBehaviour
 
     protected virtual Vector3 CalculateLookDirection()
     {
-        return path.points.Count() > 2 ?
-                    (path.Next(1) - transform.localPosition).normalized :
-                    (path.Last() - transform.localPosition).normalized;
+        return path.Length() > 1 ?
+            (path.Next(1) - transform.localPosition).normalized :
+            (path.Next() - transform.localPosition).normalized;
     }
 }

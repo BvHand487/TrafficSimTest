@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -13,6 +14,7 @@ public class TrafficLight
     public TrafficController trafficController;
     public Junction junction => trafficController?.junction;
 
+    public List<Vehicle> queue;
     public Road road;
     public Vector3 pos;
 
@@ -24,13 +26,11 @@ public class TrafficLight
     public static readonly float yellowInterval = 4.0f;
     public static readonly float redIntervalBuffer = 4.0f;
 
-    public int queueLength;
-
     public TrafficLight()
     {
         this.trafficController = null;
         this.road = null;
-        queueLength = 0;
+        queue = new List<Vehicle>();
 
         status = Status.Red;
     }
@@ -39,7 +39,7 @@ public class TrafficLight
     {
         this.trafficController = controller;
         this.road = road;
-        queueLength = 0;
+        queue = new List<Vehicle>();
 
         Vector3 closestPoint = road.IsCyclic() ?
             road.path.First() :
@@ -47,6 +47,15 @@ public class TrafficLight
 
         this.pos = controller.junction.simulation.transform.position + Utils.Math.GetMidpointVector(junction.obj.transform.localPosition, closestPoint);
         status = Status.Red;
+    }
+
+    public bool AddVehicleToQueue(Vehicle vehicle)
+    {
+        if (!queue.Contains(vehicle))
+            return false;
+
+        queue.Add(vehicle);
+        return true;
     }
 
     public void ConfigureInterval(float greenInterval)
