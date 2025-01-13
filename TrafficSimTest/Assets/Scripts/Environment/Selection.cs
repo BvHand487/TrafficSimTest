@@ -11,25 +11,23 @@ using UnityEngine.EventSystems;
 public class Selection : MonoBehaviour
 {
     private Camera cam;
-    private Simulation simulation;
 
-    private LineRenderer carPathRenderer;
-    private int carPathLength;
+    private LineRenderer pathRenderer;
+    private int pathLength;
 
     public Material outlineMaterial;
     public Material selectionMaterial;
 
-    private Car selectedCar;
-    // private MeshRenderer carFromBuildingRenderer = default;
-    // private MeshRenderer carToBuildingRenderer = default;
-    private Junction selectedJunction;
+    private Vehicle selectedVehicle;
+    // private MeshRenderer vehicleFromBuildingRenderer = default;
+    // private MeshRenderer vehicleToBuildingRenderer = default;
+    //private Junction selectedJunction;
 
 
     void Start()
     {
-        simulation = FindFirstObjectByType<Simulation>().GetComponent<Simulation>();
         cam = GetComponent<Camera>();
-        carPathRenderer = GetComponent<LineRenderer>();
+        pathRenderer = GetComponent<LineRenderer>();
     }
 
 
@@ -40,14 +38,14 @@ public class Selection : MonoBehaviour
 
     private void HandleSelection()
     {
-        if (selectedCar ?? null)
+        if (selectedVehicle ?? null)
         {
-            carPathRenderer.SetPosition(0, selectedCar.transform.position);
+            pathRenderer.SetPosition(0, selectedVehicle.transform.position);
 
-            if (selectedCar.carPath.Length() != carPathLength)
+            if (selectedVehicle.path.Length() != pathLength)
             {
-                carPathRenderer.positionCount = carPathLength;
-                carPathLength--;
+                pathRenderer.positionCount = pathLength;
+                pathLength--;
                 UpdateLineRenderer();
             }
         }
@@ -65,18 +63,16 @@ public class Selection : MonoBehaviour
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
-                if (hit.collider.CompareTag("Car"))
-                    SelectCar(hit.collider.gameObject.GetComponent<Car>());
+                if (hit.collider.CompareTag("Vehicle"))
+                    Selectvehicle(hit.collider.gameObject.GetComponent<Vehicle>());
 
                 if (hit.collider.CompareTag("Junction"))
                 {
                     Vector3 offset = 0.01f * ray.direction.normalized;
                     if (Physics.Raycast(hit.point + offset, ray.direction, out RaycastHit repeatedHit))
                     {
-                        if (repeatedHit.collider.CompareTag("Car"))
-                            SelectCar(repeatedHit.collider.gameObject.GetComponent<Car>());
-                        else
-                            selectedJunction = simulation.junctionsDict[hit.collider.gameObject];
+                        if (repeatedHit.collider.CompareTag("Vehicle"))
+                            Selectvehicle(repeatedHit.collider.gameObject.GetComponent<Vehicle>());
                     }
                 }
             }
@@ -85,30 +81,30 @@ public class Selection : MonoBehaviour
 
     void UnselectAll()
     {
-        if (selectedCar != null)
+        if (selectedVehicle != null)
         {
-            var meshRenderer = selectedCar.carPath.from.obj.GetComponentInChildren<MeshRenderer>();
+            var meshRenderer = selectedVehicle.path.from.obj.GetComponentInChildren<MeshRenderer>();
             meshRenderer.materials = new Material[] { meshRenderer.materials[0] };
 
-            meshRenderer = selectedCar.carPath.to.obj.GetComponentInChildren<MeshRenderer>();
+            meshRenderer = selectedVehicle.path.to.obj.GetComponentInChildren<MeshRenderer>();
             meshRenderer.materials = new Material[] { meshRenderer.materials[0] };
         }
-        selectedCar = null;
-        carPathRenderer.positionCount = 0;
+        selectedVehicle = null;
+        pathRenderer.positionCount = 0;
 
-        selectedJunction = null;
+        //selectedJunction = null;
     }
 
-    void SelectCar(Car car)
+    void Selectvehicle(Vehicle vehicle)
     {
-        selectedCar = car;
-        carPathLength = selectedCar.carPath.Length();
-        carPathRenderer.positionCount = carPathLength + 1;
+        selectedVehicle = vehicle;
+        pathLength = selectedVehicle.path.Length();
+        pathRenderer.positionCount = pathLength + 1;
 
         UpdateLineRenderer();
 
-        SelectBuilding(selectedCar.carPath.from);
-        SelectBuilding(selectedCar.carPath.to);
+        SelectBuilding(selectedVehicle.path.from);
+        SelectBuilding(selectedVehicle.path.to);
     }
 
     void SelectBuilding(Building building)
@@ -126,10 +122,10 @@ public class Selection : MonoBehaviour
     void UpdateLineRenderer()
     {
         List<Vector3> path = new List<Vector3>();
-        path.Add(selectedCar.transform.position);
-        path.AddRange(selectedCar.carPath.points);
+        path.Add(selectedVehicle.transform.position);
+        path.AddRange(selectedVehicle.path.points);
         for (int i = 0; i < path.Count; ++i)
             path[i] += 0.5f * Vector3.up;
-        carPathRenderer.SetPositions(path.ToArray());
+        pathRenderer.SetPositions(path.ToArray());
     }
 }

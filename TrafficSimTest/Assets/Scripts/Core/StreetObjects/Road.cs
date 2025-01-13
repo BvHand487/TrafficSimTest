@@ -10,19 +10,24 @@ public class Road
     public Junction junctionStart { get; set; }
     public Junction junctionEnd { get; set; }
 
+    public Simulation simulation;
+
     // A lsit of points that describe the path of the road
     public List<Vector3> path;
     public float length;
 
-    public Road(List<Vector3> path, Junction j1 = null, Junction j2 = null)
+    public Road(Simulation simulation, List<Vector3> localPath, Junction j1 = null, Junction j2 = null)
     {
-        this.path = path;
+        path = new List<Vector3>();
+        foreach (var localPoint in localPath)
+            path.Add(simulation.transform.position + localPoint);
+
         this.junctionStart = j1;
         this.junctionEnd = j2;
 
         for (int i = 0; i < path.Count - 1; ++i)
             length += Vector3.Distance(path[i], path[i + 1]);
-        length += Generation.Generate.tileSize;
+        length += GameManager.Instance.tileSize;
     }
 
     public Junction GetOtherJunction(Junction j)
@@ -56,7 +61,7 @@ public class Road
     // Returns a segment of the path from a junction to a point (inclusive) on the road.
     public List<Vector3> SplitPath(Junction junction, Vector3 at)
     {
-        int fromIndex = GetClosestPathIndex(junction.obj.transform.position);
+        int fromIndex = GetClosestPathIndex(junction.obj.transform.localPosition);
         int toIndex = GetClosestPathIndex(at);
 
         if (IsCyclic() && toIndex > path.Count / 2)
@@ -108,7 +113,7 @@ public class Road
     // If it's a 4-way intersection it orders them anticlockwise
     public static List<Road> OrderRoads(List<Road> roads)
     {
-        Vector3 junctionPos = Road.GetCommonJunction(roads.First(), roads.Last()).obj.transform.position;
+        Vector3 junctionPos = Road.GetCommonJunction(roads.First(), roads.Last()).obj.transform.localPosition;
 
         switch (roads.Count)
         {

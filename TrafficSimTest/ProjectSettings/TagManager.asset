@@ -4,9 +4,12 @@
 TagManager:
   serializedVersion: 3
   tags:
-  - Car
   - Junction
   - Turn
+  - Vehicle
+  - Simulation
+  - End
+  - Road
   layers:
   - Default
   - TransparentFX

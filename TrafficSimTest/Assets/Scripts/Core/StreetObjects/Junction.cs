@@ -22,15 +22,17 @@ public class Junction
 
     // If the junction is controlled with lights
     public TrafficController trafficController;
-    public List<TrafficLight> trafficLights => trafficController?.Lights;
+    public List<TrafficLight> trafficLights => trafficController?.lights;
 
+    public Simulation simulation;
 
     // If the junctions is controlled with stop signs
     /* Add priority road + car queues */
 
 
-    public Junction(GameObject obj)
+    public Junction(Simulation simulation, GameObject obj)
     {
+        this.simulation = simulation;
         this.obj = obj;
     }
 
@@ -79,16 +81,16 @@ public class Junction
 
     public bool IsPointInside(Vector3 point)
     {
-        float halfTile = Generate.tileSize / 2;
-        float low_x = obj.transform.position.x - halfTile;
-        float high_x = obj.transform.position.x + halfTile;
-        float low_z = obj.transform.position.z - halfTile;
-        float high_z = obj.transform.position.z + halfTile;
+        float halfTile = GameManager.Instance.tileSize / 2;
+        float low_x = obj.transform.localPosition.x - halfTile;
+        float high_x = obj.transform.localPosition.x + halfTile;
+        float low_z = obj.transform.localPosition.z - halfTile;
+        float high_z = obj.transform.localPosition.z + halfTile;
 
         return low_x < point.x && point.x < high_x && low_z < point.z && point.z < high_z;
     }
 
-    override public string ToString()
+    public override string ToString()
     {
         return $"({obj.name}, at: {obj.transform.position}, type: {type})";
     }

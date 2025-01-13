@@ -5,18 +5,21 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public struct CarPath
+public class VehiclePath
 {
     public Building from, to;
     public List<Vector3> points;
-    public int resolution;
+    public float turnRadius;
+    public int turnResolution;
 
-    public CarPath(Building from, Building to, List<Vector3> points, int resolution=5)
+    public VehiclePath(Building from, Building to, float turnRadius=7.5f, int turnResolution=5)
     {
         this.from = from;
         this.to = to;
-        this.points = points;
-        this.resolution = resolution;
+        this.turnRadius = turnRadius;
+        this.turnResolution = turnResolution;
+
+        this.points = Utils.Pathfinding.FindCarPath(from, to, turnRadius, turnResolution);
     }
 
     public bool Done()
@@ -35,7 +38,7 @@ public struct CarPath
         for (i = 2; i < points.Count - 1; ++i)
         {
             if (Utils.Math.AreCollinear(points[i - 2], points[i - 1], points[i]))
-                if (i == resolution + 3)
+                if (i == turnResolution + 3)
                     return true;
         }
 
@@ -57,5 +60,11 @@ public struct CarPath
         }
 
         return true;
+    }
+
+    public void Reverse()
+    {
+        points.Reverse();
+        (from, to) = (to, from);
     }
 }

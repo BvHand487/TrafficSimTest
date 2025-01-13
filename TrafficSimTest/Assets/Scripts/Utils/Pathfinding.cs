@@ -155,7 +155,7 @@ namespace Utils
         // Heuristic function: Straight-line distance between two junctions
         private static float Heuristic(Junction a, Junction b)
         {
-            return Junction.GetCommonRoad(a, b)?.length ?? Vector3.Distance(a.obj.transform.position, b.obj.transform.position);
+            return Junction.GetCommonRoad(a, b)?.length ?? Vector3.Distance(a.obj.transform.localPosition, b.obj.transform.localPosition);
         }
 
         // Reconstructs the path from end to start by tracing the cameFrom dictionary
@@ -190,8 +190,8 @@ namespace Utils
             for (int i = 0; i < junctionPath.Count - 1; ++i)
             {
                 nextRoad = Junction.GetCommonRoad(junctionPath[i], junctionPath[i + 1]);
-                if (Vector3.Distance(junctionPath[i].obj.transform.position, nextRoad.path.First()) >
-                    Vector3.Distance(junctionPath[i + 1].obj.transform.position, nextRoad.path.First()))
+                if (Vector3.Distance(junctionPath[i].obj.transform.localPosition, nextRoad.path.First()) >
+                    Vector3.Distance(junctionPath[i + 1].obj.transform.localPosition, nextRoad.path.First()))
                     nextRoad.path.Reverse();
 
                 vectorPath.AddRange(DiscretizeJunction(junctionPath[i]));

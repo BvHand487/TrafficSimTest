@@ -10,11 +10,10 @@ namespace Generation
 
         public Grid grid { get; private set; }
         public List<GridTile>[,] possibilities;
-        private Generate parentScript;
 
         private float straightChance = 0, turnChance = 0, joinChance = 0, crossChance = 0, endChance = 0;
 
-        public WFC(List<GridTile> tiles, Grid grid, Generate parentScript)
+        public WFC(List<GridTile> tiles, Grid grid)
         {
             this.tiles = tiles;
             this.grid = grid;
@@ -24,9 +23,7 @@ namespace Generation
                 for (int j = 0; j < grid.size; ++j)
                     possibilities[i, j] = new List<GridTile>(tiles);
 
-            this.parentScript = parentScript;
-
-            possibilities[grid.size / 2, grid.size / 2] = tiles.FindAll(t => t.prefab == parentScript.roadCrossPrefab);
+            possibilities[grid.size / 2, grid.size / 2] = tiles.FindAll(t => t.prefab == GameManager.Instance.roadCrossPrefab);
             GridTile centerTile = CollapseTile(grid.size / 2, grid.size / 2);
             PropagateConstraints(centerTile);
         }
@@ -126,27 +123,27 @@ namespace Generation
             List<GridTile> wantedTiles;
 
             // Cross road
-            wantedTiles = possibilities[x, y].FindAll(p => p.prefab == parentScript.roadCrossPrefab);
+            wantedTiles = possibilities[x, y].FindAll(p => p.prefab == GameManager.Instance.roadCrossPrefab);
             if (wantedTiles.Count > 0 && rand < crossChance)
                 return Utils.Random.Select(wantedTiles);
 
             // Join road
-            wantedTiles = possibilities[x, y].FindAll(p => p.prefab == parentScript.roadJoinPrefab);
+            wantedTiles = possibilities[x, y].FindAll(p => p.prefab == GameManager.Instance.roadJoinPrefab);
             if (wantedTiles.Count > 0 && rand < (joinChance + crossChance))
                 return Utils.Random.Select(wantedTiles);
 
             // Straight road
-            wantedTiles = possibilities[x, y].FindAll(p => p.prefab == parentScript.roadStraightPrefab);
+            wantedTiles = possibilities[x, y].FindAll(p => p.prefab == GameManager.Instance.roadStraightPrefab);
             if (wantedTiles.Count > 0 && rand < (joinChance + crossChance + straightChance))
                 return Utils.Random.Select(wantedTiles);
 
             // Turn road
-            wantedTiles = possibilities[x, y].FindAll(p => p.prefab == parentScript.roadTurnPrefab);
+            wantedTiles = possibilities[x, y].FindAll(p => p.prefab == GameManager.Instance.roadTurnPrefab);
             if (wantedTiles.Count > 0 && rand < (joinChance + crossChance + straightChance + turnChance))
                 return Utils.Random.Select(wantedTiles);
 
             // End road
-            wantedTiles = possibilities[x, y].FindAll(p => p.prefab == parentScript.roadEndPrefab);
+            wantedTiles = possibilities[x, y].FindAll(p => p.prefab == GameManager.Instance.roadEndPrefab);
             if (wantedTiles.Count > 0)
                 return Utils.Random.Select(wantedTiles);
 

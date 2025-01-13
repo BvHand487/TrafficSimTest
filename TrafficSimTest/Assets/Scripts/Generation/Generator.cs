@@ -6,82 +6,52 @@ using UnityEngine;
 
 namespace Generation
 {
-    public class Generate : MonoBehaviour
+    public static class Generator
     {
-        [SerializeField] private int gridSize = 50;
-        [SerializeField] private int junctionGap = 5;
-        public static readonly float tileSize = 15;
-
-        [SerializeField] private int minBuildingHeight;
-        [SerializeField] private int maxBuildingHeight;
-        [SerializeField] private float buildingHeightStep = 2.0f;
-        [SerializeField] private float buildingHeightDecay;
-        [SerializeField] private float buildingHeightRandomness = 2.0f;
-
-        [SerializeField] public GameObject roadStraightPrefab, roadTurnPrefab, roadJoinPrefab, roadCrossPrefab, roadEndPrefab, buildingPrefab, groundPrefab;
-
-        private Grid grid;
-        private WFC wfc;
-
-        private List<GridTile> tiles;
-
-        public Simulation simulation;
-        private List<Road> roads = new List<Road>();
-        private HashSet<Junction> junctions = new HashSet<Junction>();
-        private HashSet<Building> buildings = new HashSet<Building>();
-
-        // Load data from main menu using the PlayerRrefs API
-        private void Awake()
+        public static void Generate()
         {
-            if (PlayerPrefs.HasKey("Grid Size"))
-                gridSize = PlayerPrefs.GetInt("Grid Size");
+            GameManager game = GameManager.Instance;
 
-            if (PlayerPrefs.HasKey("Junction Gap"))
-                junctionGap = PlayerPrefs.GetInt("Junction Gap");
+            List<Road> roads;
+            List<Junction> junctions;
+            List<Building> buildings;
+            float physicalSize = 0f;
 
-            PlayerPrefs.DeleteAll();
-        }
-
-        void Start()
-        {
-            tiles = new List<GridTile>()
+            List<GridTile> tiles = new List<GridTile>()
             {
-                new GridTile(GridTile.Type.Junction, roadCrossPrefab, 0, "NESW", null, -Vector2Int.one),
-                new GridTile(GridTile.Type.Junction, roadJoinPrefab, 0, "WNE", null, -Vector2Int.one),
-                new GridTile(GridTile.Type.Junction, roadJoinPrefab, 90, "NES", null, -Vector2Int.one),
-                new GridTile(GridTile.Type.Junction, roadJoinPrefab, 180, "ESW", null, -Vector2Int.one),
-                new GridTile(GridTile.Type.Junction, roadJoinPrefab, 270, "SWN", null, -Vector2Int.one),
-                new GridTile(GridTile.Type.Junction, roadEndPrefab, 0, "N", null, -Vector2Int.one),
-                new GridTile(GridTile.Type.Junction, roadEndPrefab, 90, "E", null, -Vector2Int.one),
-                new GridTile(GridTile.Type.Junction, roadEndPrefab, 180, "S", null, -Vector2Int.one),
-                new GridTile(GridTile.Type.Junction, roadEndPrefab, 270, "W", null, -Vector2Int.one),
-                new GridTile(GridTile.Type.Road, roadStraightPrefab, 0, "NS", null, -Vector2Int.one),
-                new GridTile(GridTile.Type.Road, roadStraightPrefab, 90, "WE", null, -Vector2Int.one),
-                new GridTile(GridTile.Type.Road, roadTurnPrefab, 0, "NE", null, -Vector2Int.one),
-                new GridTile(GridTile.Type.Road, roadTurnPrefab, 90, "ES", null, -Vector2Int.one),
-                new GridTile(GridTile.Type.Road, roadTurnPrefab, 180, "SW", null, -Vector2Int.one),
-                new GridTile(GridTile.Type.Road, roadTurnPrefab, 270, "WN", null, -Vector2Int.one),
+                new GridTile(GridTile.Type.Junction, GameManager.Instance.roadCrossPrefab, 0, "NESW", null, -Vector2Int.one),
+                new GridTile(GridTile.Type.Junction, GameManager.Instance.roadJoinPrefab, 0, "WNE", null, -Vector2Int.one),
+                new GridTile(GridTile.Type.Junction, GameManager.Instance.roadJoinPrefab, 90, "NES", null, -Vector2Int.one),
+                new GridTile(GridTile.Type.Junction, GameManager.Instance.roadJoinPrefab, 180, "ESW", null, -Vector2Int.one),
+                new GridTile(GridTile.Type.Junction, GameManager.Instance.roadJoinPrefab, 270, "SWN", null, -Vector2Int.one),
+                new GridTile(GridTile.Type.Junction, GameManager.Instance.roadEndPrefab, 0, "N", null, -Vector2Int.one),
+                new GridTile(GridTile.Type.Junction, GameManager.Instance.roadEndPrefab, 90, "E", null, -Vector2Int.one),
+                new GridTile(GridTile.Type.Junction, GameManager.Instance.roadEndPrefab, 180, "S", null, -Vector2Int.one),
+                new GridTile(GridTile.Type.Junction, GameManager.Instance.roadEndPrefab, 270, "W", null, -Vector2Int.one),
+                new GridTile(GridTile.Type.Road, GameManager.Instance.roadStraightPrefab, 0, "NS", null, -Vector2Int.one),
+                new GridTile(GridTile.Type.Road, GameManager.Instance.roadStraightPrefab, 90, "WE", null, -Vector2Int.one),
+                new GridTile(GridTile.Type.Road, GameManager.Instance.roadTurnPrefab, 0, "NE", null, -Vector2Int.one),
+                new GridTile(GridTile.Type.Road, GameManager.Instance.roadTurnPrefab, 90, "ES", null, -Vector2Int.one),
+                new GridTile(GridTile.Type.Road, GameManager.Instance.roadTurnPrefab, 180, "SW", null, -Vector2Int.one),
+                new GridTile(GridTile.Type.Road, GameManager.Instance.roadTurnPrefab, 270, "WN", null, -Vector2Int.one),
             };
 
-            grid = new Grid(gridSize);
+            Grid grid = new Grid(GameManager.Instance.gridSize);
 
-            wfc = new WFC(tiles, grid, this);
+            WFC wfc = new WFC(tiles, grid);
             wfc.Run();
 
             // Remove unconnected grid tiles
             Generation.Optimization.KeepLargestRoadComponent(grid);
 
             // Spawn prefabs
-            GeneratePrefabs();
+            (roads, junctions, buildings) = GeneratePrefabs(tiles, grid, ref physicalSize);
 
-            simulation.Initialize(junctions.ToList(), roads.ToList(), buildings.ToList());
-            simulation.gameObject.SetActive(true);
-
-            Destroy(this.gameObject);
+            GameManager.Instance.simulations.Initialize(junctions.ToList(), roads.ToList(), buildings.ToList(), physicalSize);
         }
 
         // DFS algorithm that finds all neighbouring road tiles so that it can create a Road object
-        void GetFullRoad(GridTile current, List<GridTile> road, List<GridTile> juncs, List<GridTile> builds, bool[,] visited)
+        public static void GetFullRoad(GridTile current, List<GridTile> road, List<GridTile> juncs, List<GridTile> builds, bool[,] visited)
         {
             if (current == null || !current.IsValidTile())
                 return;
@@ -111,32 +81,27 @@ namespace Generation
         }
 
         // Genereates the prefabs from the grid and initializes Junction and Road classes
-        void GeneratePrefabs()
+        public static (List<Road>, List<Junction>, List<Building>) GeneratePrefabs(List<GridTile> tiles, Grid grid, ref float physicalSize)
         {
+            List<Road> roads = new List<Road>();
+            List<Junction> junctions = new List<Junction>();
+            List<Building> buildings = new List<Building>();
+
             Dictionary<GridTile, Junction> juncsMap = new Dictionary<GridTile, Junction>();
             Dictionary<GridTile, Building> buildsMap = new Dictionary<GridTile, Building>();
 
-            GridTile buildingTile = new GridTile(GridTile.Type.Building, buildingPrefab, 0, "NESW", null, -Vector2Int.one);
-            GridTile HorizontalRoadTile = tiles.Find(t => t.prefab == roadStraightPrefab && t.rotY == 90);
-            GridTile VerticalStraightRoadTile = tiles.Find(t => t.prefab == roadStraightPrefab && t.rotY == 0);
+            GridTile buildingTile = new GridTile(GridTile.Type.Building, GameManager.Instance.buildingPrefab, 0, "NESW", null, -Vector2Int.one);
+            GridTile HorizontalRoadTile = tiles.Find(t => t.prefab == GameManager.Instance.roadStraightPrefab && t.rotY == 90);
+            GridTile VerticalStraightRoadTile = tiles.Find(t => t.prefab == GameManager.Instance.roadStraightPrefab && t.rotY == 0);
 
             // Expands the grid by the junctionGap
-            Grid expandedGrid = new Grid((gridSize - 1) * junctionGap + gridSize + 2);
+            Grid expandedGrid = new Grid((GameManager.Instance.gridSize - 1) * GameManager.Instance.junctionGap + GameManager.Instance.gridSize + 2);
 
-            for (int i = 0; i < gridSize; i++)
-                for (int j = 0; j < gridSize; j++)
-                    expandedGrid.tiles[i * (junctionGap + 1) + 1, j * (junctionGap + 1) + 1].SetTile(grid.tiles[i, j]);
+            for (int i = 0; i < GameManager.Instance.gridSize; i++)
+                for (int j = 0; j < GameManager.Instance.gridSize; j++)
+                    expandedGrid.tiles[i * (GameManager.Instance.junctionGap + 1) + 1, j * (GameManager.Instance.junctionGap + 1) + 1].SetTile(grid.tiles[i, j]);
 
-            // Spawn ground
-            {
-                var ground = Instantiate(groundPrefab, Vector3.zero, Quaternion.identity, simulation.transform);
-                ground.name = groundPrefab.name;
-            
-                var scale = ground.transform.localScale;
-                var groundSize = expandedGrid.size + 2;
-                scale.Scale(new Vector3(groundSize, 1f, groundSize));
-                ground.transform.localScale = scale;
-            }
+            physicalSize = (expandedGrid.size + 2) * GameManager.Instance.tileSize;
 
             // Fill gap between spaced out tiles with straight roads
             List<(int, int, GridTile)> toAdd = new List<(int, int, GridTile)>();
@@ -146,18 +111,18 @@ namespace Generation
                     GridTile tile = expandedGrid.tiles[i, j];
                     if (!tile.IsValidTile()) continue;
 
-                    for (int k = 1; k <= junctionGap; ++k)
+                    for (int k = 1; k <= GameManager.Instance.junctionGap; ++k)
                     {
-                        if (i + junctionGap + 1 < expandedGrid.size && tile.CanConnectThroughRoad('E', expandedGrid.tiles[i + junctionGap + 1, j]))
+                        if (i + GameManager.Instance.junctionGap + 1 < expandedGrid.size && tile.CanConnectThroughRoad('E', expandedGrid.tiles[i + GameManager.Instance.junctionGap + 1, j]))
                             toAdd.Add((i + k, j, HorizontalRoadTile));
 
-                        if (i - junctionGap - 1 >= 0 && tile.CanConnectThroughRoad('W', expandedGrid.tiles[i - junctionGap - 1, j]))
+                        if (i - GameManager.Instance.junctionGap - 1 >= 0 && tile.CanConnectThroughRoad('W', expandedGrid.tiles[i - GameManager.Instance.junctionGap - 1, j]))
                             toAdd.Add((i - k, j, HorizontalRoadTile));
 
-                        if (j + junctionGap + 1 < expandedGrid.size && tile.CanConnectThroughRoad('N', expandedGrid.tiles[i, j + junctionGap + 1]))
+                        if (j + GameManager.Instance.junctionGap + 1 < expandedGrid.size && tile.CanConnectThroughRoad('N', expandedGrid.tiles[i, j + GameManager.Instance.junctionGap + 1]))
                             toAdd.Add((i, j + k, VerticalStraightRoadTile));
 
-                        if (j - junctionGap - 1 >= 0 && tile.CanConnectThroughRoad('S', expandedGrid.tiles[i, j - junctionGap - 1]))
+                        if (j - GameManager.Instance.junctionGap - 1 >= 0 && tile.CanConnectThroughRoad('S', expandedGrid.tiles[i, j - GameManager.Instance.junctionGap - 1]))
                             toAdd.Add((i, j - k, VerticalStraightRoadTile));
                     }
                 }
@@ -188,19 +153,19 @@ namespace Generation
                     if (!tile.IsValidTile()) continue;
 
                     Vector3 pos = tile.physicalPos;
-                    var obj = Instantiate(tile.prefab, pos, Quaternion.Euler(0, tile.rotY, 0), simulation.transform);
+                    var obj = GameObject.Instantiate(tile.prefab, pos, Quaternion.Euler(0, tile.rotY, 0), GameManager.Instance.simulations.simulation.transform);
                     obj.SetActive(true);
                     obj.name = $"{tile.prefab.name}";
 
                     if (tile.type == GridTile.Type.Junction)
-                        juncsMap.Add(tile, new Junction(obj));
+                        juncsMap.Add(tile, new Junction(GameManager.Instance.simulations.simulation, obj));
 
                     else if (tile.type == GridTile.Type.Building)
                     {
                         var factor = tile.DistanceToCenter() / expandedGrid.MaxDistanceFromCenter();
-                        var buildingHeight = Utils.Modeling.BuildingHeightFromDistance(factor, minBuildingHeight, maxBuildingHeight, buildingHeightDecay);
-                        buildingHeight += buildingHeightRandomness * (Random.value - 0.5f);
-                        buildingHeight = Mathf.Clamp(Mathf.Ceil((buildingHeight) / buildingHeightStep) * buildingHeightStep, minBuildingHeight, maxBuildingHeight);
+                        var buildingHeight = Utils.Modeling.BuildingHeightFromDistance(factor, GameManager.Instance.minBuildingHeight, GameManager.Instance.maxBuildingHeight, GameManager.Instance.buildingHeightDecay);
+                        buildingHeight += GameManager.Instance.buildingHeightRandomness * (Random.value - 0.5f);
+                        buildingHeight = Mathf.Clamp(Mathf.Ceil((buildingHeight) / GameManager.Instance.buildingHeightStep) * GameManager.Instance.buildingHeightStep, GameManager.Instance.minBuildingHeight, GameManager.Instance.maxBuildingHeight);
 
                         var scale = obj.transform.localScale;
                         scale.y = buildingHeight;
@@ -229,19 +194,19 @@ namespace Generation
                         GetFullRoad(tile, roadTiles, juncs, builds, visited);
 
                         var roadPath = Utils.Math.OrderVectorPath(roadTiles.Select(r => r.physicalPos).ToList());
-                        Road roadToAdd = new Road(roadPath, juncsMap[juncs.First()], juncsMap[juncs.Last()]);
+                        Road roadToAdd = new Road(GameManager.Instance.simulations.simulation, roadPath, juncsMap[juncs.First()], juncsMap[juncs.Last()]);
                         roads.Add(roadToAdd);
 
                         if (roadToAdd.junctionStart == roadToAdd.junctionEnd)
                         {
-                            Road sameRoadCopy = new Road(new List<Vector3>(roadToAdd.path), roadToAdd.junctionEnd, roadToAdd.junctionStart);
+                            Road sameRoadCopy = new Road(GameManager.Instance.simulations.simulation,new List<Vector3>(roadToAdd.path), roadToAdd.junctionEnd, roadToAdd.junctionStart);
                             sameRoadCopy.path.Reverse();
                             roads.Add(sameRoadCopy);
                         }
 
                         foreach (Building building in builds.FindAll(tile => roadTiles.Any(rt => GridTile.IsNeighbours(rt, tile))).Select(tile => buildsMap[tile]))
                         {
-                            building.spawnPoints.TryAdd(roadToAdd, Utils.Math.GetClosestVector(building.obj.transform.position, roadToAdd.path));   
+                            building.spawnPoints.TryAdd(roadToAdd, Utils.Math.GetClosestVector(building.obj.transform.position, roadToAdd.path));
                             if (!buildings.Contains(building))
                                 buildings.Add(building);
                         }
@@ -276,7 +241,7 @@ namespace Generation
             }
 
             // Sets the references in the Junction and Road objects
-            junctions = juncsMap.Values.ToHashSet();
+            junctions = juncsMap.Values.ToList();
 
             foreach (var j in junctions)
             {
@@ -291,7 +256,8 @@ namespace Generation
                 var distFromCenter = b.obj.transform.position.magnitude;
                 b.Initialize(Utils.Modeling.ChooseRandomBuildingType(distFromCenter / maxDistFromCenter));
             }
+
+            return (roads, junctions, buildings);
         }
     }
-
 }

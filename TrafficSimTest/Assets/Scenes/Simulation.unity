@@ -309,7 +309,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 78646250}
   m_CullTransparentMesh: 1
---- !u!1 &143786618
+--- !u!1 &80862057
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -317,65 +317,70 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 143786619}
-  - component: {fileID: 143786620}
-  - component: {fileID: 143786621}
+  - component: {fileID: 80862059}
+  - component: {fileID: 80862058}
   m_Layer: 0
-  m_Name: Simulation
+  m_Name: Game
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &143786619
+--- !u!114 &80862058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 80862057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632a24095652c49499f07722e03a5191, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  simulationPrefab: {fileID: 6576699859329208523, guid: 87c3867b845097947a3ce954e446c77e,
+    type: 3}
+  roadStraightPrefab: {fileID: 1403695168228775630, guid: 913a28887a4acfb44b805fa9dc49bf85,
+    type: 3}
+  roadTurnPrefab: {fileID: 4530936968969859911, guid: 21801a83f95179f4592071b502463ec1,
+    type: 3}
+  roadJoinPrefab: {fileID: 9066375938536572818, guid: adc2cb3bca2d6a045bd4bc6e46eb3670,
+    type: 3}
+  roadCrossPrefab: {fileID: 4093120629161919394, guid: 59d560edfa9069c4d9bf349807ffa3b6,
+    type: 3}
+  roadEndPrefab: {fileID: 6189875272714880639, guid: e469e56d5102a4f41b1ee3a35416188f,
+    type: 3}
+  buildingPrefab: {fileID: 3529599447628414491, guid: 7789e01f12e96704197780e34dc3fe3f,
+    type: 3}
+  groundPrefab: {fileID: 1268055436598246820, guid: 3e7579e4915f23a41bbbabe96a43c7b0,
+    type: 3}
+  tileSize: 15
+  gridSize: 5
+  junctionGap: 3
+  minBuildingHeight: 5
+  maxBuildingHeight: 25
+  buildingHeightStep: 1
+  buildingHeightDecay: 2
+  buildingHeightRandomness: 2
+  vehicleTypes:
+  - {fileID: 11400000, guid: 86c489ece8c5ef249a23849b27f12cc7, type: 2}
+  vehicleCount: 25
+  simulationCopies: 0
+--- !u!4 &80862059
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 143786618}
+  m_GameObject: {fileID: 80862057}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -10.041674, y: 1.2078757, z: 59.235886}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &143786620
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 143786618}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 78edd414b04292d4cba4c76d8707052a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  carPrefab: {fileID: 5966912864227686815, guid: faf35ecf27ee6e247ae90e695d4d8123,
-    type: 3}
-  homeColor: {r: 0.3920879, g: 0.8396226, b: 0.44294417, a: 0}
-  workColor: {r: 0.35555357, g: 0.8867924, b: 0.87029433, a: 0}
-  minCarTravelDistance: 45
-  carTurnRadius: 7.5
-  carTurnResolution: 7
-  maxCars: 100
---- !u!114 &143786621
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 143786618}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ef0cede23f5e3b4e9dee72cf054c367, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sun: {fileID: 410087040}
-  preset: {fileID: 11400000, guid: 8ed9bb3d868a1c942965658016db7c65, type: 2}
 --- !u!1 &176988570
 GameObject:
   m_ObjectHideFlags: 0
@@ -2256,72 +2261,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1133246286}
   m_CullTransparentMesh: 1
---- !u!1 &1144462523
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1144462525}
-  - component: {fileID: 1144462526}
-  m_Layer: 0
-  m_Name: Generator
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1144462525
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1144462523}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1144462526
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1144462523}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8aa329b8a4f37324ebf316fcdece5701, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gridSize: 4
-  junctionGap: 3
-  minBuildingHeight: 4
-  maxBuildingHeight: 28
-  buildingHeightStep: 2
-  buildingHeightDecay: 3
-  buildingHeightRandomness: 5
-  roadStraightPrefab: {fileID: 1403695168228775630, guid: 913a28887a4acfb44b805fa9dc49bf85,
-    type: 3}
-  roadTurnPrefab: {fileID: 4530936968969859911, guid: 21801a83f95179f4592071b502463ec1,
-    type: 3}
-  roadJoinPrefab: {fileID: 9066375938536572818, guid: adc2cb3bca2d6a045bd4bc6e46eb3670,
-    type: 3}
-  roadCrossPrefab: {fileID: 4093120629161919394, guid: 59d560edfa9069c4d9bf349807ffa3b6,
-    type: 3}
-  roadEndPrefab: {fileID: 6189875272714880639, guid: e469e56d5102a4f41b1ee3a35416188f,
-    type: 3}
-  buildingPrefab: {fileID: 3529599447628414491, guid: 7789e01f12e96704197780e34dc3fe3f,
-    type: 3}
-  groundPrefab: {fileID: 3692733373902369275, guid: 87c3867b845097947a3ce954e446c77e,
-    type: 3}
-  simulation: {fileID: 143786620}
 --- !u!1 &1148875879
 GameObject:
   m_ObjectHideFlags: 0
@@ -3036,7 +2975,6 @@ SceneRoots:
   - {fileID: 330585546}
   - {fileID: 410087041}
   - {fileID: 832575519}
-  - {fileID: 1144462525}
-  - {fileID: 143786619}
   - {fileID: 1775242291}
   - {fileID: 55800862}
+  - {fileID: 80862059}

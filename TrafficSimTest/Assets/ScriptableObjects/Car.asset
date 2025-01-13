@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c158fae885e49043aa21d1461e8675c, type: 3}
+  m_Name: Car
+  m_EditorClassIdentifier: 
+  prefab: {fileID: 5966912864227686815, guid: faf35ecf27ee6e247ae90e695d4d8123, type: 3}
+  maxVelocity: 25
+  accelerationRate: 5
+  decelerationRate: 10
+  lookAheadDistance: 3
+  stoppedGapDistance: 20

@@ -27,13 +27,13 @@ namespace Utils
             homeToWorkTrafficChance = homeToWorkTrafficProportion / totalTraffic;
             workToHomeTrafficChance = workToHomeTrafficProportion / totalTraffic;
 
-            // Combines the terms above to get the max number of cars during this time
-            int simulatedCarCount = (int)(totalTraffic * maxTraffic / 10.0f);
+            // Combines the terms above to get the max number of vehicles during this time
+            int simulatedVehicleCount = (int)(totalTraffic * maxTraffic / 10.0f);
 
-            // Normalizes car count value
-            int simulatedCarCountNormalized = maxTraffic * (simulatedCarCount) / Mathf.Max(simulatedCarCount, maxTraffic);
+            // Normalizes vehicle count value
+            int simulatedVehicleCountNormalized = maxTraffic * (simulatedVehicleCount) / Mathf.Max(simulatedVehicleCount, maxTraffic);
 
-            return simulatedCarCountNormalized;
+            return simulatedVehicleCountNormalized;
         }
 
         public static Building.Type ChooseRandomBuildingType(float normDistance)
@@ -46,10 +46,12 @@ namespace Utils
 
         public static Junction.Type ChooseRandomJunctionType(float normDistance)
         {
-            if (Utils.Math.NormalDistribution(normDistance, 0.65f) > UnityEngine.Random.value)
-                return Junction.Type.Lights;
-            else
-                return Junction.Type.Stops;
+            return Junction.Type.Lights;
+
+            //if (Utils.Math.NormalDistribution(normDistance, 0.65f) > UnityEngine.Random.value)
+            //    return Junction.Type.Lights;
+            //else
+            //    return Junction.Type.Stops;
         }
     }
 }

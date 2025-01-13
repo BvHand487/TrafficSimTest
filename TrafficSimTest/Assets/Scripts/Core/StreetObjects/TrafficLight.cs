@@ -24,10 +24,13 @@ public class TrafficLight
     public static readonly float yellowInterval = 4.0f;
     public static readonly float redIntervalBuffer = 4.0f;
 
+    public int queueLength;
+
     public TrafficLight()
     {
         this.trafficController = null;
         this.road = null;
+        queueLength = 0;
 
         status = Status.Red;
     }
@@ -36,12 +39,13 @@ public class TrafficLight
     {
         this.trafficController = controller;
         this.road = road;
+        queueLength = 0;
 
         Vector3 closestPoint = road.IsCyclic() ?
             road.path.First() :
-            Utils.Math.GetClosestVector(junction.obj.transform.position, road.path);
+            Utils.Math.GetClosestVector(junction.obj.transform.localPosition, road.path);
 
-        this.pos = Utils.Math.GetMidpointVector(junction.obj.transform.position, closestPoint);
+        this.pos = controller.junction.simulation.transform.position + Utils.Math.GetMidpointVector(junction.obj.transform.localPosition, closestPoint);
         status = Status.Red;
     }
 

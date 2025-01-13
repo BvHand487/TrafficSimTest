@@ -21,10 +21,11 @@ public class TrafficController
     public Junction junction;
     public List<Road> roads => junction.roads;
 
-    private List<TrafficLight> lights;
-    public List<TrafficLight> Lights => lights.FindAll(l => l.trafficController != null);
+    public List<TrafficLight> lights;
 
-    public TrafficController(Junction junction, List<float> greenIntervals = null, Mode mode = Mode.Double)
+    public static readonly float defaultGreenInterval = 20f;
+
+    public TrafficController(Junction junction)
     {
         this.junction = junction;
 
@@ -37,10 +38,7 @@ public class TrafficController
             lights.Add(tf);
         }
 
-        if (greenIntervals == null)
-            greenIntervals = new List<float>() { 20f, 20f, 20f, 20f };
-
-        ConfigureLights(greenIntervals, mode);
+        ResetLights();
     }
 
     public void Update()
@@ -80,6 +78,7 @@ public class TrafficController
         if (IsGreenOver(current))
         {
             current.status = TrafficLight.Status.Yellow;
+            current.queueLength = 0;
             elapsedTime = 0.0f;
         }
         else if (IsYellowOver(current))
@@ -110,6 +109,7 @@ public class TrafficController
         if (IsGreenOver(current))
         {
             current.status = opposite.status = TrafficLight.Status.Yellow;
+            current.queueLength = 0;
             elapsedTime = 0.0f;
         }
         else if (IsYellowOver(current))
@@ -156,5 +156,10 @@ public class TrafficController
 
         this.mode = mode;
         return true;
+    }
+
+    public void ResetLights()
+    {
+        ConfigureLights(new List<float> { defaultGreenInterval, defaultGreenInterval, defaultGreenInterval, defaultGreenInterval }, Mode.Double);
     }
 }
