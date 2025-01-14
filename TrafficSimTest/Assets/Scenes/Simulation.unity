@@ -355,7 +355,7 @@ MonoBehaviour:
   groundPrefab: {fileID: 1268055436598246820, guid: 3e7579e4915f23a41bbbabe96a43c7b0,
     type: 3}
   tileSize: 15
-  gridSize: 5
+  gridSize: 4
   junctionGap: 3
   minBuildingHeight: 5
   maxBuildingHeight: 25
@@ -364,7 +364,7 @@ MonoBehaviour:
   buildingHeightRandomness: 2
   vehicleTypes:
   - {fileID: 11400000, guid: 86c489ece8c5ef249a23849b27f12cc7, type: 2}
-  vehicleCount: 5
+  vehicleCount: 150
   simulationCopies: 0
 --- !u!4 &80862059
 Transform:

@@ -19,6 +19,7 @@ public class Junction
     public Type type;
     public List<Road> roads;
     public GameObject obj;
+    public Collider junctionCollider;
 
     // If the junction is controlled with lights
     public TrafficController trafficController;
@@ -34,6 +35,7 @@ public class Junction
     {
         this.simulation = simulation;
         this.obj = obj;
+        this.junctionCollider = obj.GetComponent<Collider>();
     }
 
     // Set junction's roads and create traffic lights
@@ -81,13 +83,7 @@ public class Junction
 
     public bool IsPointInside(Vector3 point)
     {
-        float halfTile = GameManager.Instance.tileSize / 2;
-        float low_x = obj.transform.localPosition.x - halfTile;
-        float high_x = obj.transform.localPosition.x + halfTile;
-        float low_z = obj.transform.localPosition.z - halfTile;
-        float high_z = obj.transform.localPosition.z + halfTile;
-
-        return low_x < point.x && point.x < high_x && low_z < point.z && point.z < high_z;
+        return junctionCollider.bounds.Contains(point);
     }
 
     public override string ToString()

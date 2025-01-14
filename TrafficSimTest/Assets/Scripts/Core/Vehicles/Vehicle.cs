@@ -56,12 +56,17 @@ public abstract class Vehicle : MonoBehaviour
         }
 
         bumperPosition = transform.localPosition + transform.TransformVector(bumperOffset);
-        vehicleCollider.enabled = !invisible;
         HandleVehicle();
     }
 
     private bool CheckObstacle(out RaycastHit hit)
     {
+        if (invisible)
+        {
+            hit = default(RaycastHit);
+            return false;
+        }
+
         return Physics.Raycast(bumperPosition, transform.forward, out hit, preset.lookAheadDistance);
     }
 
@@ -98,7 +103,8 @@ public abstract class Vehicle : MonoBehaviour
                         }
                         else if (IsJunctionExitBlocked(junction))
                         {
-                            // ...
+                            status = Status.WAITING_CAR;
+                            velocity = 0.0f;
                         }
                     }
 
@@ -141,36 +147,60 @@ public abstract class Vehicle : MonoBehaviour
 
     private bool IsJunctionExitBlocked(Junction junction)
     {
-        // Check if the exit of the junction is blocked by other vehicles
-        foreach (var vehicle in vehicleManager.vehicles)
+        bool reachedJunction = false;
+
+        for (int i = 1; i < path.Length(); ++i)
         {
-            if (vehicle.status == Status.DRIVING && vehicle.path == path && vehicle != this)
+            if (junction.IsPointInside(path.Next(i - 1)))
             {
-                // If any vehicle on the same path is driving, the junction exit is blocked
-                return true;
+                reachedJunction = true;
+            }
+
+            if (reachedJunction)
+            {
+                Vector3 a = path.Next(i - 1);
+                Vector3 b = path.Next(i);
+                Vector3 dir = (b - a).normalized;
+
+                if (Mathf.Abs(Vector3.Dot(dir, Vector3.right)) > 0.99f ||
+                    Mathf.Abs(Vector3.Dot(dir, Vector3.forward)) > 0.99f)
+                {
+                    Vector3 right = -Vector3.Cross(dir, Vector3.up);
+
+                    Vector3 worldBumperOffset =
+                        (right * bumperOffset.x) +
+                        (Vector3.up * bumperOffset.y) +
+                        (dir * bumperOffset.z);
+
+                    exitBumperPos = a + worldBumperOffset - dir;
+                    exitDir = dir;
+
+                    return Physics.Raycast(exitBumperPos - dir, dir, 10f);
+                }
             }
         }
+
         return false;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    public Vector3 exitBumperPos = -Vector3.one;
+    public Vector3 exitDir = -Vector3.one;
+
+    private void OnTriggerEnter(Collider other)
     {
-        if (collision.collider.CompareTag("Junction"))
+        if (other.CompareTag("Junction"))
         {
-            Debug.Log("junction enter");
             invisible = true;
         }
     }
 
-    private void OnCollisionExit(Collision collision)
+    private void OnTriggerExit(Collider other)
     {
-        if (collision.collider.CompareTag("Junction"))
+        if (other.CompareTag("Junction"))
         {
-            Debug.Log("junction exit");
             invisible = false;
         }
     }
-
 
     public abstract Vector3 GetBumperOffset();
 

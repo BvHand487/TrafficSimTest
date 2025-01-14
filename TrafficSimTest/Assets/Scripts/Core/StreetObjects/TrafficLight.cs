@@ -51,7 +51,7 @@ public class TrafficLight
 
     public bool AddVehicleToQueue(Vehicle vehicle)
     {
-        if (!queue.Contains(vehicle))
+        if (queue.Contains(vehicle))
             return false;
 
         queue.Add(vehicle);

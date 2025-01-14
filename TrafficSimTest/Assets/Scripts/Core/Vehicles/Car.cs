@@ -7,7 +7,7 @@ public class Car : Vehicle
     public override Vector3 GetBumperOffset()
     {
         BoxCollider boxCollider = GetComponent<BoxCollider>();
-        return new Vector3(boxCollider.center.x, boxCollider.center.y, boxCollider.center.z + boxCollider.size.z / 2);
+        return new Vector3(boxCollider.center.x, boxCollider.center.y, boxCollider.center.z + boxCollider.size.z / 2) + 0.01f * transform.forward;
     }
 
     void OnDrawGizmos()
@@ -27,6 +27,14 @@ public class Car : Vehicle
         }
 
         Gizmos.DrawCube(bumperPosition + Vector3.up, Vector3.one);
+
+        if (exitBumperPos != -Vector3.one)
+        {
+            Gizmos.color = Color.magenta;
+            Gizmos.DrawSphere(exitBumperPos, 0.5f);
+            Gizmos.DrawLine(exitBumperPos, exitBumperPos + 5f * exitDir);
+            Gizmos.DrawSphere(exitBumperPos + 5f * exitDir, 0.5f);
+        }
     }
 
     //void PlayEffect()
