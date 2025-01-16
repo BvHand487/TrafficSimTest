@@ -38,15 +38,22 @@ public class Selection : MonoBehaviour
 
     private void HandleSelection()
     {
-        if (selectedVehicle ?? null)
+        if (selectedVehicle)
         {
-            pathRenderer.SetPosition(0, selectedVehicle.transform.position);
-
-            if (selectedVehicle.path.Length() != pathLength)
+            if (selectedVehicle.path.Length() <= 1)
             {
-                pathRenderer.positionCount = pathLength;
-                pathLength--;
-                UpdateLineRenderer();
+                UnselectAll();
+            }
+            else
+            {
+                pathRenderer.SetPosition(0, selectedVehicle.transform.position);
+
+                if (selectedVehicle.path.Length() != pathLength)
+                {
+                    pathRenderer.positionCount = pathLength;
+                    pathLength--;
+                    UpdateLineRenderer();
+                }
             }
         }
 
@@ -64,7 +71,10 @@ public class Selection : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 if (hit.collider.CompareTag("Vehicle"))
-                    Selectvehicle(hit.collider.gameObject.GetComponent<Vehicle>());
+                {
+                    var vehicle = hit.collider.gameObject.GetComponent<Vehicle>();
+                    SelectVehicle(vehicle);
+                }
 
                 if (hit.collider.CompareTag("Junction"))
                 {
@@ -72,7 +82,10 @@ public class Selection : MonoBehaviour
                     if (Physics.Raycast(hit.point + offset, ray.direction, out RaycastHit repeatedHit))
                     {
                         if (repeatedHit.collider.CompareTag("Vehicle"))
-                            Selectvehicle(repeatedHit.collider.gameObject.GetComponent<Vehicle>());
+                        {
+                            var vehicle = repeatedHit.collider.gameObject.GetComponent<Vehicle>();
+                            SelectVehicle(vehicle);
+                        }
                     }
                 }
             }
@@ -95,14 +108,13 @@ public class Selection : MonoBehaviour
         //selectedJunction = null;
     }
 
-    void Selectvehicle(Vehicle vehicle)
+    void SelectVehicle(Vehicle vehicle)
     {
         selectedVehicle = vehicle;
         pathLength = selectedVehicle.path.Length();
         pathRenderer.positionCount = pathLength + 1;
 
         UpdateLineRenderer();
-
         SelectBuilding(selectedVehicle.path.from);
         SelectBuilding(selectedVehicle.path.to);
     }

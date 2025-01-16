@@ -12,13 +12,15 @@ public class TrafficLight
     };
 
     public TrafficController trafficController;
+    public Renderer renderer;
     public Junction junction => trafficController?.junction;
 
     public List<Vehicle> queue;
     public Road road;
     public Vector3 pos;
 
-    public Status status { get; set; }
+    private Status status;
+
     public float greenInterval = 10.0f;
 
     public static readonly float minGreenInterval = 5.0f;
@@ -32,12 +34,13 @@ public class TrafficLight
         this.road = null;
         queue = new List<Vehicle>();
 
-        status = Status.Red;
+        SetStatus(Status.Red);
     }
 
-    public TrafficLight(TrafficController controller, Road road)
+    public TrafficLight(TrafficController controller, Road road, Renderer renderer)
     {
         this.trafficController = controller;
+        this.renderer = renderer;
         this.road = road;
         queue = new List<Vehicle>();
 
@@ -46,7 +49,8 @@ public class TrafficLight
             Utils.Math.GetClosestVector(junction.obj.transform.localPosition, road.path);
 
         this.pos = controller.junction.simulation.transform.position + Utils.Math.GetMidpointVector(junction.obj.transform.localPosition, closestPoint);
-        status = Status.Red;
+
+        SetStatus(Status.Red);
     }
 
     public bool AddVehicleToQueue(Vehicle vehicle)
@@ -63,8 +67,18 @@ public class TrafficLight
         this.greenInterval = greenInterval;
     }
 
-    // Returns the traffic light color
-    public Color GetStatusColor()
+    public void SetStatus(Status status)
+    {
+        this.status = status;
+        this.renderer.material.color = TrafficLight.StatusToColor(status);
+    }
+    public Status GetStatus()
+    {
+        return status;
+    }
+
+    // Maps status to color
+    public static Color StatusToColor(Status status)
     {
         switch (status)
         {

@@ -30,10 +30,8 @@ public class Road
         length += GameManager.Instance.tileSize;
     }
 
-    public Junction GetOtherJunction(Junction j)
-    {
-        return j == junctionStart ? junctionEnd : junctionStart;
-    }
+    public bool IsConnectedTo(Junction j) => junctionStart == j || junctionEnd == j;
+    public Junction GetOtherJunction(Junction j) => j == junctionStart ? junctionEnd : junctionStart;
 
     public bool IsTurn(Vector3 point, float eps = 0.01f)
     {
@@ -56,6 +54,16 @@ public class Road
         var junctionsB = new List<Junction>() { b.junctionStart, b.junctionEnd };
 
         return junctionsA.Intersect(junctionsB)?.First();
+    }
+
+    public static Junction GetCommonJunction(List<Road> roads)
+    {
+        var starts = roads.Select(r => r.junctionStart).ToList();
+        var ends = roads.Select(r => r.junctionEnd).ToList();
+
+        var all = starts.Union(ends);
+
+        return all.Where(junction => roads.All(r => r.IsConnectedTo(junction)))?.First();
     }
 
     // Returns a segment of the path from a junction to a point (inclusive) on the road.
@@ -111,61 +119,5 @@ public class Road
         return path.Contains(point) ||
             point == 2 * path[path.Count - 1] - path[path.Count - 2] ||
             point == 2 * path[0] - path[1];
-    }
-
-    // Orders roads around the intersection sequentially
-    // If it's a 4-way intersection it orders them anticlockwise
-    public static List<Road> OrderRoads(List<Road> roads)
-    {
-        Vector3 junctionPos = Road.GetCommonJunction(roads.First(), roads.Last()).obj.transform.localPosition;
-        Dictionary<float, Road> anglesInWorld = new Dictionary<float, Road>();
-
-        switch (roads.Count)
-        {
-            case 1:
-                return roads;
-
-            case 3:
-                Vector3 dirToIndex0 = roads[0].GetClosestPathPoint(junctionPos) - junctionPos;
-                Vector3 dirToIndex1 = roads[1].GetClosestPathPoint(junctionPos) - junctionPos;
-                Vector3 dirToIndex2 = roads[2].GetClosestPathPoint(junctionPos) - junctionPos;
-
-                if (Vector3.Dot(dirToIndex0, dirToIndex1) <= -0.95)
-                {
-                    return new List<Road>() { roads[0], roads[2], roads[1] };
-                }
-
-                if (Vector3.Dot(dirToIndex0, dirToIndex2) <= -0.95)
-                {
-                    return new List<Road>() { roads[0], roads[1], roads[2] };
-                }
-
-                if (Vector3.Dot(dirToIndex1, dirToIndex2) <= -0.95)
-                {
-                    return new List<Road>() { roads[1], roads[0], roads[2] };
-                }
-
-                Debug.Log("null in order roads");
-                return null;
-
-            default:
-                for (int i = 0; i < roads.Count; ++i)
-                {
-                    var roadPos = roads[i].IsCyclic() ?
-                        roads[i].path.First() :
-                        Utils.Math.GetClosestVector(junctionPos, roads[i].path);
-
-                    Vector3 roadDir = (roadPos - junctionPos).normalized;
-
-                    var angle = Vector3.Angle(roadDir, Vector3.right);
-                    if (Vector3.Dot(roadDir, Vector3.forward) < 0.1f)
-                        angle = 360f - angle;
-                    angle = Unity.Mathematics.math.fmod(angle, 360f);
-
-                    anglesInWorld.Add(angle, roads[i]);
-                }
-
-                return anglesInWorld.OrderBy(e => e.Key).Select(pair => pair.Value).ToList();
-        }
     }
 }

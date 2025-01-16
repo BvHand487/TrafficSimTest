@@ -3,6 +3,7 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 using System;
+using UnityEngine.UIElements;
 
 public class TrafficController
 {
@@ -33,7 +34,7 @@ public class TrafficController
         trafficLightDict = new Dictionary<Vector3, TrafficLight>();
         for (int i = 0; i < junction.roads.Count; ++i)
         {
-            var tf = new TrafficLight(this, junction.roads[i]);
+            var tf = new TrafficLight(this, junction.roads[i], junction.obj.transform.GetChild(i).GetComponent<Renderer>());
             trafficLightDict.Add(tf.pos, tf);
             lights.Add(tf);
         }
@@ -69,20 +70,20 @@ public class TrafficController
         }
     }
 
-    public bool IsGreenOver(TrafficLight light) => (light.status == TrafficLight.Status.Green && elapsedTime > light.greenInterval);
-    public bool IsYellowOver(TrafficLight light) => (light.status == TrafficLight.Status.Yellow && elapsedTime > TrafficLight.yellowInterval);
-    public bool IsRedOver(TrafficLight light) => (light.status == TrafficLight.Status.Red && elapsedTime > TrafficLight.redIntervalBuffer);
+    public bool IsGreenOver(TrafficLight light) => (light.GetStatus() == TrafficLight.Status.Green && elapsedTime > light.greenInterval);
+    public bool IsYellowOver(TrafficLight light) => (light.GetStatus() == TrafficLight.Status.Yellow && elapsedTime > TrafficLight.yellowInterval);
+    public bool IsRedOver(TrafficLight light) => (light.GetStatus() == TrafficLight.Status.Red && elapsedTime > TrafficLight.redIntervalBuffer);
 
     public void UpdateSingleMode(TrafficLight current)
     {
         if (IsGreenOver(current))
         {
-            current.status = TrafficLight.Status.Yellow;
+            current.SetStatus(TrafficLight.Status.Yellow);
             elapsedTime = 0.0f;
         }
         else if (IsYellowOver(current))
         {
-            current.status = TrafficLight.Status.Red;
+            current.SetStatus(TrafficLight.Status.Red);
             current.queue.Clear();
             elapsedTime = 0.0f;
         }
@@ -91,13 +92,13 @@ public class TrafficController
             if (lights.Count == 3)
             {
                 activeLight = 0;
-                lights[activeLight].status = TrafficLight.Status.Green;
-                lights[(activeLight + 2) % lights.Count].status = TrafficLight.Status.Green;
+                lights[activeLight].SetStatus(TrafficLight.Status.Green);
+                lights[(activeLight + 2) % lights.Count].SetStatus(TrafficLight.Status.Green);
             }
             else
             {
                 activeLight = (activeLight + 1) % lights.Count;
-                lights[activeLight].status = TrafficLight.Status.Green;
+                lights[activeLight].SetStatus(TrafficLight.Status.Green);
             }
 
             current.queue.Clear();
@@ -109,12 +110,14 @@ public class TrafficController
     {
         if (IsGreenOver(current))
         {
-            current.status = opposite.status = TrafficLight.Status.Yellow;
+            current.SetStatus(TrafficLight.Status.Yellow);
+            opposite.SetStatus(TrafficLight.Status.Yellow);
             elapsedTime = 0.0f;
         }
         else if (IsYellowOver(current))
         {
-            current.status = opposite.status = TrafficLight.Status.Red;
+            current.SetStatus(TrafficLight.Status.Red);
+            opposite.SetStatus(TrafficLight.Status.Red);
             current.queue.Clear();
             opposite.queue.Clear();
             elapsedTime = 0.0f;
@@ -126,10 +129,10 @@ public class TrafficController
             else
             {
                 activeLight = (activeLight + 1) % lights.Count;
-                lights[(activeLight + 2) % lights.Count].status = TrafficLight.Status.Green;
+                lights[(activeLight + 2) % lights.Count].SetStatus(TrafficLight.Status.Green);
             }
 
-            lights[activeLight].status = TrafficLight.Status.Green;
+            lights[activeLight].SetStatus(TrafficLight.Status.Green);
             current.queue.Clear();
             opposite.queue.Clear();
             elapsedTime = 0.0f;

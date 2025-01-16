@@ -97,7 +97,7 @@ public abstract class Vehicle : MonoBehaviour
 
                         if (junction.type == Junction.Type.Lights)
                         {
-                            if (trafficLight.status != TrafficLight.Status.Green)
+                            if (trafficLight.GetStatus() != TrafficLight.Status.Green)
                             {
                                 status = Status.WAITING_RED;
                                 tlight.AddVehicleToQueue(this);

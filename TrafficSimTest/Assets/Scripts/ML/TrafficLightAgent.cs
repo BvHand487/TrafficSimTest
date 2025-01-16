@@ -28,7 +28,7 @@ public class TrafficLightAgent : Agent
         sensor.AddObservation(trafficController.junction.simulation.vehicleManager.simulatedMaxVehicles);
 
         // Lights status (0: red, 1: green)
-        sensor.AddObservation(trafficController.lights.Select(l => l.status == TrafficLight.Status.Green ? 1f : 0f).ToList());
+        sensor.AddObservation(trafficController.lights.Select(l => l.GetStatus() == TrafficLight.Status.Green ? 1f : 0f).ToList());
 
         // Elapsed time since last light change
         sensor.AddObservation(trafficController.elapsedTime);

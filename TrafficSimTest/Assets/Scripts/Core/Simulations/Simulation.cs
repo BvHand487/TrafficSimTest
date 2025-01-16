@@ -50,7 +50,7 @@ public class Simulation : MonoBehaviour
 
             for (int i = 0; i < junction.trafficLights.Count; ++i)
             {
-                Gizmos.color = junction.trafficLights[i].GetStatusColor();
+                Gizmos.color = TrafficLight.StatusToColor(junction.trafficLights[i].GetStatus());
                 Gizmos.DrawSphere(transform.position + junction.trafficLights[i].pos, 1.5f);
 
                 Handles.Label(transform.position + junction.trafficLights[i].pos + Vector3.up * 1f, $"{junction.trafficLights[i].queue.Count}");
