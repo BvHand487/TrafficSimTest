@@ -93,15 +93,23 @@ public abstract class Vehicle : MonoBehaviour
                     {
                         Junction junction = vehicleManager.simulation.junctionsDict[hit.collider.gameObject];
                         TrafficLight trafficLight = vehicleManager.GetTrafficLight(this, junction);
+                        tlight = trafficLight;
 
-                        if (junction.type == Junction.Type.Lights && trafficLight.status != TrafficLight.Status.Green)
+                        if (junction.type == Junction.Type.Lights)
                         {
-                            status = Status.WAITING_RED;
-                            tlight = trafficLight;
-                            tlight.AddVehicleToQueue(this);
-                            velocity = 0.0f;
+                            if (trafficLight.status != TrafficLight.Status.Green)
+                            {
+                                status = Status.WAITING_RED;
+                                tlight.AddVehicleToQueue(this);
+                                velocity = 0.0f;
+                            }
+                            else
+                            {
+                                tlight.queue.Clear();
+                            }
                         }
-                        else if (IsJunctionExitBlocked(junction))
+                        
+                        if (IsJunctionExitBlocked(junction))
                         {
                             status = Status.WAITING_CAR;
                             velocity = 0.0f;
@@ -114,7 +122,7 @@ public abstract class Vehicle : MonoBehaviour
 
                         velocity = 0.0f;
                         status = vehicleInFront.status;
-                        
+
                         if (status == Status.WAITING_RED)
                         {
                             tlight = vehicleInFront.tlight;
@@ -139,7 +147,7 @@ public abstract class Vehicle : MonoBehaviour
                 transform.localPosition += direction * velocity * Time.deltaTime;
 
                 Vector3 lookDirection = CalculateLookDirection();
-                transform.rotation = CalculateRotation(lookDirection);
+                transform.localRotation = CalculateRotation(lookDirection);
                 distanceThisFrame = 0;
             }
         }
@@ -172,10 +180,7 @@ public abstract class Vehicle : MonoBehaviour
                         (Vector3.up * bumperOffset.y) +
                         (dir * bumperOffset.z);
 
-                    exitBumperPos = a + worldBumperOffset - dir;
-                    exitDir = dir;
-
-                    return Physics.Raycast(exitBumperPos - dir, dir, 10f);
+                    return Physics.Raycast(junction.obj.transform.position + worldBumperOffset - dir, dir, GameManager.Instance.tileSize);
                 }
             }
         }
@@ -183,8 +188,6 @@ public abstract class Vehicle : MonoBehaviour
         return false;
     }
 
-    public Vector3 exitBumperPos = -Vector3.one;
-    public Vector3 exitDir = -Vector3.one;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -216,13 +219,14 @@ public abstract class Vehicle : MonoBehaviour
 
     protected virtual Quaternion CalculateRotation(Vector3 lookDirection)
     {
-        return Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDirection), 10f * Time.deltaTime);
+        return Quaternion.Slerp(transform.localRotation, Quaternion.LookRotation(lookDirection, Vector3.up), 10f * Time.deltaTime);
     }
 
     protected virtual Vector3 CalculateLookDirection()
     {
-        return path.Length() > 1 ?
-            (path.Next(1) - transform.localPosition).normalized :
-            (path.Next() - transform.localPosition).normalized;
+        int lookIndex = Mathf.Clamp(path.Length() - 1, 0, 2);
+        Vector3 pathDir = (path.Next(lookIndex) - transform.localPosition).normalized;
+
+        return pathDir;
     }
 }

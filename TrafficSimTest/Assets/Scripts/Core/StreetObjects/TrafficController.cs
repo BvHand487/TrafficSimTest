@@ -39,8 +39,6 @@ public class TrafficController
         }
 
         ResetLights();
-
-        Debug.Log($"pos: {junction.obj.transform.position}, lights: {lights.Count}");
     }
 
     public void Update()
@@ -80,14 +78,12 @@ public class TrafficController
         if (IsGreenOver(current))
         {
             current.status = TrafficLight.Status.Yellow;
-            current.queue.Clear();
-
-            Debug.Log($"queue clear - {current.pos}, cnt={current.queue.Count}");
             elapsedTime = 0.0f;
         }
         else if (IsYellowOver(current))
         {
             current.status = TrafficLight.Status.Red;
+            current.queue.Clear();
             elapsedTime = 0.0f;
         }
         else if (IsRedOver(current))
@@ -105,7 +101,6 @@ public class TrafficController
             }
 
             current.queue.Clear();
-            Debug.Log($"queue clear - {current.pos}, cnt={current.queue.Count}");
             elapsedTime = 0.0f;
         }
     }
@@ -120,6 +115,8 @@ public class TrafficController
         else if (IsYellowOver(current))
         {
             current.status = opposite.status = TrafficLight.Status.Red;
+            current.queue.Clear();
+            opposite.queue.Clear();
             elapsedTime = 0.0f;
         }
         else if (IsRedOver(current))
@@ -134,7 +131,7 @@ public class TrafficController
 
             lights[activeLight].status = TrafficLight.Status.Green;
             current.queue.Clear();
-            Debug.Log($"queue clear - {current.pos}, cnt={current.queue.Count}");
+            opposite.queue.Clear();
             elapsedTime = 0.0f;
         }
     }

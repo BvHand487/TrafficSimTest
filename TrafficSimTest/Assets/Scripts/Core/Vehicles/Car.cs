@@ -27,14 +27,6 @@ public class Car : Vehicle
         }
 
         Gizmos.DrawCube(bumperPosition + Vector3.up, Vector3.one);
-
-        if (exitBumperPos != -Vector3.one)
-        {
-            Gizmos.color = Color.magenta;
-            Gizmos.DrawSphere(exitBumperPos, 0.5f);
-            Gizmos.DrawLine(exitBumperPos, exitBumperPos + 5f * exitDir);
-            Gizmos.DrawSphere(exitBumperPos + 5f * exitDir, 0.5f);
-        }
     }
 
     //void PlayEffect()

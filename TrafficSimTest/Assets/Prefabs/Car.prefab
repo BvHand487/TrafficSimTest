@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 78375490371989189}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.91, y: 1.1, z: -0.4819001}
+  m_LocalPosition: {x: 2.54, y: 1.1, z: -0.4819001}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -113,7 +113,7 @@ Transform:
   m_GameObject: {fileID: 2256971783910622699}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4.3097143, y: 0.59302586, z: -2.048642}
+  m_LocalPosition: {x: 3.9397142, y: 0.59302586, z: -2.048642}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -199,7 +199,7 @@ Transform:
   m_GameObject: {fileID: 2919558996238544818}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.5225277, y: 0.5930263, z: 2.422488}
+  m_LocalPosition: {x: 1.1525276, y: 0.5930263, z: 2.422488}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -285,7 +285,7 @@ Transform:
   m_GameObject: {fileID: 2997503475501917729}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 1.5225277, y: 0.59302586, z: -2.04864}
+  m_LocalPosition: {x: 1.1525276, y: 0.59302586, z: -2.04864}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -371,7 +371,7 @@ Transform:
   m_GameObject: {fileID: 3095643256055474289}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 4.3097143, y: 0.5930262, z: 2.422488}
+  m_LocalPosition: {x: 3.9397142, y: 0.5930262, z: 2.422488}
   m_LocalScale: {x: 0.01, y: 0.01, z: 0.01}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -516,7 +516,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Size: {x: 3, y: 2.4072263, z: 7.0713234}
-  m_Center: {x: 2.92, y: 1.814382, z: 0.0062236786}
+  m_Center: {x: 2.55, y: 1.814382, z: 0.0062236786}
 --- !u!114 &248828569074370602
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -532,4 +532,3 @@ MonoBehaviour:
   preset: {fileID: 0}
   invisible: 0
   vehicleCollider: {fileID: 0}
-  layerMask: 0

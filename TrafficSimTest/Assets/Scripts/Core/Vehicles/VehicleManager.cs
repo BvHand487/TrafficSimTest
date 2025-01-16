@@ -16,7 +16,7 @@ public class VehicleManager
 
     public float minVehicleTravelDistance = 75.0f;
     public float turnRadius=7.5f;
-    public int turnResolution=5;
+    public int turnResolution=10;
 
     public List<VehiclePreset> types;
     public List<Vehicle> spawnQueue;
