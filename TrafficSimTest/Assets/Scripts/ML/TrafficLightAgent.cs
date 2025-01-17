@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.MLAgents;
@@ -10,16 +11,43 @@ public class TrafficLightAgent : Agent
 {
     public Simulation simulation;
     public TrafficController trafficController;
+    public bool isTrainingEnabled = false;
+    public bool isInitialized = false;
+
+    public void SetTraining(bool isTraining)
+    {
+        isTrainingEnabled = isTraining;
+    }
 
     public override void Initialize()
     {
+        StartCoroutine(DelayedInitialize());
+    }
+
+    private IEnumerator DelayedInitialize()
+    {
+        while (GameManager.Instance.simulations?.simulation?.junctionsDict?[gameObject]?.trafficController is null)
+        {
+            yield return null;
+        }
+
         simulation = GameManager.Instance.simulations.simulation;
         trafficController = simulation.junctionsDict[gameObject].trafficController;
+        isInitialized = true;
     }
 
     public override void OnEpisodeBegin()
     {
+        if (!isInitialized)
+            return;
+
         trafficController.ResetLights();
+    }
+
+    private void Update()
+    {
+        if (Clock.Instance.GetFractionOfDay() <= 0.01f)
+            EndEpisode();
     }
 
     public override void CollectObservations(VectorSensor sensor)
@@ -29,6 +57,8 @@ public class TrafficLightAgent : Agent
 
         // Lights status (0: red, 1: green)
         sensor.AddObservation(trafficController.lights.Select(l => l.GetStatus() == TrafficLight.Status.Green ? 1f : 0f).ToList());
+        if (trafficController.lights.Count == 3)
+            sensor.AddObservation(0f); // Dummy value for 3-way junctions
 
         // Elapsed time since last light change
         sensor.AddObservation(trafficController.elapsedTime);
@@ -47,10 +77,15 @@ public class TrafficLightAgent : Agent
 
         // Current lights green intervals
         sensor.AddObservation(trafficController.lights.Select(l => l.greenInterval).ToList());
+        if (trafficController.lights.Count == 3)
+            sensor.AddObservation(0f); // Dummy value for 3-way junctions
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
+        //if (!isTrainingEnabled)
+        //    return;
+
         // Define the min, max green interval duration and step size
         float minGreenInterval = 5.0f;
         float maxGreenInterval = 30.0f;
@@ -63,19 +98,19 @@ public class TrafficLightAgent : Agent
         var continuousActions = actionBuffers.ContinuousActions;
         var discreteActions = actionBuffers.DiscreteActions;
 
-        // Ensure the number of continuous actions matches the number of traffic lights
-        if (continuousActions.Length != numLights + 1)
-        {
-            Debug.LogError("Training: Invalid number of continuous actions received.");
-            return;
-        }
+        //// Ensure the number of continuous actions matches the number of traffic lights
+        //if (continuousActions.Length != numLights + 1)
+        //{
+        //    Debug.LogError("Training: Invalid number of continuous actions received.");
+        //    return;
+        //}
 
-        // Ensure there is exactly one discrete action for mode selection
-        if (discreteActions.Length != 1)
-        {
-            Debug.LogError("Training: Invalid number of discrete actions received.");
-            return;
-        }
+        //// Ensure there is exactly one discrete action for mode selection
+        //if (discreteActions.Length != 1)
+        //{
+        //    Debug.LogError("Training: Invalid number of discrete actions received.");
+        //    return;
+        //}
 
 
         List<float> scaledIntervals = new List<float>();
@@ -115,9 +150,19 @@ public class TrafficLightAgent : Agent
         SetReward(-0.1f);
     }
 
-    //public override void Heuristic(float[] actionsOut)
-    //{
-    //    // Optional: Manual control for testing
-    //    actionsOut[0] = 0; // Default to no action
-    //}
+    public override void Heuristic(in ActionBuffers actionsOut)
+    {
+        // Define the min, max green interval duration and step size
+        float minGreenInterval = 5.0f;
+        float maxGreenInterval = 30.0f;
+
+        var continuousActions = actionsOut.ContinuousActions;
+        var discreteActions = actionsOut.DiscreteActions;
+
+        for (int i = 0; i < trafficController.lights.Count; i++)
+            continuousActions[i] = Mathf.Clamp(20.0f, minGreenInterval, maxGreenInterval);
+
+        // double mode
+        discreteActions[0] = 1;
+    }
 }

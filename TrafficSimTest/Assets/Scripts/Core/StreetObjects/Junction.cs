@@ -67,6 +67,8 @@ public class Junction
                     return;
             }
         }
+
+        obj.GetComponent<TrafficLightAgent>().enabled = true;
     }
 
     // Updates the junction's traffic lights

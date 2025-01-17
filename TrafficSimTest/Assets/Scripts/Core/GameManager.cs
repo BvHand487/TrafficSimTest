@@ -46,6 +46,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] public int simulationCopies;
 
     public SimulationsManager simulations;
+    public TrainingManager trainingManager;
 
     public Clock clock;
 
@@ -56,7 +57,6 @@ public class GameManager : MonoBehaviour
         clock = Clock.Instance;
         simulations = new SimulationsManager();
 
-
         if (PlayerPrefs.HasKey("Grid Size"))
             gridSize = PlayerPrefs.GetInt("Grid Size");
         if (PlayerPrefs.HasKey("Junction Gap"))
@@ -64,6 +64,9 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.DeleteAll();
 
         Generator.Generate();
+
+
+        trainingManager = new TrainingManager();
     }
 
     void Update()

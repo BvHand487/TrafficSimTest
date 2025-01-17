@@ -248,11 +248,7 @@ namespace Generation
                 var maxDistFromCenter = expandedGrid.MaxDistanceFromCenter();
                 var distFromCenter = j.obj.transform.position.magnitude;
 
-                Debug.Log($"{j.obj.transform.position}");
-
                 j.Initialize(roads.FindAll((r) => r.IsConnectedTo(j)), Utils.Modeling.ChooseRandomJunctionType(distFromCenter / maxDistFromCenter));
-
-                Debug.Log($"{j.roads}");
             }
 
             foreach (var b in buildings)

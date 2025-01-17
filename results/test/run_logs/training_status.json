@@ -1,0 +1,29 @@
+{
+    "TrafficLightBrain": {
+        "checkpoints": [
+            {
+                "steps": 84910,
+                "file_path": "results\\test\\TrafficLightBrain\\TrafficLightBrain-84910.onnx",
+                "reward": -60.00000514984131,
+                "creation_time": 1737129342.8040984,
+                "auxillary_file_paths": [
+                    "results\\test\\TrafficLightBrain\\TrafficLightBrain-84910.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 84910,
+            "file_path": "results\\test\\TrafficLightBrain.onnx",
+            "reward": -60.00000514984131,
+            "creation_time": 1737129342.8040984,
+            "auxillary_file_paths": [
+                "results\\test\\TrafficLightBrain\\TrafficLightBrain-84910.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.2.2+cpu"
+    }
+}

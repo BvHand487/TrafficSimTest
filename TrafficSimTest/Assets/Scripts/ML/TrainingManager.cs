@@ -9,29 +9,40 @@ using UnityEngine;
 public class TrainingManager
 {
     public List<TrafficLightAgent> agents;
-    private BehaviorParameters behaviorParams;
+    public List<BehaviorParameters> behaviours;
 
-    public TrainingManager(BehaviorParameters behaviorParams)
+    public TrainingManager()
     {
-        this.behaviorParams = behaviorParams;
-
         agents = new List<TrafficLightAgent>();
+        behaviours = new List<BehaviorParameters>();
+
         GameObject[] junctions = GameObject.FindGameObjectsWithTag("Junction"); 
         foreach (var j in junctions)
         {
             var agent = j.GetComponent<TrafficLightAgent>();
+            agent.SetTraining(false);
             agents.Add(agent);
+            
+            var behaviour = j.GetComponent<BehaviorParameters>();
+            behaviour.BehaviorType = BehaviorType.Default;
+            behaviours.Add(behaviour);
         }
     }
 
     public void StartTraining()
     {
-        behaviorParams.BehaviorType = BehaviorType.Default; // Enable training mode
+        foreach (var a in agents)
+        {
+            a.SetTraining(true);
+        }
     }
 
     public void StopTraining()
     {
-        behaviorParams.BehaviorType = BehaviorType.HeuristicOnly; // Stop training
+        foreach (var a in agents)
+        {
+            a.SetTraining(false);
+        }
     }
 
 }

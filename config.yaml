@@ -1,28 +1,19 @@
 behaviors:
-  MyAgentBehavior:  # Agent's behavior name from Unity
+  TrafficLightBrain:
     trainer_type: ppo
     hyperparameters:
-      batch_size: 1024            # Number of experiences per training batch
-      buffer_size: 20480          # Number of experiences to collect before updating the model
-      learning_rate: 0.0003       # Model learning rate
-      beta: 0.005                 # Strength of entropy regularization
-      epsilon: 0.2                # PPO clipping parameter
-      lambd: 0.95                 # GAE lambda
-      num_epoch: 3                # Number of gradient descent steps per batch of experiences
-      learning_rate_schedule: linear  # Schedule for the learning rate (linear or constant)
-
+      batch_size: 64
+      buffer_size: 2048
+      learning_rate: 0.0003
+      beta: 0.001
+      epsilon: 0.2
+      lambd: 0.99
+      num_epoch: 3
     network_settings:
-      normalize: true             # Normalize observations
-      hidden_units: 128           # Number of units in hidden layers
-      num_layers: 2               # Number of hidden layers
-      vis_encode_type: simple     # Type of encoder for visual observations
-
+      normalize: true
+      hidden_units: 128
+      num_layers: 2
     reward_signals:
       extrinsic:
-        strength: 1.0             # Reward signal strength
-        gamma: 0.99               # Discount factor
-
-    max_steps: 500000             # Total training steps
-    time_horizon: 64              # Number of steps in the future for reward calculation
-    summary_freq: 10000           # Frequency (in steps) of summary statistics generation
-    checkpoint_interval: 500000   # Frequency (in steps) of model checkpoint saving
+        gamma: 0.99
+        strength: 1.0
