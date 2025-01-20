@@ -95,7 +95,8 @@ LightmapSettings:
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 112000000, guid: 7d7ac09c6160ff847b1d5d42a0c00db1,
     type: 2}
-  m_LightingSettings: {fileID: 0}
+  m_LightingSettings: {fileID: 4890085278179872738, guid: 461e930a510bc0547a9d057bc7d1b77d,
+    type: 2}
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -201,7 +202,7 @@ GameObject:
   - component: {fileID: 78646253}
   - component: {fileID: 78646252}
   m_Layer: 5
-  m_Name: 100
+  m_Name: 20
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -319,6 +320,7 @@ GameObject:
   m_Component:
   - component: {fileID: 80862059}
   - component: {fileID: 80862058}
+  - component: {fileID: 80862060}
   m_Layer: 0
   m_Name: Game
   m_TagString: Untagged
@@ -352,8 +354,6 @@ MonoBehaviour:
     type: 3}
   buildingPrefab: {fileID: 3529599447628414491, guid: 7789e01f12e96704197780e34dc3fe3f,
     type: 3}
-  groundPrefab: {fileID: 1268055436598246820, guid: 3e7579e4915f23a41bbbabe96a43c7b0,
-    type: 3}
   tileSize: 15
   gridSize: 5
   junctionGap: 5
@@ -364,8 +364,7 @@ MonoBehaviour:
   buildingHeightRandomness: 2
   vehicleTypes:
   - {fileID: 11400000, guid: 86c489ece8c5ef249a23849b27f12cc7, type: 2}
-  vehicleCount: 100
-  simulationCopies: 0
+  vehicleMultiplier: 1
 --- !u!4 &80862059
 Transform:
   m_ObjectHideFlags: 0
@@ -381,6 +380,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &80862060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 80862057}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba4521d5e43302648a3a514180da98ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &176988570
 GameObject:
   m_ObjectHideFlags: 0
@@ -1076,7 +1087,7 @@ GameObject:
   - component: {fileID: 340805992}
   - component: {fileID: 340805991}
   m_Layer: 5
-  m_Name: 500
+  m_Name: 50
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1197,7 +1208,7 @@ GameObject:
   - component: {fileID: 388934051}
   - component: {fileID: 388934050}
   m_Layer: 5
-  m_Name: 25
+  m_Name: 10
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1316,6 +1327,7 @@ GameObject:
   - component: {fileID: 410087041}
   - component: {fileID: 410087040}
   - component: {fileID: 410087042}
+  - component: {fileID: 410087043}
   m_Layer: 0
   m_Name: Directional Light
   m_TagString: Untagged
@@ -1426,6 +1438,20 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
+--- !u!114 &410087043
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 410087039}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ef0cede23f5e3b4e9dee72cf054c367, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  sun: {fileID: 410087040}
+  preset: {fileID: 11400000, guid: 8ed9bb3d868a1c942965658016db7c65, type: 2}
 --- !u!1 &484049653
 GameObject:
   m_ObjectHideFlags: 0
@@ -1668,6 +1694,68 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 554313014}
   m_CullTransparentMesh: 1
+--- !u!1 &632047468
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 632047471}
+  - component: {fileID: 632047470}
+  - component: {fileID: 632047469}
+  m_Layer: 0
+  m_Name: Training
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &632047469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 632047468}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a2998ec0817931b4882e3dcddca533ca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pythonVersion: 3.10.11
+  venvPath: D:\Projects\Unity\TrafficSimTest\.venv
+  configPath: D:\Projects\Unity\TrafficSimTest\config.yaml
+  resultsPath: D:\Projects\Unity\TrafficSimTest\results
+  communicationPort: 5004
+--- !u!114 &632047470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 632047468}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f73c6d31902060d47be04e4130b2f285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &632047471
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 632047468}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &694510206
 GameObject:
   m_ObjectHideFlags: 0
@@ -2978,3 +3066,4 @@ SceneRoots:
   - {fileID: 1775242291}
   - {fileID: 55800862}
   - {fileID: 80862059}
+  - {fileID: 632047471}

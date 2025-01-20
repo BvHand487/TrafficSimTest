@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 9065041594543004678}
   - component: {fileID: 456013956897955406}
   - component: {fileID: 1091275343896150186}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Car_Model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -97,7 +97,7 @@ GameObject:
   - component: {fileID: 33653923529967460}
   - component: {fileID: 2336709030542330944}
   - component: {fileID: 2317023794370624986}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Car_Wheel_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -183,7 +183,7 @@ GameObject:
   - component: {fileID: 1563254249458021803}
   - component: {fileID: 1316513519304604247}
   - component: {fileID: 1105618062271787113}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Car_Wheel_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -269,7 +269,7 @@ GameObject:
   - component: {fileID: 4513583141771570225}
   - component: {fileID: 8550829793812987390}
   - component: {fileID: 1059862950587571135}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Car_Wheel_4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -355,7 +355,7 @@ GameObject:
   - component: {fileID: 5330436136455348196}
   - component: {fileID: 2187332538775736896}
   - component: {fileID: 7351721373610119224}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Car_Wheel_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -442,7 +442,7 @@ GameObject:
   - component: {fileID: 4433880605898370398}
   - component: {fileID: 3700535818584839501}
   - component: {fileID: 248828569074370602}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Car
   m_TagString: Vehicle
   m_Icon: {fileID: 0}
@@ -532,3 +532,6 @@ MonoBehaviour:
   preset: {fileID: 0}
   invisible: 0
   vehicleCollider: {fileID: 0}
+  upcomingJunction: {fileID: 0}
+  upcomingLight: {fileID: 0}
+  vehicleInFront: {fileID: 0}

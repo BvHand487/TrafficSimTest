@@ -1,21 +1,10 @@
-using Generation;
-using NUnit.Framework;
 using System.Collections.Generic;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
+using Unity.VisualScripting;
 using UnityEngine;
 
-public class GameManager : MonoBehaviour
+public class GameManager : SingletonMonobehaviour<GameManager>
 {
-    private static GameManager _instance = null;
-    public static GameManager Instance
-    {
-        get
-        {
-            if (_instance == null)
-                _instance = new GameManager();
-            return _instance;
-        }
-    }
+    [System.NonSerialized] public Simulation simulation;
 
     [Header("Prefabs")]
     public GameObject simulationPrefab;
@@ -25,7 +14,6 @@ public class GameManager : MonoBehaviour
     public GameObject roadCrossPrefab;
     public GameObject roadEndPrefab;
     public GameObject buildingPrefab;
-    public GameObject groundPrefab;
 
     [Header("Generation Settings")]
     [SerializeField] public float tileSize = 15f;
@@ -38,24 +26,14 @@ public class GameManager : MonoBehaviour
     [SerializeField] public float buildingHeightDecay;
     [SerializeField] public float buildingHeightRandomness = 2.0f;
 
-    [Header("Simulation Settings")]
+    [Header("Vehicle Settings")]
     [SerializeField] public List<VehiclePreset> vehicleTypes;
-    [SerializeField] public int vehicleCount;
+    [SerializeField] public float vehicleMultiplier = 0.5f;
 
-    [Header("Training Settings")]
-    [SerializeField] public int simulationCopies;
 
-    public SimulationsManager simulations;
-    public TrainingManager trainingManager;
-
-    public Clock clock;
-
-    void Awake()
+    public override void Awake()
     {
-        _instance = this;
-
-        clock = Clock.Instance;
-        simulations = new SimulationsManager();
+        base.Awake();
 
         if (PlayerPrefs.HasKey("Grid Size"))
             gridSize = PlayerPrefs.GetInt("Grid Size");
@@ -63,23 +41,16 @@ public class GameManager : MonoBehaviour
             junctionGap = PlayerPrefs.GetInt("Junction Gap");
         PlayerPrefs.DeleteAll();
 
-        Generator.Generate();
+        GameObject obj = Instantiate(simulationPrefab, Vector3.zero, Quaternion.identity);
+        obj.name = $"{simulationPrefab.name}";
+        obj.SetActive(false);
 
-
-        trainingManager = new TrainingManager();
+        simulation = obj.GetComponent<Simulation>();
+        Generation.Generation.Generate(simulation.transform);
     }
 
-    void Update()
+    private void Start()
     {
-        clock.Update();
-
-        if (Input.GetKeyDown(KeyCode.D))
-        {
-            Debug.Log("duplicate creation");
-
-            simulations.MakeCopies(1);
-
-
-        }
+        simulation.gameObject.SetActive(true);
     }
 }

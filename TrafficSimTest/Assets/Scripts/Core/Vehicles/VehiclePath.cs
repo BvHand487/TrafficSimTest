@@ -8,9 +8,15 @@ using UnityEngine;
 public class VehiclePath
 {
     public Building from, to;
+    public List<Road> roads;
+    public List<Junction> junctions;
     public List<Vector3> points;
+
     public float turnRadius;
     public int turnResolution;
+
+    private bool enteredJunction = false; 
+
 
     public VehiclePath(Building from, Building to, float turnRadius=7.5f, int turnResolution=5)
     {
@@ -19,7 +25,7 @@ public class VehiclePath
         this.turnRadius = turnRadius;
         this.turnResolution = turnResolution;
 
-        this.points = Utils.Pathfinding.FindCarPath(from, to, turnRadius, turnResolution);
+        (roads, junctions, points) = Utils.Pathfinding.FindCarPath(from, to, turnRadius, turnResolution);
     }
 
     public bool Done()
@@ -55,11 +61,32 @@ public class VehiclePath
     {
         if (points.Count > 0)
         {
+            Vector3 point = points[0];
             points.RemoveAt(0);
-            return false;
+
+            if (junctions != null && junctions.Count > 0)
+            {
+                // path has entered a junction
+                if (enteredJunction == false && junctions.First().IsPointInside(point))
+                {
+                    enteredJunction = true;
+                    return true;
+                }
+
+                // path has exited a junction
+                if (enteredJunction == true && !junctions.First().IsPointInside(point))
+                {
+                    enteredJunction = false;
+                    junctions.RemoveAt(0);
+                    roads.RemoveAt(0);
+                    return true;
+                }
+            }
+
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     public void Reverse()

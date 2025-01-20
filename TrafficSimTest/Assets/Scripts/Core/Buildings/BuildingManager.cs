@@ -5,26 +5,25 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class BuildingManager
+public class BuildingManager : MonoBehaviour
 {
-    public Simulation simulation;
+    private Simulation simulation;
+
     public List<Building> buildings;
     public Dictionary<Building.Type, List<Building>> buildingsByType;
 
-    public BuildingManager(Simulation simulation, List<Building> buildings)
+    public void Awake()
     {
-        this.simulation = simulation;
-        this.buildings = buildings;
+        simulation = GetComponent<Simulation>();
+    }
 
-        buildingsByType = new Dictionary<Building.Type, List<Building>>();
+    public void Start()
+    {
+        buildings = GetComponentsInChildren<Building>().ToList();
 
-        foreach (Building b in buildings)
-        {
-            if (!buildingsByType.ContainsKey(b.type))
-                buildingsByType.Add(b.type, new List<Building>());
-            else
-                buildingsByType[b.type].Add(b);
-        }
+        buildingsByType = buildings
+            .GroupBy(building => building.type)
+            .ToDictionary(group => group.Key, group => group.ToList());
     }
 
     public Building GetRandomBuildingByType(Building.Type type)
@@ -37,11 +36,9 @@ public class BuildingManager
         return Utils.Random.Select(buildings);
     }
 
-    public void Destroy()
+    public void OnDestroy()
     {
         foreach (Building b in buildings)
-        {
-            GameObject.Destroy(b.obj);
-        }
+            Destroy(b);
     }
 }

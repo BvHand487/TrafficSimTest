@@ -7,42 +7,43 @@ using System.Threading.Tasks;
 using UnityEngine;
 using Utils;
 
-public class VehicleManager
+public class VehicleManager : MonoBehaviour
 {
-    public Simulation simulation;
-    public List<Vehicle> vehicles;
-    public int simulatedMaxVehicles;
-    public int maxVehicles;
+    private Simulation simulation;
 
-    public float minVehicleTravelDistance = 75.0f;
-    public float turnRadius=7.5f;
-    public int turnResolution=10;
+    private int maxVehicleCount;
+    [System.NonSerialized] public int currentVehicleCount;
+    [System.NonSerialized] public int simulatedMaxVehicleCount;
 
-    public List<VehiclePreset> types;
-    public List<Vehicle> spawnQueue;
+    private float minVehicleTravelDistance = 75.0f;
+    private float minVehicleSpawnDistance = 30.0f;  // for a vehicle to spawn - there has to be no other vehicles within 30 units
+    private float turnRadius=7.5f;
+    private int turnResolution=10;
+
+    private List<VehiclePreset> types = new List<VehiclePreset>();
+
+    private List<Vehicle> spawnQueue = new List<Vehicle>();
 
     private float homeToWorkTrafficChance = 1.0f;
     private float workToHomeTrafficChance = 1.0f;
 
-    private Clock clock;
-
-    public VehicleManager(Simulation simulation, int maxVehicles=20)
+    public void Awake()
     {
-        this.simulation = simulation;
-        this.maxVehicles = maxVehicles;
+        simulation = GetComponent<Simulation>();
 
-        vehicles = new List<Vehicle>();
         types = GameManager.Instance.vehicleTypes;
-        spawnQueue = new List<Vehicle>();
+    }
 
-        clock = Clock.Instance;
+    public void Start()
+    {
+        maxVehicleCount = (int) (GameManager.Instance.vehicleMultiplier * simulation.buildingManager.buildings.Count);
     }
 
     public void Update()
     {
-        simulatedMaxVehicles = Modeling.CalculateTrafficFlowFromTime(24f * clock.GetFractionOfDay(), ref homeToWorkTrafficChance, ref workToHomeTrafficChance, maxVehicles);
+        simulatedMaxVehicleCount = Modeling.CalculateTrafficFlowFromTime(24f * Clock.Instance.GetFractionOfDay(), ref homeToWorkTrafficChance, ref workToHomeTrafficChance, maxVehicleCount);
 
-        if (vehicles.Count + spawnQueue.Count < maxVehicles)
+        if (currentVehicleCount + spawnQueue.Count < simulatedMaxVehicleCount)
         {
             SpawnVehicle();
         }
@@ -51,7 +52,7 @@ public class VehicleManager
         foreach (var vehicle in spawnQueue)
             if (CanActivateVehicle(vehicle))
             {
-                vehicles.Add(vehicle);
+                currentVehicleCount++;
                 vehicle.gameObject.SetActive(true);
                 toRemove.Add(vehicle);
             }
@@ -64,8 +65,8 @@ public class VehicleManager
     {
         VehiclePreset preset = GetRandomVehicle();
         VehiclePath path = CreatePath();
-        Vehicle vehicle = InstantiateVehicle(simulation.transform.position + path.Next(), Quaternion.identity, simulation.transform, preset);
-        vehicle.Initialize(this, preset, path);
+        Vehicle vehicle = InstantiateVehicle(simulation.transform.position + path.Next(), Quaternion.identity, preset);
+        vehicle.Initialize(preset, path);
         spawnQueue.Add(vehicle);
     }
 
@@ -76,12 +77,13 @@ public class VehicleManager
 
     private bool CanActivateVehicle(Vehicle vehicle)
     {
-        var vehicles = GameObject.FindObjectsByType(typeof(Vehicle), FindObjectsSortMode.None);
-        foreach (Vehicle v in vehicles)
-            if (v != null && v.gameObject.activeInHierarchy && Vector3.Distance(v.transform.localPosition, vehicle.transform.localPosition) < 30.0f)
-                return false;
+        // TODO: change 1 << 6, which is the vehicle layer
+        Collider[] hits = Physics.OverlapSphere(vehicle.transform.position, minVehicleSpawnDistance, 1 << 6);
 
-        return true;
+        if (hits.Length == 0)
+            return true;
+        else
+            return false;
     }
 
     private VehiclePath CreatePath()
@@ -111,7 +113,7 @@ public class VehicleManager
             start = simulation.buildingManager.GetRandomBuilding();
             end = simulation.buildingManager.GetRandomBuilding();
         }
-        while (Vector3.Distance(start.obj.transform.localPosition, end.obj.transform.localPosition) < minVehicleTravelDistance);
+        while (Vector3.Distance(start.transform.localPosition, end.transform.localPosition) < minVehicleTravelDistance);
 
         return new VehiclePath(start, end, turnRadius, turnResolution);
     }
@@ -125,35 +127,22 @@ public class VehicleManager
             start = simulation.buildingManager.GetRandomBuildingByType(Building.Type.Home);
             end = simulation.buildingManager.GetRandomBuildingByType(Building.Type.Work);
         }
-        while (Vector3.Distance(start.obj.transform.localPosition, end.obj.transform.localPosition) < minVehicleTravelDistance);
+        while (Vector3.Distance(start.transform.localPosition, end.transform.localPosition) < minVehicleTravelDistance);
 
         return new VehiclePath(start, end, turnRadius, turnResolution);
     }
 
-    public Vehicle InstantiateVehicle(Vector3 pos, Quaternion rot, Transform parent, VehiclePreset preset)
+    public Vehicle InstantiateVehicle(Vector3 pos, Quaternion rot, VehiclePreset preset)
     {
-        var obj = GameObject.Instantiate(preset.prefab, pos, rot, parent);
+        var obj = GameObject.Instantiate(preset.prefab, pos, rot, transform);
         obj.SetActive(false);
         obj.name = preset.prefab.name;
         return obj.GetComponent<Vehicle>();
     }
 
-    public TrafficLight GetTrafficLight(Vehicle vehicle, Junction junction)
+    public void OnDestroy()
     {
-        var map = junction.trafficController.trafficLightDict;
-        return map[Utils.Math.GetClosestVector(vehicle.transform.localPosition, map.Keys.ToList())];
-    }
-
-    public void DestroyVehicle(Vehicle vehicle)
-    {
-        vehicles.Remove(vehicle);
-    }
-
-    public void Destroy()
-    {
-        foreach (Vehicle vehicle in vehicles)
-        {
-            GameObject.Destroy(vehicle.gameObject);
-        }
+        foreach (Vehicle vehicle in FindObjectsByType<Vehicle>(FindObjectsSortMode.None))
+            Destroy(vehicle);
     }
 }

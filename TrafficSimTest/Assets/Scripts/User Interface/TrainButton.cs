@@ -13,7 +13,6 @@ public class TrainButton : MonoBehaviour
     private TextMeshProUGUI trainText;
 
     private bool isTraining = false;
-    private TrainingManager trainingManager;
 
     void Start()
     {
@@ -21,8 +20,6 @@ public class TrainButton : MonoBehaviour
         trainText = GetComponentInChildren<TextMeshProUGUI>();
 
         button.onClick.AddListener(() => ToggleTraining());
-
-        trainingManager = GameManager.Instance.trainingManager;
     }
 
     void Update()
@@ -40,12 +37,12 @@ public class TrainButton : MonoBehaviour
         if (isTraining)
         {
             trainText.text = stopTrainString;
-            trainingManager.StartTraining();
+            TrainingManager.Instance.StartTraining();
         }
         else
         {
             trainText.text = trainString;
-            trainingManager.StopTraining();
+            TrainingManager.Instance.StopTraining();
         }
     }
 }

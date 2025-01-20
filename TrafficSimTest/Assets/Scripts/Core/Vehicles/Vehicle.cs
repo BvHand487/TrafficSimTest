@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,7 +18,7 @@ public abstract class Vehicle : MonoBehaviour
     };
     public Status status { get; private set; }
 
-    public VehicleManager vehicleManager;
+    private VehicleManager vehicleManager;
 
     public VehiclePreset preset;
 
@@ -28,129 +29,222 @@ public abstract class Vehicle : MonoBehaviour
 
     protected float velocity;
     protected float acceleration;
+    protected float distanceThisFrame;
 
-    public bool invisible;
-    public Collider vehicleCollider;
+    public bool hasAddedToQueue = false;
+    public BoxCollider vehicleCollider;
 
-    public void Initialize(VehicleManager vehicleManager, VehiclePreset preset, VehiclePath path)
+    public void Awake()
     {
-        this.vehicleManager = vehicleManager;
+        vehicleManager = GetComponentInParent<VehicleManager>();
+        vehicleCollider = GetComponent<BoxCollider>();
+
+        bumperOffset = GetBumperOffset();
+    }
+
+    public void Initialize(VehiclePreset preset, VehiclePath path)
+    {
         this.preset = preset;
         this.path = path;
         this.status = Status.DRIVING;
     }
 
-    protected void Start()
-    {
-        bumperOffset = GetBumperOffset();
-        vehicleCollider = GetComponent<Collider>();
-    }
-
-    private void FixedUpdate()
+    private void Update()
     {
         if (path.Done())
         {
-            vehicleManager.DestroyVehicle(this);
+            vehicleManager.currentVehicleCount--;
             Destroy(gameObject);
             return;
         }
 
         bumperPosition = transform.localPosition + transform.TransformVector(bumperOffset);
+
+        currentRoad = path.roads.First();
+        upcomingJunction = path.junctions?.FirstOrDefault();
+        upcomingLight = upcomingJunction?.trafficController.lights.Find(tl => tl.road == currentRoad);
+
         HandleVehicle();
     }
-
-    private bool CheckObstacle(out RaycastHit hit)
-    {
-        if (invisible)
-        {
-            hit = default(RaycastHit);
-            return false;
-        }
-
-        return Physics.Raycast(bumperPosition, transform.forward, out hit, preset.lookAheadDistance);
-    }
-
-    TrafficLight tlight;
 
     private void HandleVehicle()
     {
         velocity = preset.maxVelocity;
-        float distanceThisFrame = CalculateDistanceThisFrame();
+        distanceThisFrame = CalculateDistanceThisFrame();
 
         while (distanceThisFrame > 0 && !path.Done())
         {
             status = Status.DRIVING;
             velocity = preset.maxVelocity;
 
-            // obstacle
-            if (CheckObstacle(out RaycastHit hit))
-            {
-                float trueDistance = hit.distance - preset.stoppedGapDistance;
-
-                if (trueDistance <= 0f)
-                {
-                    if (hit.collider.CompareTag("Junction"))
-                    {
-                        Junction junction = vehicleManager.simulation.junctionsDict[hit.collider.gameObject];
-                        TrafficLight trafficLight = vehicleManager.GetTrafficLight(this, junction);
-                        tlight = trafficLight;
-
-                        if (junction.type == Junction.Type.Lights)
-                        {
-                            if (trafficLight.GetStatus() != TrafficLight.Status.Green)
-                            {
-                                status = Status.WAITING_RED;
-                                tlight.AddVehicleToQueue(this);
-                                velocity = 0.0f;
-                            }
-                            else
-                            {
-                                tlight.queue.Clear();
-                            }
-                        }
-                        
-                        if (IsJunctionExitBlocked(junction))
-                        {
-                            status = Status.WAITING_CAR;
-                            velocity = 0.0f;
-                        }
-                    }
-
-                    if (hit.collider.CompareTag("Vehicle"))
-                    {
-                        Vehicle vehicleInFront = hit.collider.GetComponent<Vehicle>();
-
-                        velocity = 0.0f;
-                        status = vehicleInFront.status;
-
-                        if (status == Status.WAITING_RED)
-                        {
-                            tlight = vehicleInFront.tlight;
-                            tlight.AddVehicleToQueue(this);
-                        }
-                    }
-                }
-            }
-
             Vector3 nextPoint = path.Next();
             float distanceToNext = Vector3.Distance(transform.localPosition, nextPoint);
 
+            transform.LookAt(nextPoint);
+
             if (distanceThisFrame >= distanceToNext)
             {
-                transform.localPosition = nextPoint;
                 path.Advance();
                 distanceThisFrame -= distanceToNext;
+
+                // handle junction
+                if (upcomingJunction != null)
+                {
+                    switch (upcomingJunction.type)
+                    {
+                        case Junction.Type.Stops:
+                            break;
+
+                        case Junction.Type.Lights:
+                            // stop at light instead of potentially skipping it
+                            if (upcomingLight.status != TrafficLight.Status.Green && Vector3.Distance(bumperPosition, upcomingLight.transform.position + bumperOffset.y * Vector3.up) <= distanceToNext)
+                            {
+                                if (!hasAddedToQueue)
+                                {
+                                    upcomingLight.queueLength++;
+                                    hasAddedToQueue = true;
+                                }
+
+                                transform.localPosition = upcomingLight.transform.position;
+                                status = Status.WAITING_RED;
+                                velocity = 0f;
+                                continue;
+                            }
+                            else if (upcomingLight.status == TrafficLight.Status.Green)
+                            {
+                                if (hasAddedToQueue)
+                                {
+                                    upcomingLight.queueLength = 0;
+                                    hasAddedToQueue = false;
+                                }
+                            }
+                            break;
+                    }
+                }
+
+                // vehicle
+                if (vehicleInFront != null)
+                {
+                    if (Vector3.Distance(transform.position, vehicleInFront.transform.position) <= preset.stoppedGapDistance + vehicleCollider.size.z)
+                    {
+                        velocity = 0f;
+                    }
+                }
+
+                transform.localPosition = nextPoint;
             }
             else
             {
-                Vector3 direction = (nextPoint - transform.localPosition).normalized;
-                transform.localPosition += direction * velocity * Time.deltaTime;
+                distanceThisFrame -= distanceToNext;
 
-                Vector3 lookDirection = CalculateLookDirection();
-                transform.localRotation = CalculateRotation(lookDirection);
-                distanceThisFrame = 0;
+                // handle junction
+                if (upcomingJunction != null)
+                {
+                    switch (upcomingJunction.type)
+                    {
+                        case Junction.Type.Stops:
+                            break;
+
+                        case Junction.Type.Lights:
+                            // stop at light instead of potentially skipping it
+                            if (upcomingLight.status != TrafficLight.Status.Green && Vector3.Distance(bumperPosition, upcomingLight.transform.position + bumperOffset.y * Vector3.up) <= preset.stoppedGapDistance)
+                            {
+                                if (!hasAddedToQueue)
+                                {
+                                    upcomingLight.queueLength++;
+                                    hasAddedToQueue = true;
+                                }
+
+                                status = Status.WAITING_RED;
+                                velocity = 0f;
+                                continue;
+                            }
+                            else if (upcomingLight.status == TrafficLight.Status.Green)
+                            {
+                                if (hasAddedToQueue)
+                                {
+                                    upcomingLight.queueLength = 0;
+                                    hasAddedToQueue = false;
+                                }
+                            }
+                            break;
+                    }
+                }
+
+                // vehicle
+                if (vehicleInFront != null)
+                {
+                    if (Vector3.Distance(transform.position, vehicleInFront.transform.position) <= preset.stoppedGapDistance + vehicleCollider.size.z)
+                    {
+                        velocity = 0f;
+                    }
+                }
+
+                Vector3 nextPointDirection = (nextPoint - transform.localPosition).normalized;
+                transform.localPosition += nextPointDirection * velocity * Time.deltaTime;
             }
         }
+    }
+
+    public Road currentRoad;
+    public Junction upcomingJunction;
+    public TrafficLight upcomingLight;
+
+    public Vehicle vehicleInFront;
+
+    public void HandleObstacle()
+    {
+        // handle junction
+        if (upcomingJunction != null)
+        {
+            switch (upcomingJunction.type)
+            {
+                case Junction.Type.Stops:
+                    break;
+
+                case Junction.Type.Lights:
+
+                    if (upcomingLight != null)
+                    {
+                        if (upcomingLight.status != TrafficLight.Status.Green && Vector3.Distance(bumperPosition, upcomingLight.transform.position + bumperOffset.y * Vector3.up) <= preset.stoppedGapDistance)
+                            velocity = 0f;
+                    }
+
+                    break;
+            }
+        }
+
+        // vehicle
+        if (vehicleInFront != null)
+        {
+            if (Vector3.Distance(transform.position, vehicleInFront.transform.position) <= preset.stoppedGapDistance + vehicleCollider.size.z)
+            {
+                velocity = 0f;
+            }
+        }
+    }
+
+    public virtual void OnDrawGizmos()
+    {
+        // Gizmos.color = new Color(0f, 0f, 1f);
+        // for (int i = 0; i < path.roads.Count; ++i)
+        // {
+        //     Handles.Label(path.roads[i].path.First() + Vector3.up, $"{i}");
+        //     Gizmos.DrawLineStrip(path.roads[i].path.Select(p => p + Vector3.up).ToArray(), false);
+        // }
+
+        // Gizmos.color = new Color(0f, 1f, 1f);
+        // for (int i = 0; i < path.junctions.Count; ++i)
+        // {
+        //     Handles.Label(path.junctions[i].transform.position + Vector3.up, $"{i}");
+        //     Gizmos.DrawSphere(path.junctions[i].transform.position + Vector3.up, 0.5f);
+        // }
+    }
+
+    public static bool AreLookingAtEachother(Vehicle v1, Vehicle v2)
+    {
+        return Vector3.Dot(v1.transform.forward, v2.transform.forward) <= -0.95 &&
+            Vector3.Distance(v1.transform.position, v2.transform.position) <= 10f;
     }
 
     private bool IsJunctionExitBlocked(Junction junction)
@@ -170,8 +264,8 @@ public abstract class Vehicle : MonoBehaviour
                 Vector3 b = path.Next(i);
                 Vector3 dir = (b - a).normalized;
 
-                if (Mathf.Abs(Vector3.Dot(dir, Vector3.right)) > 0.99f ||
-                    Mathf.Abs(Vector3.Dot(dir, Vector3.forward)) > 0.99f)
+                if (Mathf.Abs(Vector3.Dot(dir, Vector3.right)) > 0.999f ||
+                    Mathf.Abs(Vector3.Dot(dir, Vector3.forward)) > 0.999f)
                 {
                     Vector3 right = -Vector3.Cross(dir, Vector3.up);
 
@@ -180,29 +274,12 @@ public abstract class Vehicle : MonoBehaviour
                         (Vector3.up * bumperOffset.y) +
                         (dir * bumperOffset.z);
 
-                    return Physics.Raycast(junction.obj.transform.position + worldBumperOffset - dir, dir, GameManager.Instance.tileSize);
+                    return Physics.Raycast(junction.transform.position + worldBumperOffset - dir, dir, GameManager.Instance.tileSize, 1 << 6);
                 }
             }
         }
 
         return false;
-    }
-
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Junction"))
-        {
-            invisible = true;
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Junction"))
-        {
-            invisible = false;
-        }
     }
 
     public abstract Vector3 GetBumperOffset();

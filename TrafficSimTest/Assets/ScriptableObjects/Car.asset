@@ -16,5 +16,5 @@ MonoBehaviour:
   maxVelocity: 25
   accelerationRate: 5
   decelerationRate: 10
-  lookAheadDistance: 3
-  stoppedGapDistance: 20
+  lookAheadDistance: 20
+  stoppedGapDistance: 2

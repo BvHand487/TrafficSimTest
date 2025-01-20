@@ -3,21 +3,10 @@ using UnityEngine;
 
 
 // Singleton class representing time in the simulation
-public class Clock
+public class Clock : SingletonMonobehaviour<Clock>
 {
-    private static Clock _instance = null;
-    public static Clock Instance
-    {
-        get
-        {
-            if (_instance == null)
-                _instance = new Clock();
-            return _instance;
-        }
-    }
-
     public DateTime datetime { get; private set; }
-    private static readonly float clockRatio = 24;
+    private static readonly float clockRatio = 4 * 24;
 
     public float timeScale
     {
@@ -33,9 +22,11 @@ public class Clock
     }
     private float prevTimeScale;
 
-    private Clock()
+    public override void Awake()
     {
-        datetime = DateTime.Now;
+        base.Awake();
+
+        datetime = DateTime.Today;
         prevTimeScale = 1.0f;
         timeScale = 1.0f;
     }
@@ -55,11 +46,6 @@ public class Clock
         
         if (!isPaused && timeScale == 0f)
             Time.timeScale = prevTimeScale;
-    }
-
-    public string GetFormattedDatetime(string format)
-    {
-        return datetime.ToString(format, new System.Globalization.CultureInfo("en-US"));
     }
 
     public float GetFractionOfDay()

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Generation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,24 +7,58 @@ using System.Threading.Tasks;
 using Unity.MLAgents.Policies;
 using UnityEngine;
 
-public class TrainingManager
+public class TrainingManager : SingletonMonobehaviour<TrainingManager>
 {
-    public List<TrafficLightAgent> agents;
-    public List<BehaviorParameters> behaviours;
+    private List<TrafficLightAgent> agents;
+    private List<BehaviorParameters> behaviours;
+    private string trainingId;
 
-    public TrainingManager()
+    private PythonBackendManager pythonBackend;
+
+    public override void Awake()
+    {
+        base.Awake();
+
+        pythonBackend = PythonBackendManager.Instance;
+    }
+
+    public void Start()
+    {
+        LoadAgents();
+        LoadBehaviours();
+
+        if (enabled && pythonBackend.enabled)
+            trainingId = pythonBackend.StartMLAgents();
+    }
+
+    private void OnApplicationQuit()
+    {
+        if (pythonBackend.IsMLAgentsRunning())
+            pythonBackend.StopMLAgents();
+    }
+
+    public void LoadAgents()
     {
         agents = new List<TrafficLightAgent>();
-        behaviours = new List<BehaviorParameters>();
 
-        GameObject[] junctions = GameObject.FindGameObjectsWithTag("Junction"); 
+        GameObject[] junctions = GameObject.FindGameObjectsWithTag("Junction");
         foreach (var j in junctions)
         {
-            var agent = j.GetComponent<TrafficLightAgent>();
-            agent.SetTraining(false);
+            var agent = j.GetComponentInChildren<TrafficLightAgent>();
+            agent.enabled = false;
             agents.Add(agent);
-            
-            var behaviour = j.GetComponent<BehaviorParameters>();
+        }
+    }
+
+    public void LoadBehaviours()
+    {
+        behaviours = new List<BehaviorParameters>();
+
+        GameObject[] junctions = GameObject.FindGameObjectsWithTag("Junction");
+        foreach (var j in junctions)
+        {
+            var behaviour = j.GetComponentInChildren<BehaviorParameters>();
+            behaviour.enabled = false;
             behaviour.BehaviorType = BehaviorType.Default;
             behaviours.Add(behaviour);
         }
@@ -33,7 +68,7 @@ public class TrainingManager
     {
         foreach (var a in agents)
         {
-            a.SetTraining(true);
+            a.enabled = true;
         }
     }
 
@@ -41,7 +76,7 @@ public class TrainingManager
     {
         foreach (var a in agents)
         {
-            a.SetTraining(false);
+            a.enabled = false;
         }
     }
 

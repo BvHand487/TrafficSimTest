@@ -14,6 +14,6 @@ public class DatetimeText : MonoBehaviour
 
     void Update()
     {
-        datetimeText.text = clock.GetFormattedDatetime("dd MMM yyyy HH:mm:ss");
+        datetimeText.text = string.Format("{0:dd MMM yyyy HH:mm:ss}", clock.datetime);
     }
 }

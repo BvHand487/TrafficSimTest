@@ -2,7 +2,7 @@
 using System.Linq;
 using UnityEngine;
 
-public class Building
+public class Building : MonoBehaviour
 {
     public enum Type
     {
@@ -10,34 +10,42 @@ public class Building
         Home,
         Work
     }
-
-    public Type type { get; private set; }
-    public GameObject obj;
+    public Type type;
     public Dictionary<Road, Vector3> spawnPoints = new Dictionary<Road, Vector3>();
     public Junction closestJunction;
 
-    public Building(GameObject obj)
+    private Simulation simulation;
+    private BuildingManager buildingManager;
+
+    private MeshRenderer meshRenderer;
+
+    public void Awake()
     {
-        this.obj = obj;
+        simulation = GetComponentInParent<Simulation>();
+        buildingManager = GetComponentInParent<BuildingManager>();
+
+        meshRenderer = GetComponentInChildren<MeshRenderer>();
     }
 
-    public void Initialize(Type type = Type.None)
+    public void OnEnable()
     {
-        this.type = type;
+        float halfSize = 0.5f * (simulation.transform.GetChild(0).localScale.x - GameManager.Instance.tileSize);
+        float maxDistance = Mathf.Sqrt(2f) * halfSize;
 
-        var mat = obj.GetComponentInChildren<Renderer>().material;
+        type = Utils.Modeling.ChooseRandomBuildingType(transform.position.magnitude / maxDistance);
+
         switch (type)
         {
             case Type.Home:
-                mat.color = Color.green;
+                meshRenderer.material.color = Color.green;
                 break;
 
             case Type.Work:
-                mat.color = Color.cyan;
+                meshRenderer.material.color = Color.cyan;
                 break;
 
             default:
-                mat.color = Color.black;
+                meshRenderer.material.color = Color.black;
                 break;
         }
 
@@ -64,8 +72,8 @@ public class Building
             Vector3 spawnPos = b.spawnPoints[road];
 
             // If junctionStart is closer to the building than junctionEnd
-            if (Vector3.Distance(spawnPos, road.junctionStart.obj.transform.position) <=
-                Vector3.Distance(spawnPos, road.junctionEnd.obj.transform.position))
+            if (Vector3.Distance(spawnPos, road.junctionStart.transform.position) <=
+                Vector3.Distance(spawnPos, road.junctionEnd.transform.position))
                 return road.junctionStart;
             else
                 return road.junctionEnd;

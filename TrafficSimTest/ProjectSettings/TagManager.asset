@@ -10,6 +10,8 @@ TagManager:
   - Simulation
   - End
   - Road
+  - TrafficLight
+  - Building
   layers:
   - Default
   - TransparentFX
@@ -17,7 +19,7 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - Vehicle
   - 
   - 
   - 

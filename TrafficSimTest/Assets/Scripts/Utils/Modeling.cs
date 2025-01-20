@@ -38,7 +38,7 @@ namespace Utils
 
         public static Building.Type ChooseRandomBuildingType(float normDistance)
         {
-            if (Utils.Math.NormalDistribution(normDistance, 0.32f) > UnityEngine.Random.value)
+            if (Math.NormalDistribution(normDistance, 0.32f) > UnityEngine.Random.value)
                 return Building.Type.Work;
             else
                 return Building.Type.Home;

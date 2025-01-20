@@ -96,10 +96,10 @@ public class Selection : MonoBehaviour
     {
         if (selectedVehicle != null)
         {
-            var meshRenderer = selectedVehicle.path.from.obj.GetComponentInChildren<MeshRenderer>();
+            var meshRenderer = selectedVehicle.path.from.GetComponentInChildren<MeshRenderer>();
             meshRenderer.materials = new Material[] { meshRenderer.materials[0] };
 
-            meshRenderer = selectedVehicle.path.to.obj.GetComponentInChildren<MeshRenderer>();
+            meshRenderer = selectedVehicle.path.to.GetComponentInChildren<MeshRenderer>();
             meshRenderer.materials = new Material[] { meshRenderer.materials[0] };
         }
         selectedVehicle = null;
@@ -121,7 +121,7 @@ public class Selection : MonoBehaviour
 
     void SelectBuilding(Building building)
     {
-        var meshRenderer = building.obj.GetComponentInChildren<MeshRenderer>();
+        var meshRenderer = building.GetComponentInChildren<MeshRenderer>();
 
         List<Material> mats = meshRenderer.materials.ToList();
 

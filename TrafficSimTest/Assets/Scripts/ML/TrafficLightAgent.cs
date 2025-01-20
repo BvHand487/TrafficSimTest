@@ -9,38 +9,19 @@ using UnityEngine.Rendering;
 
 public class TrafficLightAgent : Agent
 {
-    public Simulation simulation;
-    public TrafficController trafficController;
-    public bool isTrainingEnabled = false;
-    public bool isInitialized = false;
+    private TrafficController trafficController;
 
-    public void SetTraining(bool isTraining)
+    protected override void Awake()
     {
-        isTrainingEnabled = isTraining;
-    }
+        base.Awake();
 
-    public override void Initialize()
-    {
-        StartCoroutine(DelayedInitialize());
-    }
+        trafficController = GetComponent<TrafficController>();
 
-    private IEnumerator DelayedInitialize()
-    {
-        while (GameManager.Instance.simulations?.simulation?.junctionsDict?[gameObject]?.trafficController is null)
-        {
-            yield return null;
-        }
-
-        simulation = GameManager.Instance.simulations.simulation;
-        trafficController = simulation.junctionsDict[gameObject].trafficController;
-        isInitialized = true;
+        enabled = false;
     }
 
     public override void OnEpisodeBegin()
     {
-        if (!isInitialized)
-            return;
-
         trafficController.ResetLights();
     }
 
@@ -53,10 +34,10 @@ public class TrafficLightAgent : Agent
     public override void CollectObservations(VectorSensor sensor)
     {
         // Current max vehicles on the road
-        sensor.AddObservation(trafficController.junction.simulation.vehicleManager.simulatedMaxVehicles);
+        sensor.AddObservation(trafficController.junction.simulation.vehicleManager.simulatedMaxVehicleCount);
 
         // Lights status (0: red, 1: green)
-        sensor.AddObservation(trafficController.lights.Select(l => l.GetStatus() == TrafficLight.Status.Green ? 1f : 0f).ToList());
+        sensor.AddObservation(trafficController.lights.Select(l => l.status == TrafficLight.Status.Green ? 1f : 0f).ToList());
         if (trafficController.lights.Count == 3)
             sensor.AddObservation(0f); // Dummy value for 3-way junctions
 
@@ -67,7 +48,7 @@ public class TrafficLightAgent : Agent
         //sensor.AddObservation(trafficController.lights.Select(l => (float) l.queue.Count()).ToList());
 
         // Get vehicles waiting at the junction right now
-        sensor.AddObservation(trafficController.lights.Select(l => (float) l.queue.Count()).Sum());
+        sensor.AddObservation(trafficController.lights.Select(l => (float) l.queueLength).Sum());
 
         // Current lights mode (0: single, 1: double)
         if (trafficController.mode == TrafficController.Mode.Single)
@@ -83,9 +64,6 @@ public class TrafficLightAgent : Agent
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        //if (!isTrainingEnabled)
-        //    return;
-
         // Define the min, max green interval duration and step size
         float minGreenInterval = 5.0f;
         float maxGreenInterval = 30.0f;

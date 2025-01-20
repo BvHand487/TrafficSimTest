@@ -8,7 +8,7 @@ namespace Utils
 {
     public static class Pathfinding
     {
-        public static List<Vector3> FindCarPath(Building start, Building end, float radius, int resolution)
+        public static (List<Road>, List<Junction>, List<Vector3>) FindCarPath(Building start, Building end, float radius, int resolution)
         {
             List<Road> commonRoads = start.spawnPoints.Keys.Intersect(end.spawnPoints.Keys).ToList();
 
@@ -38,7 +38,7 @@ namespace Utils
                 var buildingExitPoint = start.spawnPoints[roadEnds.First()];
 
                 List<Vector3> startToRoadPath = new List<Vector3>();
-                startToRoadPath.Add(start.obj.transform.position);
+                startToRoadPath.Add(start.transform.position);
 
                 var pathToStartJunction = roadEnds.First().SplitPath(junctionPath.First(), buildingExitPoint);
                 if (!pathToStartJunction.Contains(buildingExitPoint))
@@ -61,22 +61,26 @@ namespace Utils
                     pathToEndJunction.Reverse();
 
                 endToRoadPath.AddRange(pathToEndJunction);
-                endToRoadPath.Add(end.obj.transform.position);
+                endToRoadPath.Add(end.transform.position);
 
                 path.InsertRange(0, startToRoadPath);
                 path.AddRange(endToRoadPath);
 
-                return Math.SmoothVectorPath(path, radius, resolution);
+                var roadPath = JunctionToRoadPath(junctionPath);
+                roadPath.Insert(0, roadEnds.First());
+                roadPath.Add(roadEnds.Last());
+
+                return (roadPath, junctionPath, Math.SmoothVectorPath(path, radius, resolution));
             }
             else
             {
                 Road commonRoad = commonRoads.First();
 
-                Vector3 roadStart = Utils.Random.Select(start.spawnPoints.Values.Where(p => commonRoad.IsOnRoadPath(p)));
-                Vector3 roadEnd = Utils.Random.Select(end.spawnPoints.Values.Where(p => commonRoad.IsOnRoadPath(p)));
+                Vector3 roadStart = Random.Select(start.spawnPoints.Values.Where(p => commonRoad.IsOnRoadPath(p)));
+                Vector3 roadEnd = Random.Select(end.spawnPoints.Values.Where(p => commonRoad.IsOnRoadPath(p)));
 
                 List<Vector3> startToEndPath = new List<Vector3>();
-                startToEndPath.Add(start.obj.transform.position);
+                startToEndPath.Add(start.transform.position);
 
                 var roadToRoadPath = commonRoad.SplitPath(roadStart, roadEnd);
                 
@@ -90,9 +94,9 @@ namespace Utils
                     roadToRoadPath.Reverse();
 
                 startToEndPath.AddRange(roadToRoadPath);
-                startToEndPath.Add(end.obj.transform.position);
+                startToEndPath.Add(end.transform.position);
 
-                return Math.SmoothVectorPath(startToEndPath, radius, resolution);
+                return (new List<Road> { commonRoad }, null, Math.SmoothVectorPath(startToEndPath, radius, resolution));
             }
         }
 
@@ -155,7 +159,7 @@ namespace Utils
         // Heuristic function: Straight-line distance between two junctions
         private static float Heuristic(Junction a, Junction b)
         {
-            return Junction.GetCommonRoad(a, b)?.length ?? Vector3.Distance(a.obj.transform.localPosition, b.obj.transform.localPosition);
+            return Junction.GetCommonRoad(a, b)?.length ?? Vector3.Distance(a.transform.localPosition, b.transform.localPosition);
         }
 
         // Reconstructs the path from end to start by tracing the cameFrom dictionary
@@ -178,7 +182,21 @@ namespace Utils
 
         public static List<Vector3> DiscretizeJunction(Junction junction)
         {
-            return new List<Vector3> { junction.obj.transform.position };
+            return new List<Vector3> { junction.transform.position };
+        }
+
+        public static List<Road> JunctionToRoadPath(List<Junction> junctionPath)
+        {
+            List<Road> roadPath = new List<Road>();
+
+            for (int i = 0; i < junctionPath.Count - 1; ++i)
+            {
+                var road = Junction.GetCommonRoad(junctionPath[i], junctionPath[i + 1]);
+                if (road != null)
+                    roadPath.Add(road);
+            }
+
+            return roadPath;
         }
 
         public static List<Vector3> JunctionToVectorPath(List<Junction> junctionPath)
@@ -190,15 +208,15 @@ namespace Utils
             for (int i = 0; i < junctionPath.Count - 1; ++i)
             {
                 nextRoad = Junction.GetCommonRoad(junctionPath[i], junctionPath[i + 1]);
-                if (Vector3.Distance(junctionPath[i].obj.transform.localPosition, nextRoad.path.First()) >
-                    Vector3.Distance(junctionPath[i + 1].obj.transform.localPosition, nextRoad.path.First()))
+                if (Vector3.Distance(junctionPath[i].transform.localPosition, nextRoad.path.First()) >
+                    Vector3.Distance(junctionPath[i + 1].transform.localPosition, nextRoad.path.First()))
                     nextRoad.path.Reverse();
 
                 vectorPath.AddRange(DiscretizeJunction(junctionPath[i]));
                 vectorPath.AddRange(DiscretizeRoad(nextRoad));
             }
 
-            vectorPath.Add(junctionPath.Last().obj.transform.position);
+            vectorPath.Add(junctionPath.Last().transform.position);
             return vectorPath;
         }
     }

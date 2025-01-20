@@ -54,5 +54,35 @@ namespace Generation
                 if (visited[n.coords.x, n.coords.y] == false)
                     FindAllTiles(n, tiles, visited);
         }
+
+        // DFS algorithm that finds all neighbouring road tiles so that it can create a Road object
+        public static void GetFullRoad(GridTile current, List<GridTile> road, List<GridTile> junctions, List<GridTile> buildings, bool[,] visited)
+        {
+            if (current == null || !current.IsValidTile())
+                return;
+
+            if (current.type == GridTile.Type.Junction)
+            {
+                junctions.Add(current);
+                return;
+            }
+
+            if (current.type == GridTile.Type.Building)
+            {
+                buildings.Add(current);
+                return;
+            }
+
+            if (visited[current.coords.x, current.coords.y]) return;
+            visited[current.coords.x, current.coords.y] = true;
+
+            road.Add(current);
+
+            current.ForNeighbours(neighbour =>
+            {
+                if (neighbour.IsValidTile() && current.CanConnectThroughRoad(current.GetDirectionToTile(neighbour), neighbour) || neighbour.type == GridTile.Type.Building)
+                    GetFullRoad(neighbour, road, junctions, buildings, visited);
+            });
+        }
     }
 }

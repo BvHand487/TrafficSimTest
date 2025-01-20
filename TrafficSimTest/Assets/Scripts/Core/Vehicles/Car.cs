@@ -10,8 +10,10 @@ public class Car : Vehicle
         return new Vector3(boxCollider.center.x, boxCollider.center.y, boxCollider.center.z + boxCollider.size.z / 2) + 0.01f * transform.forward;
     }
 
-    void OnDrawGizmos()
+    public override void OnDrawGizmos()
     {
+        base.OnDrawGizmos();
+
         // car status check
         switch (status)
         {
