@@ -47,6 +47,8 @@ public class TrafficController : MonoBehaviour
             }
 
             lights[i].road = closestRoad;
+            lights[i].roadDirection = Utils.Math.GetClosestVector(junction.transform.position, closestRoad.path) - junction.transform.position;
+            lights[i].roadDirection.Normalize();
         }
     }
 

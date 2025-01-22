@@ -1,10 +1,7 @@
-using Generation;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.Burst.CompilerServices;
-using Unity.VisualScripting;
+using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -12,6 +9,7 @@ public class Selection : MonoBehaviour
 {
     private Camera cam;
 
+    private TextMeshPro timeWaitingText;
     private LineRenderer pathRenderer;
     private int pathLength;
 
@@ -19,15 +17,12 @@ public class Selection : MonoBehaviour
     public Material selectionMaterial;
 
     private Vehicle selectedVehicle;
-    // private MeshRenderer vehicleFromBuildingRenderer = default;
-    // private MeshRenderer vehicleToBuildingRenderer = default;
-    //private Junction selectedJunction;
-
 
     void Start()
     {
         cam = GetComponent<Camera>();
         pathRenderer = GetComponent<LineRenderer>();
+        // timeWaitingText = GetComponent<TextMeshPro>();
     }
 
 
@@ -104,7 +99,7 @@ public class Selection : MonoBehaviour
         }
         selectedVehicle = null;
         pathRenderer.positionCount = 0;
-
+        // timeWaitingText.text = "";
         //selectedJunction = null;
     }
 
@@ -113,6 +108,7 @@ public class Selection : MonoBehaviour
         selectedVehicle = vehicle;
         pathLength = selectedVehicle.path.Length();
         pathRenderer.positionCount = pathLength + 1;
+        // timeWaitingText.text = "Time waiting: " + string.Format("{0:00}", selectedVehicle.timeWaiting);
 
         UpdateLineRenderer();
         SelectBuilding(selectedVehicle.path.from);

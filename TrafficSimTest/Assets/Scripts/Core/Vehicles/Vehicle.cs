@@ -31,7 +31,8 @@ public abstract class Vehicle : MonoBehaviour
     protected float acceleration;
     protected float distanceThisFrame;
 
-    public bool hasAddedToQueue = false;
+    public float timeWaiting = 0f;
+    public bool stoppedAtRed = false;
     public BoxCollider vehicleCollider;
 
     public void Awake()
@@ -51,6 +52,13 @@ public abstract class Vehicle : MonoBehaviour
 
     private void Update()
     {
+        // do nothing while waiting on red
+        if (stoppedAtRed == true && upcomingLight.status != TrafficLight.Status.Green)
+        {
+            timeWaiting += Time.deltaTime;
+            return;
+        }
+
         if (path.Done())
         {
             vehicleManager.currentVehicleCount--;
@@ -99,23 +107,31 @@ public abstract class Vehicle : MonoBehaviour
                             // stop at light instead of potentially skipping it
                             if (upcomingLight.status != TrafficLight.Status.Green && Vector3.Distance(bumperPosition, upcomingLight.transform.position + bumperOffset.y * Vector3.up) <= distanceToNext)
                             {
-                                if (!hasAddedToQueue)
+                                if (!stoppedAtRed)
                                 {
+                                    stoppedAtRed = true;
                                     upcomingLight.queueLength++;
-                                    hasAddedToQueue = true;
+                                    timeWaiting = 0f;
                                 }
 
-                                transform.localPosition = upcomingLight.transform.position;
+                                Vector3 worldBumperOffset =
+                                    (Vector3.Cross(Vector3.up, upcomingLight.roadDirection) * bumperOffset.x) +
+                                    (Vector3.up * bumperOffset.y) +
+                                    (upcomingLight.roadDirection * bumperOffset.z);
+
+                                transform.localPosition = upcomingLight.transform.position + preset.stoppedGapDistance * upcomingLight.roadDirection + worldBumperOffset;
+           
                                 status = Status.WAITING_RED;
                                 velocity = 0f;
                                 continue;
                             }
                             else if (upcomingLight.status == TrafficLight.Status.Green)
                             {
-                                if (hasAddedToQueue)
+                                if (stoppedAtRed)
                                 {
+                                    stoppedAtRed = false;
                                     upcomingLight.queueLength = 0;
-                                    hasAddedToQueue = false;
+                                    timeWaiting = 0f;
                                 }
                             }
                             break;
@@ -149,10 +165,10 @@ public abstract class Vehicle : MonoBehaviour
                             // stop at light instead of potentially skipping it
                             if (upcomingLight.status != TrafficLight.Status.Green && Vector3.Distance(bumperPosition, upcomingLight.transform.position + bumperOffset.y * Vector3.up) <= preset.stoppedGapDistance)
                             {
-                                if (!hasAddedToQueue)
+                                if (!stoppedAtRed)
                                 {
+                                    stoppedAtRed = true;
                                     upcomingLight.queueLength++;
-                                    hasAddedToQueue = true;
                                 }
 
                                 status = Status.WAITING_RED;
@@ -161,10 +177,10 @@ public abstract class Vehicle : MonoBehaviour
                             }
                             else if (upcomingLight.status == TrafficLight.Status.Green)
                             {
-                                if (hasAddedToQueue)
+                                if (stoppedAtRed)
                                 {
                                     upcomingLight.queueLength = 0;
-                                    hasAddedToQueue = false;
+                                    stoppedAtRed = false;
                                 }
                             }
                             break;

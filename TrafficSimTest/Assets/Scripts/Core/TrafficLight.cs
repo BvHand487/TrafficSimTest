@@ -16,6 +16,8 @@ public class TrafficLight : MonoBehaviour
     };
 
     public Road road;
+    public Vector3 roadDirection;  // The direction to the road
+
     public int queueLength;
     public TrafficController trafficController;
 
