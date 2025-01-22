@@ -2,6 +2,7 @@ using Generation;
 using System;
 using System.Diagnostics;
 using System.IO;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PythonBackendManager : SingletonMonobehaviour<PythonBackendManager>
@@ -35,7 +36,7 @@ public class PythonBackendManager : SingletonMonobehaviour<PythonBackendManager>
             mlagentsExecutable = Path.Combine(venvPath, "bin", "mlagents-learn");
     }
 
-    public void Update()
+    public void Start()
     {
         VerifyPythonVersion();
         VerifyPackageInstallation();
@@ -170,8 +171,16 @@ public class PythonBackendManager : SingletonMonobehaviour<PythonBackendManager>
         };
 
         mlagentsProcess = new Process { StartInfo = mlagentsStart };
-        mlagentsProcess.OutputDataReceived += (sender, args) => UnityEngine.Debug.Log($"{this.GetType().Name}: {args.Data}");
-        mlagentsProcess.ErrorDataReceived += (sender, args) => UnityEngine.Debug.LogError($"{this.GetType().Name}: {args.Data}");
+
+        mlagentsProcess.OutputDataReceived += (sender, args) => {
+            if (!string.IsNullOrEmpty(args.Data))
+                UnityEngine.Debug.Log($"{this.GetType().Name}: {args.Data}");
+        };
+
+        mlagentsProcess.ErrorDataReceived += (sender, args) => {
+            if (!string.IsNullOrEmpty(args.Data))
+                UnityEngine.Debug.LogError($"{this.GetType().Name}: {args.Data}");
+        };
 
         mlagentsProcess.Start();
         mlagentsProcess.BeginOutputReadLine();
