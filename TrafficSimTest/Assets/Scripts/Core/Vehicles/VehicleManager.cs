@@ -18,7 +18,7 @@ public class VehicleManager : MonoBehaviour
     private float minVehicleTravelDistance = 75.0f;
     private float minVehicleSpawnDistance = 30.0f;  // for a vehicle to spawn - there has to be no other vehicles within 30 units
     private float turnRadius=7.5f;
-    private int turnResolution=10;
+    private int turnResolution=5;
 
     private List<VehiclePreset> types = new List<VehiclePreset>();
 
@@ -41,7 +41,16 @@ public class VehicleManager : MonoBehaviour
 
     public void Update()
     {
-        simulatedMaxVehicleCount = Modeling.CalculateTrafficFlowFromTime(24f * Clock.Instance.GetFractionOfDay(), ref homeToWorkTrafficChance, ref workToHomeTrafficChance, maxVehicleCount);
+        if (TrainingManager.Instance.timeDependentTraffic == true)
+        {
+            simulatedMaxVehicleCount = Modeling.CalculateTrafficFlowFromTime(24f * Clock.Instance.GetFractionOfDay(), ref homeToWorkTrafficChance, ref workToHomeTrafficChance, maxVehicleCount);
+        }    
+        else
+        {
+            simulatedMaxVehicleCount = maxVehicleCount;
+            homeToWorkTrafficChance = 0.4f;
+            workToHomeTrafficChance = 0.4f;
+        }
 
         if (currentVehicleCount + spawnQueue.Count < simulatedMaxVehicleCount)
         {
@@ -95,8 +104,7 @@ public class VehicleManager : MonoBehaviour
             path = CreateDirectedVehiclePath();
         else if (rand < workToHomeTrafficChance)
         {
-            path = CreateDirectedVehiclePath();
-            path.Reverse();
+            path = CreateDirectedVehiclePath(reversed: true);
         }
         else
             path = CreateRandomVehiclePath();
@@ -118,7 +126,7 @@ public class VehicleManager : MonoBehaviour
         return new VehiclePath(start, end, turnRadius, turnResolution);
     }
 
-    private VehiclePath CreateDirectedVehiclePath()
+    private VehiclePath CreateDirectedVehiclePath(bool reversed = false)
     {
         Building start, end;
 
@@ -129,7 +137,11 @@ public class VehicleManager : MonoBehaviour
         }
         while (Vector3.Distance(start.transform.localPosition, end.transform.localPosition) < minVehicleTravelDistance);
 
-        return new VehiclePath(start, end, turnRadius, turnResolution);
+        if (reversed == false)
+            return new VehiclePath(start, end, turnRadius, turnResolution);
+        else
+            return new VehiclePath(end, start, turnRadius, turnResolution);
+
     }
 
     public Vehicle InstantiateVehicle(Vector3 pos, Quaternion rot, VehiclePreset preset)
@@ -138,6 +150,20 @@ public class VehicleManager : MonoBehaviour
         obj.SetActive(false);
         obj.name = preset.prefab.name;
         return obj.GetComponent<Vehicle>();
+    }
+
+    public void ClearVehicles()
+    {
+        Vehicle[] vehicles = FindObjectsByType<Vehicle>(FindObjectsSortMode.None);
+        foreach (var vehicle in vehicles)
+            Destroy(vehicle.gameObject);
+
+        foreach (var vehicle in spawnQueue)
+            Destroy(vehicle.gameObject);
+        
+        spawnQueue.Clear();
+
+        currentVehicleCount = 0;
     }
 
     public void OnDestroy()

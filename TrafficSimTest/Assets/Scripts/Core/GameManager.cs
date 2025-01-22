@@ -30,7 +30,6 @@ public class GameManager : SingletonMonobehaviour<GameManager>
     [SerializeField] public List<VehiclePreset> vehicleTypes;
     [SerializeField] public float vehicleMultiplier = 0.5f;
 
-
     public override void Awake()
     {
         base.Awake();

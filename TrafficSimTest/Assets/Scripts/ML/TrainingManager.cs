@@ -9,6 +9,9 @@ using UnityEngine;
 
 public class TrainingManager : SingletonMonobehaviour<TrainingManager>
 {
+    [SerializeField] public bool timeDependentTraffic = false;
+    [SerializeField] public float episodeLength = 300.0f;  // in seconds simulated time
+
     private List<TrafficLightAgent> agents;
     private List<BehaviorParameters> behaviours;
     private string trainingId;
@@ -59,24 +62,28 @@ public class TrainingManager : SingletonMonobehaviour<TrainingManager>
         {
             var behaviour = j.GetComponentInChildren<BehaviorParameters>();
             behaviour.enabled = false;
-            behaviour.BehaviorType = BehaviorType.Default;
+            behaviour.BehaviorType = BehaviorType.InferenceOnly;
             behaviours.Add(behaviour);
         }
     }
 
     public void StartTraining()
     {
-        foreach (var a in agents)
+        for (int i = 0; i < agents.Count; ++i)
         {
-            a.enabled = true;
+            behaviours[i].enabled = true;
+            behaviours[i].BehaviorType = BehaviorType.Default;
+            agents[i].enabled = true;
         }
     }
 
     public void StopTraining()
     {
-        foreach (var a in agents)
+        for (int i = 0; i < agents.Count; ++i)
         {
-            a.enabled = false;
+            behaviours[i].enabled = false;
+            behaviours[i].BehaviorType = BehaviorType.InferenceOnly;
+            agents[i].enabled = false;
         }
     }
 

@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Collections;
 using System.Linq;
 using UnityEngine;
-using System;
-using UnityEngine.UIElements;
 
 public class TrafficController : MonoBehaviour
 {
@@ -33,8 +30,24 @@ public class TrafficController : MonoBehaviour
 
     public void Start()
     {
-        for (int i = 0; i < junction.roads.Count; ++i)
-            lights[i].road = junction.roads[i];
+        for (int i = 0; i < lights.Count; ++i)
+        {
+            Road closestRoad = null;
+            float closestDistance = float.MaxValue;
+
+            foreach (var road in junction.roads)
+            {
+                var closestRoadPoint = Utils.Math.GetClosestVector(junction.transform.position, road.path);
+                var dist = Vector3.Distance(closestRoadPoint, lights[i].transform.position);
+                if (dist < closestDistance)
+                {
+                    closestDistance = dist;
+                    closestRoad = road;
+                }    
+            }
+
+            lights[i].road = closestRoad;
+        }
     }
 
     public void Update()

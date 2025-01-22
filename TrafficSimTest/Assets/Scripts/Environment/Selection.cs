@@ -133,11 +133,7 @@ public class Selection : MonoBehaviour
 
     void UpdateLineRenderer()
     {
-        List<Vector3> path = new List<Vector3>();
-        path.Add(selectedVehicle.transform.position);
-        path.AddRange(selectedVehicle.path.points);
-        for (int i = 0; i < path.Count; ++i)
-            path[i] += 0.5f * Vector3.up;
-        pathRenderer.SetPositions(path.ToArray());
+        for (int i = selectedVehicle.path.currentPointIndex; i< selectedVehicle.path.points.Count; ++i)
+            pathRenderer.SetPosition(i - selectedVehicle.path.currentPointIndex + 1, selectedVehicle.path.points[i] + Vector3.up);
     }
 }

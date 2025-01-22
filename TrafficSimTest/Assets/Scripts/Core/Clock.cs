@@ -6,7 +6,7 @@ using UnityEngine;
 public class Clock : SingletonMonobehaviour<Clock>
 {
     public DateTime datetime { get; private set; }
-    private static readonly float clockRatio = 4 * 24;
+    private static readonly float clockRatio = 1f;
 
     public float timeScale
     {

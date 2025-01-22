@@ -9,25 +9,37 @@ using UnityEngine.Rendering;
 
 public class TrafficLightAgent : Agent
 {
+    private VehicleManager vehicleManager;
+    private TrainingManager trainingManager;
     private TrafficController trafficController;
+
+    private float elapsedTime = 0f;
 
     protected override void Awake()
     {
         base.Awake();
 
+        trainingManager = TrainingManager.Instance;
         trafficController = GetComponent<TrafficController>();
+    }
 
-        enabled = false;
+    public void Start()
+    {
+        vehicleManager = trafficController.junction.simulation.vehicleManager;
     }
 
     public override void OnEpisodeBegin()
     {
+        vehicleManager.ClearVehicles();
         trafficController.ResetLights();
-    }
+        elapsedTime = 0f;
+}
 
     private void Update()
     {
-        if (Clock.Instance.GetFractionOfDay() <= 0.01f)
+        elapsedTime += Time.deltaTime;
+
+        if (elapsedTime > trainingManager.episodeLength)
             EndEpisode();
     }
 
@@ -110,7 +122,7 @@ public class TrafficLightAgent : Agent
         }
 
         // Configure the traffic control mode
-        int modeAction = Mathf.RoundToInt(continuousActions[numLights]); // Last action is discrete
+        int modeAction = discreteActions[0]; // Last action is discrete
         if (modeAction == 0)
         {
             trafficController.ConfigureLights(scaledIntervals, TrafficController.Mode.Single);

@@ -60,8 +60,8 @@ public abstract class Vehicle : MonoBehaviour
 
         bumperPosition = transform.localPosition + transform.TransformVector(bumperOffset);
 
-        currentRoad = path.roads.First();
-        upcomingJunction = path.junctions?.FirstOrDefault();
+        currentRoad = path.CurrentRoad();
+        upcomingJunction = path.UpcomingJunction();
         upcomingLight = upcomingJunction?.trafficController.lights.Find(tl => tl.road == currentRoad);
 
         HandleVehicle();
@@ -226,19 +226,22 @@ public abstract class Vehicle : MonoBehaviour
 
     public virtual void OnDrawGizmos()
     {
-        // Gizmos.color = new Color(0f, 0f, 1f);
-        // for (int i = 0; i < path.roads.Count; ++i)
-        // {
-        //     Handles.Label(path.roads[i].path.First() + Vector3.up, $"{i}");
-        //     Gizmos.DrawLineStrip(path.roads[i].path.Select(p => p + Vector3.up).ToArray(), false);
-        // }
+        //Gizmos.color = new Color(0f, 0f, 1f);
+        //for (int i = 0; i < path.roads.Count; ++i)
+        //{
+        //    Handles.Label(path.roads[i].path.First() + Vector3.up, $"{i}");
+        //    Gizmos.DrawLineStrip(path.roads[i].path.Select(p => p + Vector3.up).ToArray(), false);
+        //}
 
-        // Gizmos.color = new Color(0f, 1f, 1f);
-        // for (int i = 0; i < path.junctions.Count; ++i)
-        // {
-        //     Handles.Label(path.junctions[i].transform.position + Vector3.up, $"{i}");
-        //     Gizmos.DrawSphere(path.junctions[i].transform.position + Vector3.up, 0.5f);
-        // }
+        //if (path.junctions != null)
+        //{
+        //    Gizmos.color = new Color(0f, 1f, 1f);
+        //    for (int i = 0; i < path.junctions.Count; ++i)
+        //    {
+        //        Handles.Label(path.junctions[i].transform.position + Vector3.up, $"{i}");
+        //        Gizmos.DrawSphere(path.junctions[i].transform.position + Vector3.up, 0.5f);
+        //    }
+        //}
     }
 
     public static bool AreLookingAtEachother(Vehicle v1, Vehicle v2)

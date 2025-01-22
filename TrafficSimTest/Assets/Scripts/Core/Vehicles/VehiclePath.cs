@@ -8,15 +8,19 @@ using UnityEngine;
 public class VehiclePath
 {
     public Building from, to;
+
     public List<Road> roads;
     public List<Junction> junctions;
+    
     public List<Vector3> points;
 
     public float turnRadius;
     public int turnResolution;
 
-    private bool enteredJunction = false; 
-
+    private bool enteredJunction = false;
+    public int currentPointIndex = 0;
+    private int currentRoadIndex = 0;
+    private int currentJunctionIndex = 0;
 
     public VehiclePath(Building from, Building to, float turnRadius=7.5f, int turnResolution=5)
     {
@@ -30,55 +34,41 @@ public class VehiclePath
 
     public bool Done()
     {
-        return points.Count == 0;
+        return currentPointIndex == points.Count;
     }
 
-    public Vector3 First() => points.First();
-    public Vector3 Last() => points.Last();
-    public Vector3 Next(int idx=0) => points[idx];
-
-    // At the beginning of the path the car disrupts traffic
-    public bool IsDistruptingRoad()
-    {
-        int i = 0;
-        for (i = 2; i < points.Count - 1; ++i)
-        {
-            if (Utils.Math.AreCollinear(points[i - 2], points[i - 1], points[i]))
-                if (i == turnResolution + 3)
-                    return true;
-        }
-
-        return false;
-    }
+    public Vector3 First() => points[currentPointIndex];
+    public Vector3 Last() => points[points.Count - 1];
+    public Vector3 Next(int idx=0) => points[currentPointIndex + idx];
 
     public int Length()
     {
-        return points.Count;
+        return points.Count - currentPointIndex;
     }
 
     // Advances the car path, returns true if the paths is done
     public bool Advance()
     {
-        if (points.Count > 0)
+        if (currentPointIndex < points.Count)
         {
-            Vector3 point = points[0];
-            points.RemoveAt(0);
+            Vector3 point = points[currentPointIndex];
+            currentPointIndex++;
 
-            if (junctions != null && junctions.Count > 0)
+            if (junctions != null && currentJunctionIndex < junctions.Count)
             {
                 // path has entered a junction
-                if (enteredJunction == false && junctions.First().IsPointInside(point))
+                if (enteredJunction == false && junctions[currentJunctionIndex].IsPointInside(point))
                 {
                     enteredJunction = true;
                     return true;
                 }
 
                 // path has exited a junction
-                if (enteredJunction == true && !junctions.First().IsPointInside(point))
+                if (enteredJunction == true && !junctions[currentJunctionIndex].IsPointInside(point))
                 {
                     enteredJunction = false;
-                    junctions.RemoveAt(0);
-                    roads.RemoveAt(0);
+                    currentJunctionIndex++;
+                    currentRoadIndex++;
                     return true;
                 }
             }
@@ -89,9 +79,12 @@ public class VehiclePath
         return false;
     }
 
-    public void Reverse()
+    public Road CurrentRoad() => roads[currentRoadIndex];
+    public Junction UpcomingJunction()
     {
-        points.Reverse();
-        (from, to) = (to, from);
+        if (junctions != null && currentJunctionIndex < junctions.Count)
+            return junctions[currentJunctionIndex];
+
+        return null;
     }
 }

@@ -1741,6 +1741,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f73c6d31902060d47be04e4130b2f285, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timeDependentTraffic: 0
+  episodeLength: 300
 --- !u!4 &632047471
 Transform:
   m_ObjectHideFlags: 0
