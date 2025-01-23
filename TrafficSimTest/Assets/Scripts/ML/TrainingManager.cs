@@ -10,6 +10,7 @@ using UnityEngine;
 public class TrainingManager : SingletonMonobehaviour<TrainingManager>
 {
     [SerializeField] public bool timeDependentTraffic = false;
+    [SerializeField] public bool twoPhaseJunctions = false;
     [SerializeField] public float episodeLength = 300.0f;  // in seconds simulated time
 
     private List<TrafficLightAgent> agents;
@@ -87,4 +88,13 @@ public class TrainingManager : SingletonMonobehaviour<TrainingManager>
         }
     }
 
+    public void LoadModel(string path)
+    {
+        // if training -> stop training -> load .onnx from 'path'
+    }
+
+    public void SaveModel(string path)
+    {
+        // if training -> stop training -> go to temporary 'results' directory -> make copy of .onnx at 'path'
+    }
 }

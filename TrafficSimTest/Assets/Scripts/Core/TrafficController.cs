@@ -12,6 +12,9 @@ public class TrafficController : MonoBehaviour
 
     public Mode mode;
 
+    private bool switchMode = false;
+    private Mode newMode;
+
     public Junction junction;
     public List<TrafficLight> lights;
 
@@ -94,6 +97,13 @@ public class TrafficController : MonoBehaviour
         else if (IsYellowOver(current))
         {
             current.status = TrafficLight.Status.Red;
+
+            if (switchMode)
+            {
+                mode = newMode;
+                switchMode = false;
+            }
+
             elapsedTime = 0.0f;
         }
         else if (IsRedOver(current))
@@ -125,6 +135,13 @@ public class TrafficController : MonoBehaviour
         {
             current.status = TrafficLight.Status.Red;
             opposite.status = TrafficLight.Status.Red;
+
+            if (switchMode)
+            {
+                mode = newMode;
+                switchMode = false;
+            }
+
             elapsedTime = 0.0f;
         }
         else if (IsRedOver(current))
@@ -141,9 +158,8 @@ public class TrafficController : MonoBehaviour
         }
     }
 
-
     /*
-     * Acts as an interface to the future ML agents - verifies the configuration is valid and then sets the traffic lights intervals
+     * Acts as an interface to the ML agents - verifies the configuration is valid and then sets the traffic lights intervals
      */
     public bool ConfigureLights(List<float> greenIntervals, Mode mode)
     {
@@ -163,7 +179,9 @@ public class TrafficController : MonoBehaviour
             lights[i].ConfigureInterval(greenIntervals[i]);
         }
 
-        this.mode = mode;
+        switchMode = true;
+        newMode = mode;
+
         return true;
     }
 

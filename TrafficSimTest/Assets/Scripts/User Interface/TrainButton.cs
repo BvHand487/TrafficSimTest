@@ -30,8 +30,6 @@ public class TrainButton : MonoBehaviour
 
     public void ToggleTraining()
     {
-        Debug.Log("button");
-
         isTraining = !isTraining;
 
         if (isTraining)
