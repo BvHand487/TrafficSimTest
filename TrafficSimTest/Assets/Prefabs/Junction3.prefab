@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2775138799273056743}
   - component: {fileID: 673899000599802244}
   - component: {fileID: 2784084299105466730}
+  - component: {fileID: 7372651272109144356}
   m_Layer: 0
   m_Name: TrafficController
   m_TagString: Untagged
@@ -116,6 +117,18 @@ MonoBehaviour:
   DecisionPeriod: 5
   DecisionStep: 0
   TakeActionsBetweenDecisions: 1
+--- !u!114 &7372651272109144356
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 99677460606695387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0de233a4702c63646813ec0be1600cfc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6960445232992493620
 GameObject:
   m_ObjectHideFlags: 0
@@ -237,7 +250,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57306afa781c3b043a7992fc81cbb54e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  queue: []
+  roadDirection: {x: 0, y: 0, z: 0}
+  queueLength: 0
   trafficController: {fileID: 0}
   greenInterval: 10
 --- !u!1 &7724252557789297759
@@ -361,7 +375,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57306afa781c3b043a7992fc81cbb54e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  queue: []
+  roadDirection: {x: 0, y: 0, z: 0}
+  queueLength: 0
   trafficController: {fileID: 0}
   greenInterval: 10
 --- !u!1 &8704194204369785868
@@ -485,7 +500,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57306afa781c3b043a7992fc81cbb54e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  queue: []
+  roadDirection: {x: 0, y: 0, z: 0}
+  queueLength: 0
   trafficController: {fileID: 0}
   greenInterval: 10
 --- !u!1 &9066375938536572818

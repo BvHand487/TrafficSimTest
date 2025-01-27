@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -9,20 +10,28 @@ public class Selection : MonoBehaviour
 {
     private Camera cam;
 
-    private TextMeshPro timeWaitingText;
-    private LineRenderer pathRenderer;
+    private Vehicle selectedVehicle;
+    private LineRenderer lineRenderer;
     private int pathLength;
 
-    public Material outlineMaterial;
-    public Material selectionMaterial;
+    [SerializeField] private Material outlineMaterial;
+    [SerializeField] private Material selectionMaterial;
+    [SerializeField] private Tooltip tooltip;
 
-    private Vehicle selectedVehicle;
+    private Tooltip vehicleTooltip;
+    private Tooltip junctionTooltip;
+    private List<Tooltip> lightTooltips;
+
+    private Junction selectedJunction;
+    private BoxCollider selectedJunctionCollider;
+
 
     void Start()
     {
-        cam = GetComponent<Camera>();
-        pathRenderer = GetComponent<LineRenderer>();
-        // timeWaitingText = GetComponent<TextMeshPro>();
+        cam = Camera.main;
+        lineRenderer = GetComponent<LineRenderer>();
+
+        lightTooltips = new List<Tooltip>();
     }
 
 
@@ -41,14 +50,27 @@ public class Selection : MonoBehaviour
             }
             else
             {
-                pathRenderer.SetPosition(0, selectedVehicle.transform.position);
+                lineRenderer.SetPosition(0, selectedVehicle.transform.position);
+
+                vehicleTooltip.SetText($"Time waiting: {selectedVehicle.timeWaiting.ToString("0.00")}");
 
                 if (selectedVehicle.path.Length() != pathLength)
                 {
-                    pathRenderer.positionCount = pathLength;
+                    lineRenderer.positionCount = pathLength;
                     pathLength--;
-                    UpdateLineRenderer();
+                    UpdateVehicleLineRenderer();
                 }
+            }
+        }
+
+        if (selectedJunction)
+        {
+            junctionTooltip.SetText($"Elapsed Time: {selectedJunction.trafficController.elapsedTime.ToString("0.00")}");
+
+            for (int i = 0; i < selectedJunction.trafficController.lights.Count; ++i)
+            {
+                TrafficLight light = selectedJunction.trafficController.lights[i];
+                lightTooltips[i].SetText($"Green Interval: {light.greenInterval.ToString("0.00")}\nQueue: {light.vehicleQueue.Count}");
             }
         }
 
@@ -81,6 +103,11 @@ public class Selection : MonoBehaviour
                             var vehicle = repeatedHit.collider.gameObject.GetComponent<Vehicle>();
                             SelectVehicle(vehicle);
                         }
+                        else
+                        {
+                            var junction = hit.collider.gameObject.GetComponent<Junction>();
+                            SelectJunction(junction);
+                        }
                     }
                 }
             }
@@ -98,19 +125,43 @@ public class Selection : MonoBehaviour
             meshRenderer.materials = new Material[] { meshRenderer.materials[0] };
         }
         selectedVehicle = null;
-        pathRenderer.positionCount = 0;
-        // timeWaitingText.text = "";
-        //selectedJunction = null;
+        lineRenderer.positionCount = 0;
+        lineRenderer.loop = false;
+
+        if (vehicleTooltip != null)
+        {
+            Destroy(vehicleTooltip.gameObject);
+            vehicleTooltip = null;
+        }
+
+
+        selectedJunction = null;
+
+        if (junctionTooltip != null)
+        {
+            Destroy(junctionTooltip.gameObject);
+            junctionTooltip = null;
+
+            if (lightTooltips != null)
+            {
+                foreach (var t in lightTooltips)
+                    Destroy(t.gameObject);
+
+                lightTooltips.Clear();
+            }
+        }
     }
 
     void SelectVehicle(Vehicle vehicle)
     {
         selectedVehicle = vehicle;
         pathLength = selectedVehicle.path.Length();
-        pathRenderer.positionCount = pathLength + 1;
-        // timeWaitingText.text = "Time waiting: " + string.Format("{0:00}", selectedVehicle.timeWaiting);
+        lineRenderer.positionCount = pathLength + 1;
 
-        UpdateLineRenderer();
+        vehicleTooltip = Instantiate(tooltip, selectedVehicle.transform.position, Quaternion.identity);
+        vehicleTooltip.Initialize(selectedVehicle.transform, new Vector3(0.4f, 5f, 0.4f));
+
+        UpdateVehicleLineRenderer();
         SelectBuilding(selectedVehicle.path.from);
         SelectBuilding(selectedVehicle.path.to);
     }
@@ -127,9 +178,46 @@ public class Selection : MonoBehaviour
         meshRenderer.materials = mats.ToArray();
     }
 
-    void UpdateLineRenderer()
+    void UpdateVehicleLineRenderer()
     {
-        for (int i = selectedVehicle.path.currentPointIndex; i< selectedVehicle.path.points.Count; ++i)
-            pathRenderer.SetPosition(i - selectedVehicle.path.currentPointIndex + 1, selectedVehicle.path.points[i] + Vector3.up);
+        for (int i = selectedVehicle.path.currentPointIndex; i < selectedVehicle.path.points.Count; ++i)
+            lineRenderer.SetPosition(i - selectedVehicle.path.currentPointIndex + 1, selectedVehicle.path.points[i] + 0.05f * Vector3.up);
+    }
+
+    void SetJunctionLineRenderer()
+    {
+        Vector3[] corners = new Vector3[4];
+
+        Bounds bounds = selectedJunctionCollider.bounds;
+        corners[0] = new Vector3(bounds.min.x, bounds.min.y + 0.05f, bounds.min.z);
+        corners[1] = new Vector3(bounds.min.x, bounds.min.y + 0.05f, bounds.max.z);
+        corners[2] = new Vector3(bounds.max.x, bounds.min.y + 0.05f, bounds.max.z);
+        corners[3] = new Vector3(bounds.max.x, bounds.min.y + 0.05f, bounds.min.z);
+
+        lineRenderer.positionCount = 4;
+        lineRenderer.SetPositions(corners);
+        lineRenderer.loop = true;
+    }
+
+    void SelectJunction(Junction junction)
+    {
+        selectedJunction = junction;
+        selectedJunctionCollider = junction.GetComponent<BoxCollider>();
+
+        SetJunctionLineRenderer();
+
+        junctionTooltip = Instantiate(tooltip, selectedJunction.transform.position, Quaternion.identity);
+        junctionTooltip.Initialize(selectedJunction.transform, new Vector3(-0.2f, 5f, 0f), true);
+
+        for (int i = 0; i < junction.trafficController.lights.Count; ++i)
+        {
+            TrafficLight light = junction.trafficController.lights[i];
+            Vector3 customOffset = 7.5f * light.roadDirection;
+
+            var lightTooltip = Instantiate(tooltip, light.transform.position, Quaternion.identity);
+            lightTooltip.Initialize(light.transform, customOffset + 5f * Vector3.up, true);
+
+            lightTooltips.Add(lightTooltip);
+        }
     }
 }

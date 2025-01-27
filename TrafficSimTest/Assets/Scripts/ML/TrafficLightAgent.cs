@@ -1,117 +1,121 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
+using Unity.MLAgents.Policies;
 using Unity.MLAgents.Sensors;
+using UnityEditor.MemoryProfiler;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 public class TrafficLightAgent : Agent
 {
-    private VehicleManager vehicleManager;
+    private BehaviorParameters parameters;
     private TrainingManager trainingManager;
-    private TrafficController trafficController;
 
-    private float elapsedTime = 0f;
+    private VehicleManager vehicleManager;
+    private TrafficController trafficController;
+    private CongestionTracker tracker;
+    private List<TrafficLightAgent> neighbours;
+
+    private float previousCongestion;
+    private float previousReward;
+    private float timeElapsed;
 
     protected override void Awake()
     {
         base.Awake();
 
+        parameters = GetComponent<BehaviorParameters>();
         trainingManager = TrainingManager.Instance;
+
         trafficController = GetComponent<TrafficController>();
+        tracker = GetComponent<CongestionTracker>();
+        neighbours = new List<TrafficLightAgent>();
     }
 
     public void Start()
     {
         vehicleManager = trafficController.junction.simulation.vehicleManager;
+
+        var thisJunction = trafficController.junction;
+        neighbours = thisJunction.roads
+            .Select(r => r.GetOtherJunction(thisJunction))
+            .Where(j => j != null && j != thisJunction)
+            .Distinct()
+            .Select(neighbourJunction => neighbourJunction.GetComponent<TrafficLightAgent>())
+            .ToList();
+
+        
+        parameters.BrainParameters.VectorObservationSize = 3 + neighbours.Count * 1;
+
+        var actionParams = parameters.BrainParameters.ActionSpec;
+        actionParams.NumContinuousActions = trafficController.lights.Count;
+
+        if (trainingManager.twoPhaseJunctions)
+            actionParams.BranchSizes = new int[] { 2 };
+        else
+            actionParams.BranchSizes = null;
+
+        parameters.BrainParameters.ActionSpec = actionParams;
+
+
+        timeElapsed = 0f;
     }
 
     public override void OnEpisodeBegin()
-    {
+    {   
+        tracker.ResetValues();
         vehicleManager.ClearVehicles();
         trafficController.ResetLights();
-        elapsedTime = 0f;
-}
+    }
 
     private void Update()
     {
-        elapsedTime += Time.deltaTime;
+        timeElapsed += Time.deltaTime;
 
-        if (elapsedTime > trainingManager.episodeLength)
+        if (timeElapsed > trainingManager.episodeLength)
             EndEpisode();
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        // Current max vehicles on the road
-        sensor.AddObservation(trafficController.junction.simulation.vehicleManager.simulatedMaxVehicleCount);
+        if (!tracker.ReadyToReport() || neighbours.Any(n => !n.tracker.ReadyToReport()))
+            return;
 
-        // Lights status (0: red, 1: green)
-        sensor.AddObservation(trafficController.lights.Select(l => l.status == TrafficLight.Status.Green ? 1f : 0f).ToList());
-        if (trafficController.lights.Count == 3)
-            sensor.AddObservation(0f); // Dummy value for 3-way junctions
+        sensor.AddObservation(tracker.GetCumulativeCongestion());
+        sensor.AddObservation(previousCongestion);
+        sensor.AddObservation(previousReward);
 
-        // Elapsed time since last light change
-        sensor.AddObservation(trafficController.elapsedTime);
-
-        // Get vehicle queue lengths ? (not sure)
-        //sensor.AddObservation(trafficController.lights.Select(l => (float) l.queue.Count()).ToList());
-
-        // Get vehicles waiting at the junction right now
-        sensor.AddObservation(trafficController.lights.Select(l => (float) l.queueLength).Sum());
-
-        // Current lights mode (0: single, 1: double)
-        if (trafficController.mode == TrafficController.Mode.Single)
-            sensor.AddObservation(0);
-        else
-            sensor.AddObservation(1);
-
-        // Current lights green intervals
-        sensor.AddObservation(trafficController.lights.Select(l => l.greenInterval).ToList());
-        if (trafficController.lights.Count == 3)
-            sensor.AddObservation(0f); // Dummy value for 3-way junctions
+        foreach (var agent in neighbours)
+        {
+            sensor.AddObservation(agent.tracker.GetCumulativeCongestion());
+        }
     }
 
     public override void OnActionReceived(ActionBuffers actionBuffers)
     {
-        // Define the min, max green interval duration and step size
+        ReflectActions(actionBuffers);
+        EvaluateRewards();
+    }
+
+    public void ReflectActions(ActionBuffers actionBuffers)
+    {
+        // define the min, max green interval duration and step size
         float minGreenInterval = 5.0f;
         float maxGreenInterval = 30.0f;
         float stepSize = 0.5f;
 
-        // Number of traffic lights in the simulation
-        int numLights = trafficController.lights.Count;
-
-        // Get the continuous and discrete action buffers
         var continuousActions = actionBuffers.ContinuousActions;
         var discreteActions = actionBuffers.DiscreteActions;
 
-        //// Ensure the number of continuous actions matches the number of traffic lights
-        //if (continuousActions.Length != numLights + 1)
-        //{
-        //    Debug.LogError("Training: Invalid number of continuous actions received.");
-        //    return;
-        //}
-
-        //// Ensure there is exactly one discrete action for mode selection
-        //if (discreteActions.Length != 1)
-        //{
-        //    Debug.LogError("Training: Invalid number of discrete actions received.");
-        //    return;
-        //}
-
-
         List<float> scaledIntervals = new List<float>();
 
-        // Configure green intervals for each traffic light
-        for (int i = 0; i < numLights; i++)
+        for (int i = 0; i < trafficController.lights.Count; i++)
         {
-            // The raw action for the green interval
             float rawGreenInterval = continuousActions[i];
 
-            // Scale and clamp the raw action to the allowed range and step size
             float scaledGreenInterval = Mathf.Clamp(
                 Mathf.Round(rawGreenInterval / stepSize) * stepSize,
                 minGreenInterval,
@@ -121,23 +125,42 @@ public class TrafficLightAgent : Agent
             scaledIntervals.Add(scaledGreenInterval);
         }
 
-        // Configure the traffic control mode
-        int modeAction = discreteActions[0]; // Last action is discrete
-        if (modeAction == 0)
+        if (trainingManager.twoPhaseJunctions)
         {
-            trafficController.ConfigureLights(scaledIntervals, TrafficController.Mode.Single);
-        }
-        else if (modeAction == 1)
-        {
-            trafficController.ConfigureLights(scaledIntervals, TrafficController.Mode.Double);
+            if (discreteActions[0] == 0)
+                trafficController.ConfigureLights(scaledIntervals, TrafficController.Mode.Single);
+
+            if (discreteActions[0] == 1)
+                trafficController.ConfigureLights(scaledIntervals, TrafficController.Mode.Double);
         }
         else
+            trafficController.ConfigureLights(scaledIntervals, TrafficController.Mode.Double);
+
+        SetReward(-0.1f);
+    }
+
+    public void EvaluateRewards()
+    {
+        var congestion = tracker.GetCumulativeCongestion();
+        var neighboursCongestion = neighbours.Select(n => tracker.GetCumulativeCongestion()).Sum();
+
+        var totalCongestion = congestion + neighboursCongestion;
+
+        // Calculate the reward (e.g., minimize congestion)
+        float reward = -congestion - neighboursCongestion * 0.5f; // Encouraging lower congestion at the junction and neighbors
+
+        float collaborationReward = 0f;
+        foreach (var agent in neighbours)
         {
-            Debug.LogWarning("Training: Invalid traffic mode size received.");
+            collaborationReward += Mathf.Max(0, previousCongestion - agent.tracker.GetCumulativeCongestion());
         }
 
-        // Apply a small penalty for time spent (encouraging efficiency)
-        SetReward(-0.1f);
+        reward += collaborationReward;
+
+        SetReward(reward);
+
+        previousCongestion = congestion;
+        previousReward = reward;
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1306089894702143989}
   - component: {fileID: 7987409919306297750}
   - component: {fileID: 925276743311014730}
+  - component: {fileID: 5187911233133717001}
   m_Layer: 0
   m_Name: TrafficController
   m_TagString: Untagged
@@ -117,6 +118,20 @@ MonoBehaviour:
   DecisionPeriod: 5
   DecisionStep: 0
   TakeActionsBetweenDecisions: 1
+--- !u!114 &5187911233133717001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 278596252826018198}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0de233a4702c63646813ec0be1600cfc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  timeWindow: 180
+  updatePeriod: 10
 --- !u!1 &3827662319154851184
 GameObject:
   m_ObjectHideFlags: 0
@@ -238,7 +253,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57306afa781c3b043a7992fc81cbb54e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  queue: []
+  roadDirection: {x: 0, y: 0, z: 0}
+  vehicleQueue: []
   trafficController: {fileID: 0}
   greenInterval: 10
 --- !u!1 &4093120629161919394
@@ -489,7 +505,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57306afa781c3b043a7992fc81cbb54e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  queue: []
+  roadDirection: {x: 0, y: 0, z: 0}
+  vehicleQueue: []
   trafficController: {fileID: 0}
   greenInterval: 10
 --- !u!1 &7450204801557596331
@@ -613,7 +630,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57306afa781c3b043a7992fc81cbb54e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  queue: []
+  roadDirection: {x: 0, y: 0, z: 0}
+  vehicleQueue: []
   trafficController: {fileID: 0}
   greenInterval: 10
 --- !u!1 &7775293841332371362
@@ -737,6 +755,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57306afa781c3b043a7992fc81cbb54e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  queue: []
+  roadDirection: {x: 0, y: 0, z: 0}
+  vehicleQueue: []
   trafficController: {fileID: 0}
   greenInterval: 10

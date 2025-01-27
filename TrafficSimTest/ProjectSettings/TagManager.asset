@@ -9,9 +9,7 @@ TagManager:
   - Vehicle
   - Simulation
   - End
-  - Road
   - TrafficLight
-  - Building
   layers:
   - Default
   - TransparentFX

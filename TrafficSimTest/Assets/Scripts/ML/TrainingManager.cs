@@ -1,9 +1,4 @@
-﻿using Generation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Unity.MLAgents.Policies;
 using UnityEngine;
 
@@ -17,6 +12,7 @@ public class TrainingManager : SingletonMonobehaviour<TrainingManager>
     private List<BehaviorParameters> behaviours;
     private string trainingId;
 
+    private bool isTraining = false;
     private PythonBackendManager pythonBackend;
 
     public override void Awake()
@@ -63,7 +59,7 @@ public class TrainingManager : SingletonMonobehaviour<TrainingManager>
         {
             var behaviour = j.GetComponentInChildren<BehaviorParameters>();
             behaviour.enabled = false;
-            behaviour.BehaviorType = BehaviorType.InferenceOnly;
+            behaviour.BehaviorType = BehaviorType.HeuristicOnly;
             behaviours.Add(behaviour);
         }
     }
@@ -76,6 +72,8 @@ public class TrainingManager : SingletonMonobehaviour<TrainingManager>
             behaviours[i].BehaviorType = BehaviorType.Default;
             agents[i].enabled = true;
         }
+
+        isTraining = true;
     }
 
     public void StopTraining()
@@ -83,14 +81,19 @@ public class TrainingManager : SingletonMonobehaviour<TrainingManager>
         for (int i = 0; i < agents.Count; ++i)
         {
             behaviours[i].enabled = false;
-            behaviours[i].BehaviorType = BehaviorType.InferenceOnly;
+            behaviours[i].BehaviorType = BehaviorType.HeuristicOnly;
             agents[i].enabled = false;
         }
+
+        isTraining = false;
     }
 
     public void LoadModel(string path)
     {
-        // if training -> stop training -> load .onnx from 'path'
+        if (isTraining)
+            StopTraining();
+
+        return;
     }
 
     public void SaveModel(string path)

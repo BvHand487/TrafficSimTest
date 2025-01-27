@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -18,7 +19,7 @@ public class TrafficLight : MonoBehaviour
     public Road road;
     public Vector3 roadDirection;  // The direction to the road
 
-    public int queueLength;
+    public List<Vehicle> vehicleQueue;
     public TrafficController trafficController;
 
     private Status _status;
@@ -32,7 +33,7 @@ public class TrafficLight : MonoBehaviour
             meshRenderer.material.color = TrafficLight.StatusToColor(_status);
 
             if (value == Status.Green)
-                queueLength = 0;
+                vehicleQueue.Clear();
         }
     }
 
@@ -45,7 +46,7 @@ public class TrafficLight : MonoBehaviour
 
         meshRenderer = GetComponent<MeshRenderer>();
 
-        queueLength = 0;
+        vehicleQueue.Clear();
         status = Status.Red;
     }
 
@@ -53,7 +54,7 @@ public class TrafficLight : MonoBehaviour
     {
         Gizmos.color = TrafficLight.StatusToColor(status);
         Gizmos.DrawSphere(transform.position, 1f);
-        Handles.Label(transform.position + 3f * Vector3.up, $"{queueLength}");
+        Handles.Label(transform.position + 3f * Vector3.up, $"{vehicleQueue.Count}");
     }
 
     public void ConfigureInterval(float greenInterval)

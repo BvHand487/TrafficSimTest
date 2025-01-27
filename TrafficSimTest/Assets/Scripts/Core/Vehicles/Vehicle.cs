@@ -53,10 +53,18 @@ public abstract class Vehicle : MonoBehaviour
     private void Update()
     {
         // do nothing while waiting on red
-        if (stoppedAtRed == true && upcomingLight.status != TrafficLight.Status.Green)
+        if (stoppedAtRed == true)
         {
-            timeWaiting += Time.deltaTime;
-            return;
+            if (upcomingLight.status != TrafficLight.Status.Green)
+            {
+                timeWaiting += Time.deltaTime;
+                return;
+            }
+            else
+            {
+                timeWaiting = 0f;
+                stoppedAtRed = false;
+            }
         }
 
         if (path.Done())
@@ -110,7 +118,7 @@ public abstract class Vehicle : MonoBehaviour
                                 if (!stoppedAtRed)
                                 {
                                     stoppedAtRed = true;
-                                    upcomingLight.queueLength++;
+                                    upcomingLight.vehicleQueue.Add(this);
                                     timeWaiting = 0f;
                                 }
 
@@ -130,7 +138,7 @@ public abstract class Vehicle : MonoBehaviour
                                 if (stoppedAtRed)
                                 {
                                     stoppedAtRed = false;
-                                    upcomingLight.queueLength = 0;
+                                    upcomingLight.vehicleQueue.Clear();
                                     timeWaiting = 0f;
                                 }
                             }
@@ -168,7 +176,7 @@ public abstract class Vehicle : MonoBehaviour
                                 if (!stoppedAtRed)
                                 {
                                     stoppedAtRed = true;
-                                    upcomingLight.queueLength++;
+                                    upcomingLight.vehicleQueue.Add(this);
                                 }
 
                                 status = Status.WAITING_RED;
@@ -179,7 +187,7 @@ public abstract class Vehicle : MonoBehaviour
                             {
                                 if (stoppedAtRed)
                                 {
-                                    upcomingLight.queueLength = 0;
+                                    upcomingLight.vehicleQueue.Clear();
                                     stoppedAtRed = false;
                                 }
                             }

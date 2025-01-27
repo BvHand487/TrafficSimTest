@@ -28,6 +28,7 @@ public class TrafficController : MonoBehaviour
         junction = GetComponentInParent<Junction>();
         lights = GetComponentsInChildren<TrafficLight>().ToList();
         
+        mode = Mode.Double;
         ResetLights();
     }
 
@@ -57,6 +58,17 @@ public class TrafficController : MonoBehaviour
 
     public void Update()
     {
+        // keybind to switch the traffic mode across the whole simulation - for debugging purposes
+        //if (Input.GetKeyDown(KeyCode.M))
+        //{
+        //    switchMode = true;
+            
+        //    if (mode == Mode.Single)
+        //        newMode = Mode.Double;
+        //    else
+        //        newMode = Mode.Single;
+        //}
+
         elapsedTime += Time.deltaTime;
 
         switch (mode)
@@ -72,12 +84,23 @@ public class TrafficController : MonoBehaviour
                 {
                     TrafficLight current = lights[activeLight];
                     TrafficLight opposite = lights[(activeLight + 2) % lights.Count];
+                        
+                    if (lights.Count == 3)
+                    {
+                        if (activeLight == 0)
+                            opposite = lights[2];
 
-                    if (lights.Count == 3 && activeLight == 1)
-                        UpdateSingleMode(current);
-                    else
-                        UpdateDoubleMode(current, opposite);
+                        if (activeLight == 2)
+                            opposite = lights[0];
 
+                        if (activeLight == 1)
+                        {
+                            UpdateSingleMode(current);
+                            return;
+                        }
+                    }
+
+                    UpdateDoubleMode(current, opposite);
                     break;
                 }
         }
@@ -108,17 +131,14 @@ public class TrafficController : MonoBehaviour
         }
         else if (IsRedOver(current))
         {
-            if (lights.Count == 3)
+            activeLight = (activeLight + 1) % lights.Count;
+
+            if (lights.Count == 3 && activeLight == 2 && mode == Mode.Double)
             {
-                activeLight = 0;
-                lights[activeLight].status = TrafficLight.Status.Green;
-                lights[(activeLight + 2) % lights.Count].status = TrafficLight.Status.Green;
+                lights[0].status = TrafficLight.Status.Green;
             }
-            else
-            {
-                activeLight = (activeLight + 1) % lights.Count;
-                lights[activeLight].status = TrafficLight.Status.Green;
-            }
+
+            lights[activeLight].status = TrafficLight.Status.Green;
             elapsedTime = 0.0f;
         }
     }
@@ -147,12 +167,18 @@ public class TrafficController : MonoBehaviour
         else if (IsRedOver(current))
         {
             if (lights.Count == 3)
-                activeLight = 1;
+            {
+                if (activeLight == 0 || activeLight == 2)
+                    activeLight = 1;
+                else
+                    activeLight = 0;
+            }
             else
             {
                 activeLight = (activeLight + 1) % lights.Count;
                 lights[(activeLight + 2) % lights.Count].status = TrafficLight.Status.Green;
             }
+
             lights[activeLight].status = TrafficLight.Status.Green;
             elapsedTime = 0.0f;
         }
@@ -179,8 +205,11 @@ public class TrafficController : MonoBehaviour
             lights[i].ConfigureInterval(greenIntervals[i]);
         }
 
-        switchMode = true;
-        newMode = mode;
+        if (this.mode != mode)
+        {
+            switchMode = true;
+            newMode = mode;
+        }
 
         return true;
     }
