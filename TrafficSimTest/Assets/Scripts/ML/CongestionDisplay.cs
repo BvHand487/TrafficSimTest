@@ -11,9 +11,10 @@ public class CongestionDisplay : MonoBehaviour
     private Graph graph;
     private List<CongestionTracker> trackers;
 
+    private DateTime earliestTime;
     private Queue<float> history = new Queue<float>();
-    private int maxHistoryLength = 50;
-    private float timeWindow = 60f;
+    private int maxHistoryLength = 60;  // graph shows 1 hour
+    private float timeWindow = 60f;  // plots every minute
     private float timeElapsed;
 
     private void Awake()
@@ -34,6 +35,8 @@ public class CongestionDisplay : MonoBehaviour
 
     void Update()
     {
+        Debug.Log($"{history.Count}");
+
         timeElapsed += Time.deltaTime;
 
         if (timeElapsed < timeWindow)
@@ -41,18 +44,30 @@ public class CongestionDisplay : MonoBehaviour
 
         if (trackers.All(t => t.ReadyToReport()))
         {
+            if (earliestTime == default(DateTime))
+                earliestTime = Clock.Instance.datetime;
+
+            DateTime latestTime = earliestTime.AddSeconds(timeWindow * history.Count);
+            
             var value = CalculateAggregatedCongestion();
             history.Enqueue(value);
 
             graph.ShowGraph(
                 history.ToList(),
                 maxHistoryLength,
-                (idx) => idx % 5 == 0 ? $"{idx}" : string.Empty,
-                (value) => value.ToString("0.00")
+                (idx) => idx % 10 == 0 ? $"{(earliestTime.AddSeconds(timeWindow * idx)).ToString("HH:mm:ss")}" : string.Empty,
+                (value) => value.ToString("0.00"),
+                isCoroutine: true
             );
         }
 
-        timeElapsed = 0f;
+        while (history.Count > maxHistoryLength)
+        {
+            history.Dequeue();
+            earliestTime = earliestTime.AddSeconds(timeWindow);
+        }
+
+        timeElapsed -= timeWindow;
     }
 
     public float CalculateAggregatedCongestion()
@@ -63,8 +78,6 @@ public class CongestionDisplay : MonoBehaviour
         {
             var trackerCongestion = t.GetCumulativeCongestion();
             totalCongestion += trackerCongestion;
-
-            Debug.Log(trackerCongestion);
         }
 
         // normalize

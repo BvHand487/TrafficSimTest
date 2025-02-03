@@ -16,7 +16,7 @@ public class TrafficLightAgent : Agent
 
     private VehicleManager vehicleManager;
     private TrafficController trafficController;
-    private CongestionTracker tracker;
+    public CongestionTracker tracker;
     private List<TrafficLightAgent> neighbours;
 
     private float previousCongestion;
@@ -66,6 +66,9 @@ public class TrafficLightAgent : Agent
 
     public override void OnEpisodeBegin()
     {   
+        if (!vehicleManager)
+            vehicleManager = trafficController.junction.simulation.vehicleManager;
+
         tracker.ResetValues();
         vehicleManager.ClearVehicles();
         trafficController.ResetLights();

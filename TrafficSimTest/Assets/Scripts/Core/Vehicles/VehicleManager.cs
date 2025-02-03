@@ -11,7 +11,7 @@ public class VehicleManager : MonoBehaviour
 {
     private Simulation simulation;
 
-    private int maxVehicleCount;
+    public int maxVehicleCount;
     [System.NonSerialized] public int currentVehicleCount;
     [System.NonSerialized] public int simulatedMaxVehicleCount;
 
@@ -22,10 +22,10 @@ public class VehicleManager : MonoBehaviour
 
     private List<VehiclePreset> types = new List<VehiclePreset>();
 
-    private List<Vehicle> spawnQueue = new List<Vehicle>();
+    public List<Vehicle> spawnQueue = new List<Vehicle>();
 
-    private float homeToWorkTrafficChance = 1.0f;
-    private float workToHomeTrafficChance = 1.0f;
+    public float homeToWorkTrafficChance = 1.0f;
+    public float workToHomeTrafficChance = 1.0f;
 
     public void Awake()
     {

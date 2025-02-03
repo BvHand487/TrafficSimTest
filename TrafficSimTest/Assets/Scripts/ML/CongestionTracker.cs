@@ -6,19 +6,22 @@ using UnityEngine;
 
 public class CongestionTracker : MonoBehaviour
 {
-    [SerializeField] private float timeWindow = 180f;  // Total congestion is an average over 3 minutes
-    [SerializeField] private float updatePeriod = 10f;  // Add values every 10 seconds
+    public float timeWindow = 300f;  // Total congestion is an average over 5 minutes
+    public float updatePeriod = 5f;  // Add values every 5 seconds
 
     private VehicleManager vehicleManager;
     private TrafficController trafficController;
     
-    private float cumulativeCongestion = 0f;
+    private float maxHistoryLength;
     private Queue<float> congestionHistory;
+    private float cumulativeCongestion = 0f;
     private float timeElapsed;
 
     void Awake()
     {
         congestionHistory = new Queue<float>();
+
+        maxHistoryLength = timeWindow / updatePeriod;
     }
 
     public void Start()
@@ -37,7 +40,7 @@ public class CongestionTracker : MonoBehaviour
         float currentCongestion = CalculateCurrentCongestion();
         UpdateCongestion(currentCongestion);
 
-        timeElapsed = 0f;
+        timeElapsed -= updatePeriod;
     }
 
     // Returns queue length of vehicles per road
@@ -65,13 +68,12 @@ public class CongestionTracker : MonoBehaviour
     public void UpdateCongestion(float currentCongestion)
     {
         congestionHistory.Enqueue(currentCongestion);
+        cumulativeCongestion += currentCongestion;
 
-        cumulativeCongestion += currentCongestion * Time.timeScale;
-
-        while (congestionHistory.Count * Time.timeScale > timeWindow)
+        while (congestionHistory.Count > maxHistoryLength)
         {
             float oldestCongestion = congestionHistory.Dequeue();
-            cumulativeCongestion -= oldestCongestion * Time.timeScale;
+            cumulativeCongestion -= oldestCongestion;
         }
     }
 
@@ -83,24 +85,27 @@ public class CongestionTracker : MonoBehaviour
         float totalQueueLength = queueLengths.Sum();  // sum of all queue lengths
         float totalWaitingTime = waitingTimes.Sum();  // sum of all waiting times
 
-        float normalizedQueueLength = totalQueueLength / (trafficController.lights.Count * 20f);  // assume max queue length is 20 for now
-        float normalizedWaitingTime = totalWaitingTime / (trafficController.lights.Count * 40f);  // assume max waiting time is 40 for now
+        float normalizedQueueLength = totalQueueLength / (trafficController.lights.Count * 5f);  // assume max queue length is 5 for now
+        float normalizedWaitingTime = totalWaitingTime / (trafficController.lights.Count * 10f);  // assume max waiting time is 10 for now
 
-        float queueWeight = 0.5f;
-        float waitingTimeWeight = 0.5f;
+        float queueWeight = 1f;
+        float waitingTimeWeight = 1f;
 
         return (queueWeight * normalizedQueueLength) + (waitingTimeWeight * normalizedWaitingTime);
     }
 
     public float GetCumulativeCongestion()
     {
+        if (congestionHistory.Count == 0)
+            return 0f;
+
         // normalize
         return cumulativeCongestion / congestionHistory.Count;
     }
 
     public bool ReadyToReport()
     {
-        if (congestionHistory.Count >= 1 && cumulativeCongestion != float.NaN && cumulativeCongestion != 0f)
+        if (congestionHistory.Count == maxHistoryLength)
             return true;
         else
             return false;

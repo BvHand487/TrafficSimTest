@@ -1,12 +1,10 @@
-using JetBrains.Annotations;
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TrackBar;
+
 
 public class Graph : MonoBehaviour
 {
@@ -82,7 +80,17 @@ public class Graph : MonoBehaviour
         return obj;
     }
 
-    public void ShowGraph(List<float> values, int maxVisibleValues = -1, Func<int, string> getLabelX = null, Func<float, string> getLabelY = null)
+    public void ShowGraph(List<float> values, int maxVisibleValues = -1, Func<int, string> getLabelX = null, Func<float, string> getLabelY = null, bool isCoroutine=true)
+    {
+        var enumerator = ShowGraphCoroutine(values, maxVisibleValues, getLabelX, getLabelY);
+        
+        if (isCoroutine)
+            StartCoroutine(enumerator);
+        else
+            while (enumerator.MoveNext()) { }
+    }
+
+    public IEnumerator ShowGraphCoroutine(List<float> values, int maxVisibleValues = -1, Func<int, string> getLabelX = null, Func<float, string> getLabelY = null)
     {
         if (getLabelX == null)
             getLabelX = delegate (int idx) { return $"{idx}"; };
@@ -139,7 +147,7 @@ public class Graph : MonoBehaviour
 
             // Create graph point
             currentPointPos = new Vector2(xPos, yPos);
-            
+
             if (spriteOnPoints)
             {
                 currentPoint = CreatePoint(currentPointPos);
@@ -162,7 +170,7 @@ public class Graph : MonoBehaviour
                     graphElements.Add(edge);
                 }
             }
-            
+
             previousPointPos = currentPointPos;
 
             // Create axis ticks on the X-axis
@@ -177,10 +185,14 @@ public class Graph : MonoBehaviour
             RectTransform dashX = Instantiate(dashesX);
             dashX.SetParent(graphContainer, false);
             dashX.gameObject.SetActive(true);
-            dashX.anchoredPosition = new Vector2(xPos, axisTickXOffset);
+            dashX.anchoredPosition = new Vector2(xPos, 0);
             graphElements.Add(dashX.gameObject);
 
             xIndex++;
+
+            // yield execution every few iterations
+            if (xIndex % 17 == 0)
+                yield return null;
         }
 
         // Create axis ticks on the Y-axis
@@ -200,8 +212,12 @@ public class Graph : MonoBehaviour
             RectTransform dashY = Instantiate(dashesY);
             dashY.SetParent(graphContainer, false);
             dashY.gameObject.SetActive(true);
-            dashY.anchoredPosition = new Vector2(axisTickYOffset, normValue * graphHeight);
+            dashY.anchoredPosition = new Vector2(0, normValue * graphHeight);
             graphElements.Add(dashY.gameObject);
+
+            // yield execution every few iterations
+            if (i % 4 == 0)
+                yield return null;
         }
 
         if (activateTrendline && maxVisibleValues > 1)
@@ -230,6 +246,7 @@ public class Graph : MonoBehaviour
             graphElements.Add(trendline.gameObject);
         }
     }
+
 
     public void DestroyGraph()
     {
