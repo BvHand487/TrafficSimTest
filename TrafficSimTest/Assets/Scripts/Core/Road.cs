@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+
 // Straight roads and turns are considered a part of the road path
 public class Road
 {

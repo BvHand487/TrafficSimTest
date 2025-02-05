@@ -1,16 +1,38 @@
+using SFB;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class LoadSimulation : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public Button loadButton;
+    public bool forcesReload = false;
+
+    public void Awake()
     {
-        
+        loadButton = GetComponent<Button>();
+
+        loadButton.onClick.AddListener(LoadSimulationFromFileSystem);
     }
 
-    // Update is called once per frame
-    void Update()
+    // Load .tsf
+    public void LoadSimulationFromFileSystem()
     {
-        
+        string[] paths = StandaloneFileBrowser.OpenFilePanel("Open File", Application.persistentDataPath, "tsf", false);
+
+        if (paths.Length == 0)
+            return;
+
+        PersistenceManager.Instance.LoadSimulationData(paths[0]);
+
+        if (forcesReload == true)
+        {
+            PlayerPrefs.DeleteAll();
+            PlayerPrefs.SetString("Load method", "file");
+
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
     }
 }

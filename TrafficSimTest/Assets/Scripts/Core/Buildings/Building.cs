@@ -33,6 +33,14 @@ public class Building : MonoBehaviour
         float maxDistance = Mathf.Sqrt(2f) * halfSize;
 
         type = Utils.Modeling.ChooseRandomBuildingType(transform.position.magnitude / maxDistance);
+        SetType(type);
+
+        this.closestJunction = Building.GetClosestJunction(this);
+    }
+
+    public void SetType(Type type)
+    {
+        this.type = type;
 
         switch (type)
         {
@@ -48,8 +56,6 @@ public class Building : MonoBehaviour
                 meshRenderer.material.color = Color.black;
                 break;
         }
-
-        this.closestJunction = Building.GetClosestJunction(this);
     }
 
     public static Junction GetClosestJunction(Building b)

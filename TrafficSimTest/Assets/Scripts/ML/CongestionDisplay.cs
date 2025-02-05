@@ -35,8 +35,6 @@ public class CongestionDisplay : MonoBehaviour
 
     void Update()
     {
-        Debug.Log($"{history.Count}");
-
         timeElapsed += Time.deltaTime;
 
         if (timeElapsed < timeWindow)

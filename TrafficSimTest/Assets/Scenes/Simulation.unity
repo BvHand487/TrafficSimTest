@@ -801,6 +801,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4cb3830270d63884299db544630c29ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  loadButton: {fileID: 0}
+  forcesReload: 1
 --- !u!1 &237157819
 GameObject:
   m_ObjectHideFlags: 0
@@ -1191,6 +1193,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 769376216899aa1498f342c5c78bf3c3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  saveButton: {fileID: 0}
 --- !u!1 &280566890
 GameObject:
   m_ObjectHideFlags: 0
@@ -2010,9 +2013,9 @@ GameObject:
   - component: {fileID: 384121017}
   - component: {fileID: 384121020}
   - component: {fileID: 384121019}
-  - component: {fileID: 384121018}
+  - component: {fileID: 384121021}
   m_Layer: 5
-  m_Name: SimulationData
+  m_Name: SimulationInfo
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2037,18 +2040,6 @@ RectTransform:
   m_AnchoredPosition: {x: 278.98, y: 34.2736}
   m_SizeDelta: {x: 520.23, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &384121018
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 384121016}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc81b5a8aec7f42479b80ad8bcb0c84c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &384121019
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2071,7 +2062,7 @@ MonoBehaviour:
       m_Calls: []
   m_text: "Time-dependent vehicle amount:  true\n\r- Max vehicles: 100\r\n- Simulated
     max vehicles: 80\r\n- Current vehicles: 60\r\n- Vehicles spawn queue: 20\r\n-
-    HTW / WTH / RND: 70% / 2% / 28%"
+    HTW / WTH / RND: 70% / 5% / 25%"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2150,6 +2141,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 384121016}
   m_CullTransparentMesh: 1
+--- !u!114 &384121021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 384121016}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14c6e5b8ebf55894d9e5acaedfc820c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &388934048
 GameObject:
   m_ObjectHideFlags: 0

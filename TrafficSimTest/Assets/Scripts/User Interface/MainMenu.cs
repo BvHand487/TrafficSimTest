@@ -1,7 +1,6 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class MainMenu : MonoBehaviour
 {
@@ -20,11 +19,20 @@ public class MainMenu : MonoBehaviour
         sliderValues[name] = value;
     }
 
-    // Pass data to the generator script using the PlayerRrefs API
     public void Generate()
     {
+        PlayerPrefs.SetString("Load method", "generate");
+
+        // pass generation settings using PlayerPrefs API
         foreach (var (name, val) in sliderValues)
             PlayerPrefs.SetInt(name, val);
+
+        SceneManager.LoadSceneAsync(1);
+    }
+
+    public void LoadSimulation()
+    {
+        PlayerPrefs.SetString("Load method", "file");
 
         SceneManager.LoadSceneAsync(1);
     }
