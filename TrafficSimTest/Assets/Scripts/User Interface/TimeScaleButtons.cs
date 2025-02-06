@@ -33,6 +33,7 @@ public class TimeScaleButtons : MonoBehaviour
             });
         }
 
+        currentButtonIndex = buttons.FindIndex(tsb => tsb.timeScale == clock.timeScale);
         buttons[currentButtonIndex].SetSelected(true);
         
         // Applications running in the editor don't support timeScales > 100, so make a check and disable buttons if needed.

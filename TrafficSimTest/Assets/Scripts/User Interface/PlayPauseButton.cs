@@ -18,6 +18,11 @@ public class PlayPauseButton : MonoBehaviour
 
         clock = Clock.Instance;
         button.onClick.AddListener(() => TogglePaused());
+
+        if (clock.isPaused)
+            image.sprite = imagePaused;
+        else
+            image.sprite = imageUnpaused;
     }
 
     private void Update()

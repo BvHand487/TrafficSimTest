@@ -4,7 +4,6 @@ using UnityEngine.UI;
 
 public class CustomSlider : MonoBehaviour
 {
-    [SerializeField] private MainMenu menu;
     [SerializeField] private TextMeshProUGUI title;
 
     private TextMeshProUGUI sliderValueComp = null;
@@ -19,10 +18,15 @@ public class CustomSlider : MonoBehaviour
         sliderComp = GetComponent<Slider>();
     }
 
+    private void Start()
+    {
+        UpdateSliderValue(sliderComp.value);
+    }
+
     public void UpdateSliderValue(float value)
     {
         int roundedValue = (int) value;
         sliderValueComp.text = roundedValue.ToString("0");
-        menu.UpdateSliderValues(title.text, roundedValue);
+        UIManager.Instance.UpdateSliderValues(title.text, roundedValue);
     }
 }

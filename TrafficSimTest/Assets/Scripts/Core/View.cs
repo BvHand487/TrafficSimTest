@@ -17,7 +17,7 @@ public class View : MonoBehaviour
     public float minCameraY = 300f;
     public float maxCameraY = 300f;
 
-    void Start()
+    void Awake()
     {
         cam = GetComponent<Camera>();
     }
@@ -27,7 +27,6 @@ public class View : MonoBehaviour
         HandlePan();
         HandleZoom();
     }
-
     
     private void HandlePan()
     {

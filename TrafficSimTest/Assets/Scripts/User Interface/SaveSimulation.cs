@@ -18,7 +18,7 @@ public class SaveSimulation : MonoBehaviour
     public void SaveSimulationToFileSystem()
     {
         Simulation simulation = GameManager.Instance.simulation;
-        string path = Application.persistentDataPath + $"/simulation.tsf";
+        string path = StandaloneFileBrowser.SaveFilePanel("Save File", Application.persistentDataPath, "simulation", "tsf");
 
         PersistenceManager.Instance.SaveSimulationData(path, simulation);
     }

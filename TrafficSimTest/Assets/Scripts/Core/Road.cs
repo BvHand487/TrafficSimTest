@@ -70,8 +70,8 @@ public class Road
     // Returns a segment of the path from a junction to a point (inclusive) on the road.
     public List<Vector3> SplitPath(Junction junction, Vector3 at)
     {
-        int fromIndex = GetClosestPathIndex(junction.transform.localPosition);
-        int toIndex = GetClosestPathIndex(at);
+        int fromIndex = GetClosestEndIndex(junction.transform.localPosition);
+        int toIndex = GetClosestEndIndex(at);
 
         if (IsCyclic() && toIndex > path.Count / 2)
             fromIndex = path.Count - 1 - fromIndex;
@@ -88,8 +88,8 @@ public class Road
         if (from == to)
             return new List<Vector3>() { from };
 
-        int fromIndex = GetClosestPathIndex(from);
-        int toIndex = GetClosestPathIndex(to);
+        int fromIndex = GetClosestEndIndex(from);
+        int toIndex = GetClosestEndIndex(to);
 
         if (fromIndex > toIndex)
             (fromIndex, toIndex) = (toIndex, fromIndex);
@@ -97,7 +97,7 @@ public class Road
         return path.Skip(fromIndex).Take(toIndex - fromIndex + 1).ToList();
     }
 
-    public int GetClosestPathIndex(Vector3 point)
+    public int GetClosestEndIndex(Vector3 point)
     {
         int idx = path.IndexOf(point);
         if (idx == -1)
@@ -108,9 +108,9 @@ public class Road
 
         return idx;
     }
-    public Vector3 GetClosestPathPoint(Vector3 point)
+    public Vector3 GetClosestEndPoint(Vector3 point)
     {
-        return path[GetClosestPathIndex(point)];
+        return path[GetClosestEndIndex(point)];
     }
 
     public bool IsCyclic() => junctionStart == junctionEnd;

@@ -6,6 +6,7 @@ public class BuildingData
 {
     public string typeName;
     public float[] pos;
+    public float height;
     public string prefabPath;
 
     public BuildingData(Building building)
@@ -17,6 +18,8 @@ public class BuildingData
             building.transform.position.y,
             building.transform.position.z
         };
+
+        this.height = building.transform.localScale.y;
 
         this.prefabPath = $"Prefabs/{GameManager.Instance.buildingPrefab.name}";
     }

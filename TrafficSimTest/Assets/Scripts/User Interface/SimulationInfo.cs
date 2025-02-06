@@ -9,15 +9,17 @@ public class SimulationInfo : MonoBehaviour
 
     private TextMeshProUGUI simulationData;
 
-    void Start()
+    void Awake()
     {
         simulationData = GetComponent<TextMeshProUGUI>();
+    }
 
+    void Start()
+    {
         simulation = GameObject.FindGameObjectWithTag("Simulation").GetComponent<Simulation>();
         vehicleManager = simulation.vehicleManager;
         buildingManager = simulation.buildingManager;
     }
-
 
     void Update()
     {

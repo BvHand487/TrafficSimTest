@@ -49,6 +49,15 @@ namespace Generation
                         Building building = InstantiatePrefab(tile.prefab, pos, rot, parent).GetComponent<Building>();
                         buildingsMap.Add(tile, building);
 
+
+                        // choose random building type based on distance from the center of the city
+                        float halfSize = 0.5f * (parent.transform.GetChild(0).localScale.x - GameManager.Instance.tileSize);
+                        float maxDistance = Mathf.Sqrt(2f) * halfSize;
+                        var type = Utils.Modeling.ChooseRandomBuildingType(building.transform.position.magnitude / maxDistance);
+                        building.SetType(type);
+
+
+                        // choose random building height and set it
                         var factor = tile.DistanceToCenter() / grid.MaxDistanceFromCenter();
                         var buildingHeight = Utils.Modeling.BuildingHeightFromDistance(factor, gm.minBuildingHeight, gm.maxBuildingHeight, gm.buildingHeightDecay);
                         buildingHeight += gm.buildingHeightRandomness * (Random.value - 0.5f);
@@ -97,7 +106,9 @@ namespace Generation
 
                         foreach (Building building in buildingTiles.FindAll(tile => roadTiles.Any(rt => GridTile.IsNeighbours(rt, tile))).Select(tile => buildingsMap[tile]))
                         {
-                            building.spawnPoints.TryAdd(roadToAdd, Utils.Math.GetClosestVector(building.transform.position, roadToAdd.path));
+                            if (!building.roads.Contains(roadToAdd))
+                                building.roads.Add(roadToAdd);
+
                             if (!buildings.Contains(building))
                                 buildings.Add(building);
                         }
@@ -119,12 +130,9 @@ namespace Generation
                         {
                             Road road = roads.Find(r => r.junctionStart == junctionsMap[tile] || r.junctionEnd == junctionsMap[tile]);
 
-                            Vector3 closestPoint = Utils.Math.GetClosestVector(building.transform.position, road.path);
-                            int closestPointIndex = road.path.IndexOf(closestPoint);
-                            int nextPointIndex = closestPointIndex == 0 ? 1 : road.path.Count - 2;
+                            if (!building.roads.Contains(road))
+                                building.roads.Add(road);
 
-                            Vector3 continuationDir = closestPoint - road.path[nextPointIndex];
-                            building.spawnPoints.TryAdd(road, closestPoint + continuationDir);
                             if (!buildings.Contains(building))
                                 buildings.Add(building);
                         }

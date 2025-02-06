@@ -66,9 +66,9 @@ public class Junction : MonoBehaviour
 
         if (roads.Count == 3)
         {
-            Vector3 dirToIndex0 = roads[0].GetClosestPathPoint(junctionPos) - junctionPos;
-            Vector3 dirToIndex1 = roads[1].GetClosestPathPoint(junctionPos) - junctionPos;
-            Vector3 dirToIndex2 = roads[2].GetClosestPathPoint(junctionPos) - junctionPos;
+            Vector3 dirToIndex0 = roads[0].GetClosestEndPoint(junctionPos) - junctionPos;
+            Vector3 dirToIndex1 = roads[1].GetClosestEndPoint(junctionPos) - junctionPos;
+            Vector3 dirToIndex2 = roads[2].GetClosestEndPoint(junctionPos) - junctionPos;
 
             if (Vector3.Dot(dirToIndex0, dirToIndex1) <= -0.95)
             {

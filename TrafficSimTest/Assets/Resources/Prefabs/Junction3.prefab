@@ -53,6 +53,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mode: 0
   junction: {fileID: 0}
+  agent: {fileID: 0}
   lights: []
   elapsedTime: 0
 --- !u!114 &2775138799273056743
@@ -71,6 +72,7 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 5000
+  tracker: {fileID: 0}
 --- !u!114 &673899000599802244
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -129,6 +131,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0de233a4702c63646813ec0be1600cfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timeWindow: 300
+  updatePeriod: 5
 --- !u!1 &6960445232992493620
 GameObject:
   m_ObjectHideFlags: 0
@@ -251,7 +255,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   roadDirection: {x: 0, y: 0, z: 0}
-  queueLength: 0
+  vehicleQueue: []
   trafficController: {fileID: 0}
   greenInterval: 10
 --- !u!1 &7724252557789297759
@@ -376,7 +380,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   roadDirection: {x: 0, y: 0, z: 0}
-  queueLength: 0
+  vehicleQueue: []
   trafficController: {fileID: 0}
   greenInterval: 10
 --- !u!1 &8704194204369785868
@@ -501,7 +505,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   roadDirection: {x: 0, y: 0, z: 0}
-  queueLength: 0
+  vehicleQueue: []
   trafficController: {fileID: 0}
   greenInterval: 10
 --- !u!1 &9066375938536572818

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
@@ -8,18 +9,23 @@ public class PersistenceManager : SingletonMonobehaviour<PersistenceManager>
 
     public override void Awake()
     {
-        base.Awake();
+        if (Instance != null)
+            Destroy(Instance.gameObject);
 
+        base.Awake();
         DontDestroyOnLoad(this);
+
+        PlayerPrefs.DeleteAll();
     }
 
     public SimulationData SaveSimulationData(string path, Simulation simulation)
     {
-        BinaryFormatter formatter = new BinaryFormatter();
         FileStream stream = new FileStream(path, FileMode.Create);
 
         SimulationData data = new SimulationData(simulation);
-        formatter.Serialize(stream, data);
+        byte[] json = System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(data, true));
+
+        stream.Write(json, 0, json.Length);
         stream.Close();
 
         return lastData = data;
@@ -27,11 +33,14 @@ public class PersistenceManager : SingletonMonobehaviour<PersistenceManager>
 
     public SimulationData LoadSimulationData(string path)
     {
-        BinaryFormatter formatter = new BinaryFormatter();
         FileStream stream = new FileStream(path, FileMode.Open);
 
-        SimulationData data = formatter.Deserialize(stream) as SimulationData;
+        byte[] bytes = new byte[stream.Length];
+        stream.Read(bytes, 0, bytes.Length);
         stream.Close();
+
+        string json = System.Text.Encoding.UTF8.GetString(bytes);
+        SimulationData data = JsonUtility.FromJson<SimulationData>(json);
 
         return lastData = data;
     }

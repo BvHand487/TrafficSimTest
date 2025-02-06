@@ -5,29 +5,34 @@ using UnityEngine;
 // Singleton class representing time in the simulation
 public class Clock : SingletonMonobehaviour<Clock>
 {
-    public DateTime datetime { get; private set; }
+    public DateTime datetime { get; set; }
+    public bool isPaused = false;
     private static readonly float clockRatio = 1f;
 
+    private float effectiveTimeScale;
     public float timeScale
     {
-        get => Time.timeScale;
+        get
+        {
+            return effectiveTimeScale;
+        }
         set
         {
-            if (Time.timeScale != 0f)
+            if (!isPaused)
             {
-                prevTimeScale = Time.timeScale;
                 Time.timeScale = value;
+                effectiveTimeScale = value;
             }
+            else
+                effectiveTimeScale = value;
         }
     }
-    private float prevTimeScale;
 
     public override void Awake()
     {
         base.Awake();
 
         datetime = DateTime.Today;
-        prevTimeScale = 1.0f;
         timeScale = 1.0f;
     }
 
@@ -38,14 +43,12 @@ public class Clock : SingletonMonobehaviour<Clock>
 
     public void SetPaused(bool isPaused)
     {
-        if (isPaused && timeScale != 0f)
-        {
-            timeScale = 0f;
-            return;
-        }
-        
-        if (!isPaused && timeScale == 0f)
-            Time.timeScale = prevTimeScale;
+        this.isPaused = isPaused;
+
+        if (isPaused)
+            Time.timeScale = 0f;
+        else
+            Time.timeScale = effectiveTimeScale;
     }
 
     public float GetFractionOfDay()
