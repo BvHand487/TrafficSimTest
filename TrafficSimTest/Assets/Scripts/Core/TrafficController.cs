@@ -16,7 +16,7 @@ public class TrafficController : MonoBehaviour
     private Mode newMode;
 
     public Junction junction;
-    public TrafficLightAgent agent;
+    public TrafficAgent agent;
     public List<TrafficLight> lights;
 
     public float elapsedTime = 0.0f;
@@ -27,7 +27,7 @@ public class TrafficController : MonoBehaviour
     public void Awake()
     {
         junction = GetComponentInParent<Junction>();
-        agent = GetComponent<TrafficLightAgent>();
+        agent = GetComponent<TrafficAgent>();
         lights = GetComponentsInChildren<TrafficLight>().ToList();
         
         mode = Mode.Double;

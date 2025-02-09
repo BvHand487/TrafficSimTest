@@ -21,7 +21,7 @@ public class TrainingManager : SingletonMonobehaviour<TrainingManager>
     [SerializeField] public bool twoPhaseJunctions = false;
     [SerializeField] public float episodeLength = 300.0f;  // in seconds simulated time
 
-    private List<TrafficLightAgent> agents;
+    private List<TrafficAgent> agents;
     private List<BehaviorParameters> behaviours;
     private string trainingId;
 
@@ -52,12 +52,12 @@ public class TrainingManager : SingletonMonobehaviour<TrainingManager>
 
     public void LoadAgents()
     {
-        agents = new List<TrafficLightAgent>();
+        agents = new List<TrafficAgent>();
 
         GameObject[] junctions = GameObject.FindGameObjectsWithTag("Junction");
         foreach (var j in junctions)
         {
-            var agent = j.GetComponentInChildren<TrafficLightAgent>();
+            var agent = j.GetComponentInChildren<TrafficAgent>();
             agents.Add(agent);
         }
     }

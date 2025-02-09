@@ -10,7 +10,7 @@ using Unity.MLAgents.Sensors;
 using UnityEditor.MemoryProfiler;
 using UnityEngine;
 
-public class TrafficLightAgent : Agent
+public class TrafficAgent : Agent
 {
     private BehaviorParameters parameters;
     private TrainingManager trainingManager;
@@ -18,7 +18,7 @@ public class TrafficLightAgent : Agent
     private VehicleManager vehicleManager;
     private TrafficController trafficController;
     public CongestionTracker tracker;
-    private List<TrafficLightAgent> neighbours;
+    private List<TrafficAgent> neighbours;
 
     private float previousCongestion;
     private float previousReward;
@@ -32,7 +32,7 @@ public class TrafficLightAgent : Agent
 
         trafficController = GetComponent<TrafficController>();
         tracker = GetComponent<CongestionTracker>();
-        neighbours = new List<TrafficLightAgent>();
+        neighbours = new List<TrafficAgent>();
     }
 
     public void Start()
@@ -47,7 +47,7 @@ public class TrafficLightAgent : Agent
             .Distinct();
 
         neighbours = neighbouingJunctions
-            .Select(neighbourJunction => neighbourJunction.GetComponentInChildren<TrafficLightAgent>())
+            .Select(neighbourJunction => neighbourJunction.GetComponentInChildren<TrafficAgent>())
             .ToList();
 
         parameters.BrainParameters.VectorObservationSize = 2 * thisJunction.roads.Count;

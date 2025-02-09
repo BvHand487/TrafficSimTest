@@ -12,7 +12,7 @@ public class GameManager : SingletonMonobehaviour<GameManager>
     public GameObject simulationPrefab;
     public GameObject roadStraightPrefab;
     public GameObject roadTurnPrefab;
-    public GameObject roadJoinPrefab;
+    public GameObject roadJoinPrefab;                        
     public GameObject roadCrossPrefab;
     public GameObject roadEndPrefab;
     public GameObject buildingPrefab;
