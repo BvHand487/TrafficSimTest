@@ -19,7 +19,7 @@ public class GameManager : SingletonMonobehaviour<GameManager>
 
     [Header("Generation Settings")]
     [SerializeField] public float tileSize = 15f;
-    [SerializeField] public int gridSize = 50;
+    [SerializeField] public int gridSize = 3;
     [SerializeField] public int junctionGap = 5;
     
     [SerializeField] public int minBuildingHeight;

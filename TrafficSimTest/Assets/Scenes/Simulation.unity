@@ -566,7 +566,7 @@ MonoBehaviour:
   buildingPrefab: {fileID: 3529599447628414491, guid: 7789e01f12e96704197780e34dc3fe3f,
     type: 3}
   tileSize: 15
-  gridSize: 5
+  gridSize: 3
   junctionGap: 5
   minBuildingHeight: 5
   maxBuildingHeight: 25
@@ -575,7 +575,7 @@ MonoBehaviour:
   buildingHeightRandomness: 2
   vehicleTypes:
   - {fileID: 11400000, guid: 86c489ece8c5ef249a23849b27f12cc7, type: 2}
-  vehicleMultiplier: 0.5
+  vehicleMultiplier: 1
 --- !u!4 &80862059
 Transform:
   m_ObjectHideFlags: 0
@@ -3267,9 +3267,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f73c6d31902060d47be04e4130b2f285, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mode: 0
   timeDependentTraffic: 0
   twoPhaseJunctions: 0
   episodeLength: 300
+  isTraining: 0
 --- !u!4 &632047471
 Transform:
   m_ObjectHideFlags: 0

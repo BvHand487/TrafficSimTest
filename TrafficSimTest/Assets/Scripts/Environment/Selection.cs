@@ -66,7 +66,8 @@ public class Selection : MonoBehaviour
         if (selectedJunction)
         {
             junctionTooltip.SetText($"Elapsed Time: {selectedJunction.trafficController.elapsedTime.ToString("0.00")}\n" +
-                $"Congestion: {selectedJunction.trafficController.agent.tracker.GetCumulativeCongestion().ToString("0.00")}");
+                $"Congestion: {selectedJunction.trafficController.agent.tracker.GetCumulativeCongestion().ToString("0.00")}\n" +
+                $"Vehicles passed: {selectedJunction.vehiclesExitedSinceLastStep}");
 
             for (int i = 0; i < selectedJunction.trafficController.lights.Count; ++i)
             {

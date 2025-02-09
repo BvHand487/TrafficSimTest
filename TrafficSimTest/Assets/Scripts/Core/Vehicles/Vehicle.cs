@@ -309,6 +309,13 @@ public abstract class Vehicle : MonoBehaviour
         return false;
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Junction"))
+            if (upcomingJunction != null)
+                upcomingJunction.vehiclesExitedSinceLastStep++;
+    }
+
     public abstract Vector3 GetBumperOffset();
 
     protected virtual bool IsStopped()

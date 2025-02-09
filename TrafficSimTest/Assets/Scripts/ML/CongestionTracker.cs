@@ -6,8 +6,8 @@ using UnityEngine;
 
 public class CongestionTracker : MonoBehaviour
 {
-    public float timeWindow = 300f;  // Total congestion is an average over 5 minutes
-    public float updatePeriod = 5f;  // Add values every 5 seconds
+    public float timeWindow = 90f;  // Total congestion is an average over 5 minutes
+    public float updatePeriod = 1.5f;  // Add values every 5 seconds
 
     private VehicleManager vehicleManager;
     private TrafficController trafficController;
@@ -113,6 +113,8 @@ public class CongestionTracker : MonoBehaviour
 
     public void ResetValues()
     {
+        Debug.Log("reset");
+
         congestionHistory.Clear();
         cumulativeCongestion = 0f;
         timeElapsed = 0f;

@@ -1,3 +1,4 @@
+using NUnit.Framework.Constraints;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +29,6 @@ public class TrafficLightAgent : Agent
         base.Awake();
 
         parameters = GetComponent<BehaviorParameters>();
-        trainingManager = TrainingManager.Instance;
 
         trafficController = GetComponent<TrafficController>();
         tracker = GetComponent<CongestionTracker>();
@@ -38,62 +38,71 @@ public class TrafficLightAgent : Agent
     public void Start()
     {
         vehicleManager = trafficController.junction.simulation.vehicleManager;
+        trainingManager = TrainingManager.Instance;
 
         var thisJunction = trafficController.junction;
-        neighbours = thisJunction.roads
+        var neighbouingJunctions = thisJunction.roads
             .Select(r => r.GetOtherJunction(thisJunction))
-            .Where(j => j != null && j != thisJunction)
-            .Distinct()
-            .Select(neighbourJunction => neighbourJunction.GetComponent<TrafficLightAgent>())
+            .Where(j => j != null && j != thisJunction && j.roads.Count > 1)
+            .Distinct();
+
+        neighbours = neighbouingJunctions
+            .Select(neighbourJunction => neighbourJunction.GetComponentInChildren<TrafficLightAgent>())
             .ToList();
 
-        
-        parameters.BrainParameters.VectorObservationSize = 3 + neighbours.Count * 1;
+        parameters.BrainParameters.VectorObservationSize = 2 * thisJunction.roads.Count;
+        foreach (var junction in neighbouingJunctions)
+        {
+            parameters.BrainParameters.VectorObservationSize += 2;
+        }
 
         var actionParams = parameters.BrainParameters.ActionSpec;
-        actionParams.NumContinuousActions = trafficController.lights.Count;
-
-        if (trainingManager.twoPhaseJunctions)
-            actionParams.BranchSizes = new int[] { 2 };
-        else
-            actionParams.BranchSizes = null;
-
+        actionParams.NumContinuousActions = 0;
+        actionParams.BranchSizes = new int[] { 2 };
         parameters.BrainParameters.ActionSpec = actionParams;
 
+        Debug.Log($"j: {thisJunction.transform.position}, neighbouring agents: {neighbours.Count}, params: {parameters.BrainParameters.VectorObservationSize}");
 
         timeElapsed = 0f;
     }
 
     public override void OnEpisodeBegin()
-    {   
+    {
+        if (!trainingManager.isTraining)
+            return;
+
         if (!vehicleManager)
             vehicleManager = trafficController.junction.simulation.vehicleManager;
 
         tracker.ResetValues();
         vehicleManager.ClearVehicles();
-        trafficController.ResetLights();
+        trafficController.SetLights(Mathf.RoundToInt(Random.value));
     }
 
     private void Update()
     {
+        timeElapsedLights += Time.deltaTime;
+
+        if (!trainingManager.isTraining)
+            return;
+
         timeElapsed += Time.deltaTime;
 
         if (timeElapsed > trainingManager.episodeLength)
             EndEpisode();
+
+        timeElapsed -= trainingManager.episodeLength;
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        if (!tracker.ReadyToReport() || neighbours.Any(n => !n.tracker.ReadyToReport()))
-            return;
-
-        sensor.AddObservation(tracker.GetCumulativeCongestion());
-        sensor.AddObservation(previousCongestion);
-        sensor.AddObservation(previousReward);
+        sensor.AddObservation(tracker.GetQueueLengths().Select(v => (float) v).ToArray());
+        sensor.AddObservation(tracker.GetTotalWaitingTimes().Select(v => (float) v).ToArray());
 
         foreach (var agent in neighbours)
         {
-            sensor.AddObservation(agent.tracker.GetCumulativeCongestion());
+            sensor.AddObservation(agent.tracker.GetQueueLengths().Sum());
+            sensor.AddObservation(agent.tracker.GetTotalWaitingTimes().Sum());
         }
     }
 
@@ -106,59 +115,74 @@ public class TrafficLightAgent : Agent
     public void ReflectActions(ActionBuffers actionBuffers)
     {
         // define the min, max green interval duration and step size
-        float minGreenInterval = 5.0f;
-        float maxGreenInterval = 30.0f;
-        float stepSize = 0.5f;
+        //float minGreenInterval = 5.0f;
+        //float maxGreenInterval = 30.0f;
+        //float stepSize = 0.5f;
 
-        var continuousActions = actionBuffers.ContinuousActions;
-        var discreteActions = actionBuffers.DiscreteActions;
+        //var continuousActions = actionBuffers.ContinuousActions;
+        //var discreteActions = actionBuffers.DiscreteActions;
 
-        List<float> scaledIntervals = new List<float>();
+        //List<float> scaledIntervals = new List<float>();
 
-        for (int i = 0; i < trafficController.lights.Count; i++)
-        {
-            float rawGreenInterval = continuousActions[i];
+        //for (int i = 0; i < trafficController.lights.Count; i++)
+        //{
+        //    float continuousGreenInterval = Mathf.Lerp(minGreenInterval, maxGreenInterval, 0.5f * continuousActions[i] + 0.5f);
 
-            float scaledGreenInterval = Mathf.Clamp(
-                Mathf.Round(rawGreenInterval / stepSize) * stepSize,
-                minGreenInterval,
-                maxGreenInterval
-            );
+        //    float scaledGreenInterval = Mathf.Clamp(
+        //        Mathf.Round(continuousGreenInterval / stepSize) * stepSize,
+        //        minGreenInterval,
+        //        maxGreenInterval
+        //    );
 
-            scaledIntervals.Add(scaledGreenInterval);
-        }
+        //    scaledIntervals.Add(scaledGreenInterval);
+        //}
 
-        if (trainingManager.twoPhaseJunctions)
-        {
-            if (discreteActions[0] == 0)
-                trafficController.ConfigureLights(scaledIntervals, TrafficController.Mode.Single);
+        //if (trainingManager.twoPhaseJunctions)
+        //{
+        //    if (discreteActions[0] == 0)
+        //        trafficController.ConfigureLights(scaledIntervals, TrafficController.Mode.Single);
 
-            if (discreteActions[0] == 1)
-                trafficController.ConfigureLights(scaledIntervals, TrafficController.Mode.Double);
-        }
-        else
-            trafficController.ConfigureLights(scaledIntervals, TrafficController.Mode.Double);
+        //    if (discreteActions[0] == 1)
+        //        trafficController.ConfigureLights(scaledIntervals, TrafficController.Mode.Double);
+        //}
+        //else
+        //    trafficController.ConfigureLights(scaledIntervals, TrafficController.Mode.Double);
 
-        SetReward(-0.1f);
+        // minimum light time
+        if (timeElapsedLights < 10f)
+            return;
+
+        timeElapsedLights = 0f;
+
+        int phase = actionBuffers.DiscreteActions[0];
+
+        trafficController.SetLights(phase);
     }
 
     public void EvaluateRewards()
     {
+        // current and nearby congestion - negative reward
         var congestion = tracker.GetCumulativeCongestion();
         var neighboursCongestion = neighbours.Select(n => tracker.GetCumulativeCongestion()).Sum();
-
         var totalCongestion = congestion + neighboursCongestion;
+        float reward = -congestion - neighboursCongestion * 0.5f;
 
-        // Calculate the reward (e.g., minimize congestion)
-        float reward = -congestion - neighboursCongestion * 0.5f; // Encouraging lower congestion at the junction and neighbors
-
+        // collaborative work - positive reward
         float collaborationReward = 0f;
         foreach (var agent in neighbours)
         {
-            collaborationReward += Mathf.Max(0, previousCongestion - agent.tracker.GetCumulativeCongestion());
+            collaborationReward += Mathf.Max(0, previousCongestion - agent.tracker.GetCumulativeCongestion()) * 0.05f;
         }
-
         reward += collaborationReward;
+
+        // exponentially worse reward for long waiting time
+        float expWaitingTimePenalty = -0.1f * trafficController.lights.Sum(l => l.vehicleQueue.Sum(v => Mathf.Exp(v.timeWaiting / 20f)));
+        reward += expWaitingTimePenalty;
+
+        // increase reward for high throughput
+        float vehiclesCleared = trafficController.junction.VehiclesExitedSinceLastStep();
+        float clearanceReward = vehiclesCleared; // Positive reward for clearing vehicles
+        reward += clearanceReward;
 
         SetReward(reward);
 
@@ -166,19 +190,12 @@ public class TrafficLightAgent : Agent
         previousReward = reward;
     }
 
+    public float timeElapsedLights = 0f;
+
     public override void Heuristic(in ActionBuffers actionsOut)
     {
-        // Define the min, max green interval duration and step size
-        float minGreenInterval = 5.0f;
-        float maxGreenInterval = 30.0f;
-
-        var continuousActions = actionsOut.ContinuousActions;
         var discreteActions = actionsOut.DiscreteActions;
 
-        for (int i = 0; i < trafficController.lights.Count; i++)
-            continuousActions[i] = Mathf.Clamp(20.0f, minGreenInterval, maxGreenInterval);
-
-        // double mode
-        discreteActions[0] = 1;
+        discreteActions[0] = 1 - trafficController.currentPhase;
     }
 }

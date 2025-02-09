@@ -107,4 +107,14 @@ public class Junction : MonoBehaviour
     {
         return boxCollider.bounds.Contains(point);
     }
+
+
+    public int vehiclesExitedSinceLastStep = 0;
+
+    public int VehiclesExitedSinceLastStep()
+    {
+        int exited = vehiclesExitedSinceLastStep;
+        vehiclesExitedSinceLastStep = 0;
+        return exited;
+    }
 }

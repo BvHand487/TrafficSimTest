@@ -15,5 +15,7 @@ behaviors:
       num_layers: 2
     reward_signals:
       extrinsic:
-        gamma: 0.99
         strength: 1.0
+        gamma: 0.99
+    max_steps: 10000000
+    keep_checkpoints: 10

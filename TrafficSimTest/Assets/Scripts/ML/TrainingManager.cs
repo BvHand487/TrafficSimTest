@@ -1,9 +1,22 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using Unity.MLAgents;
 using Unity.MLAgents.Policies;
+using Unity.Sentis;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.Timeline;
 
 public class TrainingManager : SingletonMonobehaviour<TrainingManager>
 {
+    public enum Mode
+    {
+        Default,
+        Training,
+        LoadedModel
+    }
+    public Mode mode;
+
     [SerializeField] public bool timeDependentTraffic = false;
     [SerializeField] public bool twoPhaseJunctions = false;
     [SerializeField] public float episodeLength = 300.0f;  // in seconds simulated time
@@ -12,7 +25,7 @@ public class TrainingManager : SingletonMonobehaviour<TrainingManager>
     private List<BehaviorParameters> behaviours;
     private string trainingId;
 
-    private bool isTraining = false;
+    public bool isTraining = false;
     private PythonBackendManager pythonBackend;
 
     public override void Awake()
@@ -45,7 +58,6 @@ public class TrainingManager : SingletonMonobehaviour<TrainingManager>
         foreach (var j in junctions)
         {
             var agent = j.GetComponentInChildren<TrafficLightAgent>();
-            agent.enabled = false;
             agents.Add(agent);
         }
     }
@@ -58,7 +70,6 @@ public class TrainingManager : SingletonMonobehaviour<TrainingManager>
         foreach (var j in junctions)
         {
             var behaviour = j.GetComponentInChildren<BehaviorParameters>();
-            behaviour.enabled = false;
             behaviour.BehaviorType = BehaviorType.HeuristicOnly;
             behaviours.Add(behaviour);
         }
@@ -67,11 +78,7 @@ public class TrainingManager : SingletonMonobehaviour<TrainingManager>
     public void StartTraining()
     {
         for (int i = 0; i < agents.Count; ++i)
-        {
-            behaviours[i].enabled = true;
             behaviours[i].BehaviorType = BehaviorType.Default;
-            agents[i].enabled = true;
-        }
 
         isTraining = true;
     }
@@ -79,21 +86,14 @@ public class TrainingManager : SingletonMonobehaviour<TrainingManager>
     public void StopTraining()
     {
         for (int i = 0; i < agents.Count; ++i)
-        {
-            behaviours[i].enabled = false;
             behaviours[i].BehaviorType = BehaviorType.HeuristicOnly;
-            agents[i].enabled = false;
-        }
 
         isTraining = false;
     }
 
     public void LoadModel(string path)
     {
-        if (isTraining)
-            StopTraining();
-
-        return;
+        // ...
     }
 
     public void SaveModel(string path)

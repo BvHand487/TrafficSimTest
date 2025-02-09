@@ -56,6 +56,8 @@ MonoBehaviour:
   agent: {fileID: 0}
   lights: []
   elapsedTime: 0
+  phaseDuration: 20
+  currentPhase: 0
 --- !u!114 &2775138799273056743
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73,6 +75,7 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 5000
   tracker: {fileID: 0}
+  timeElapsedLights: 0
 --- !u!114 &673899000599802244
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -86,12 +89,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 12
+    VectorObservationSize: 16
     NumStackedVectorObservations: 1
     m_ActionSpec:
-      m_NumContinuousActions: 4
+      m_NumContinuousActions: 0
       BranchSizes: 02000000
-    VectorActionSize: 
+    VectorActionSize: 02000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
@@ -116,7 +119,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a5c9d521e5ef4759a8246a07d52221e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DecisionPeriod: 5
+  DecisionPeriod: 9
   DecisionStep: 0
   TakeActionsBetweenDecisions: 1
 --- !u!114 &7372651272109144356
@@ -131,8 +134,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0de233a4702c63646813ec0be1600cfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  timeWindow: 300
-  updatePeriod: 5
+  timeWindow: 90
+  updatePeriod: 1.5
 --- !u!1 &6960445232992493620
 GameObject:
   m_ObjectHideFlags: 0
