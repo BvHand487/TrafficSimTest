@@ -2,39 +2,39 @@
     "name": "root",
     "metadata": {
         "timer_format_version": "0.1.0",
-        "start_time_seconds": "1737581869",
+        "start_time_seconds": "1739174076",
         "python_version": "3.10.12 | packaged by Anaconda, Inc. | (main, Jul  5 2023, 19:01:18) [MSC v.1916 64 bit (AMD64)]",
-        "command_line_arguments": "C:\\Users\\User\\anaconda3\\envs\\TrafficSim\\Scripts\\mlagents-learn",
+        "command_line_arguments": "C:\\Users\\User\\anaconda3\\envs\\TrafficSim\\Scripts\\mlagents-learn config.yaml --run-id=example --debug",
         "mlagents_version": "1.1.0",
         "mlagents_envs_version": "1.1.0",
         "communication_protocol_version": "1.5.0",
         "pytorch_version": "2.2.2+cu121",
         "numpy_version": "1.23.5",
-        "end_time_seconds": "1737581932"
+        "end_time_seconds": "1739174138"
     },
-    "total": 62.50743279999915,
+    "total": 62.56718499999988,
     "count": 1,
-    "self": 0.003617399999711779,
+    "self": 0.00985450000007404,
     "children": {
         "run_training.setup": {
-            "total": 0.025985799999034498,
+            "total": 0.08847999999989042,
             "count": 1,
-            "self": 0.025985799999034498
+            "self": 0.08847999999989042
         },
         "TrainerController.start_learning": {
-            "total": 62.477829600000405,
+            "total": 62.46885049999992,
             "count": 1,
-            "self": 9.900000077323057e-05,
+            "self": 0.00017560000014782418,
             "children": {
                 "TrainerController._reset_env": {
-                    "total": 62.47771219999959,
+                    "total": 62.46799039999996,
                     "count": 1,
-                    "self": 62.47771219999959
+                    "self": 62.46799039999996
                 },
                 "TrainerController._save_models": {
-                    "total": 1.8400000044493936e-05,
+                    "total": 0.0006844999998065759,
                     "count": 1,
-                    "self": 1.8400000044493936e-05
+                    "self": 0.0006844999998065759
                 }
             }
         }
