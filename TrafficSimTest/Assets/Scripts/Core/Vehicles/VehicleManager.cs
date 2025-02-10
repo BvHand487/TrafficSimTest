@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using Utils;
 
@@ -27,18 +22,22 @@ public class VehicleManager : MonoBehaviour
     public float homeToWorkTrafficChance = 1.0f;
     public float workToHomeTrafficChance = 1.0f;
 
+    public bool vehicleCollisions = false;
+    public float vehicleMultiplier;
+
     public void Awake()
     {
         simulation = GetComponent<Simulation>();
 
         types = GameManager.Instance.vehicleTypes;
+        vehicleMultiplier = GameManager.Instance.vehicleMultiplier;
     }
 
     public void Start()
     {
-        maxVehicleCount = (int) (GameManager.Instance.vehicleMultiplier * simulation.buildingManager.buildings.Count);
+        UpdateMaxVehicleCount();
     }
-
+   
     public void Update()
     {
         if (TrainingManager.Instance.timeDependentTraffic == true)
@@ -164,6 +163,11 @@ public class VehicleManager : MonoBehaviour
         spawnQueue.Clear();
 
         currentVehicleCount = 0;
+    }
+
+    public void UpdateMaxVehicleCount()
+    {
+        maxVehicleCount = (int)(vehicleMultiplier * simulation.buildingManager.buildings.Count);
     }
 
     public void OnDestroy()

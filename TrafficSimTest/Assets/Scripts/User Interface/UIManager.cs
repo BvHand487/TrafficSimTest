@@ -5,7 +5,8 @@ using UnityEngine.SceneManagement;
 public class UIManager : SingletonMonobehaviour<UIManager>
 {
     private OptionsMenu optionsMenu;
-    private Dictionary<string, int> sliderValues = new Dictionary<string, int>();  // tracks all sliders in the scene
+    public Dictionary<string, int> sliderValues = new Dictionary<string, int>();  // tracks all sliders in the scene
+    public Dictionary<string, bool> checkmarkValues = new Dictionary<string, bool>();  // tracks all checkmarks in the scene
 
     public override void Awake()
     {
@@ -27,12 +28,45 @@ public class UIManager : SingletonMonobehaviour<UIManager>
     {
         foreach (CustomSlider slider in FindObjectsByType(typeof(CustomSlider), FindObjectsSortMode.None))
             slider.UpdateSliderValue(slider.minValue);
+
+        foreach (CustomCheckmark checkmark in FindObjectsByType(typeof(CustomCheckmark), FindObjectsSortMode.None))
+        {
+            checkmark.isToggled = false;
+            checkmarkValues[checkmark.title.text] = false;
+        }
     }
 
     public void UpdateSliderValues(string name, int value)
     {
         sliderValues[name] = value;
+
+        switch (name)
+        {
+            case "Vehicle multiplier (%)":
+                GameManager.Instance.simulation.vehicleManager.vehicleMultiplier = (float) UIManager.Instance.sliderValues[name] / 100f;
+                GameManager.Instance.simulation.vehicleManager.UpdateMaxVehicleCount();
+                break;
+        }
     }
+
+    public void UpdateCheckmarkValues(string name, bool value)
+    {
+        checkmarkValues[name] = value;
+
+        switch (name)
+        {
+            case "Time-dependent traffic":
+                TrainingManager.Instance.timeDependentTraffic = UIManager.Instance.checkmarkValues[name];
+                break;
+            case "Two mode junctions":
+                TrainingManager.Instance.twoModeJunctions = UIManager.Instance.checkmarkValues[name];
+                break;
+            case "Vehicle collisions":
+                GameManager.Instance.simulation.vehicleManager.vehicleCollisions = UIManager.Instance.checkmarkValues[name];
+                break;
+        }
+    }
+
 
     public void Generate()
     {

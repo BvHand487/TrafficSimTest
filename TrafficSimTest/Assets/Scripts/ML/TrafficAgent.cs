@@ -1,19 +1,14 @@
-using NUnit.Framework.Constraints;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using Unity.MLAgents;
 using Unity.MLAgents.Actuators;
 using Unity.MLAgents.Policies;
 using Unity.MLAgents.Sensors;
-using UnityEditor.MemoryProfiler;
 using UnityEngine;
 
 public class TrafficAgent : Agent
 {
     private BehaviorParameters parameters;
-    private TrainingManager trainingManager;
 
     private VehicleManager vehicleManager;
     private TrafficController trafficController;
@@ -38,7 +33,6 @@ public class TrafficAgent : Agent
     public void Start()
     {
         vehicleManager = trafficController.junction.simulation.vehicleManager;
-        trainingManager = TrainingManager.Instance;
 
         var thisJunction = trafficController.junction;
         var neighbouingJunctions = thisJunction.roads
@@ -68,7 +62,7 @@ public class TrafficAgent : Agent
 
     public override void OnEpisodeBegin()
     {
-        if (!trainingManager.isTraining)
+        if (!TrainingManager.Instance.isTraining)
             return;
 
         if (!vehicleManager)
@@ -83,15 +77,15 @@ public class TrafficAgent : Agent
     {
         timeElapsedLights += Time.deltaTime;
 
-        if (!trainingManager.isTraining)
+        if (!TrainingManager.Instance.isTraining)
             return;
 
         timeElapsed += Time.deltaTime;
 
-        if (timeElapsed > trainingManager.episodeLength)
+        if (timeElapsed > TrainingManager.Instance.episodeLength)
             EndEpisode();
 
-        timeElapsed -= trainingManager.episodeLength;
+        timeElapsed -= TrainingManager.Instance.episodeLength;
     }
 
     public override void CollectObservations(VectorSensor sensor)

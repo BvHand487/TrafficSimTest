@@ -1,11 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.IO;
-using Unity.MLAgents;
 using Unity.MLAgents.Policies;
-using Unity.Sentis;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.Timeline;
 
 public class TrainingManager : SingletonMonobehaviour<TrainingManager>
 {
@@ -18,7 +13,7 @@ public class TrainingManager : SingletonMonobehaviour<TrainingManager>
     public Mode mode;
 
     [SerializeField] public bool timeDependentTraffic = false;
-    [SerializeField] public bool twoPhaseJunctions = false;
+    [SerializeField] public bool twoModeJunctions = false;
     [SerializeField] public float episodeLength = 300.0f;  // in seconds simulated time
 
     private List<TrafficAgent> agents;

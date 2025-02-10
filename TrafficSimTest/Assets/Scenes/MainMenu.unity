@@ -869,7 +869,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lastData:
+    viewData:
+      pos: []
     clockData:
+      timeTicks: 0
       timeScale: 0
       isPaused: 0
     roadsData: []
