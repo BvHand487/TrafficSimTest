@@ -1,4 +1,4 @@
-using System.Collections;
+    using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.MLAgents.Sensors;
@@ -94,7 +94,7 @@ public class CongestionTracker : MonoBehaviour
         return (queueWeight * normalizedQueueLength) + (waitingTimeWeight * normalizedWaitingTime);
     }
 
-    public float GetCumulativeCongestion()
+    public float GetAverageCongestion()
     {
         if (congestionHistory.Count == 0)
             return 0f;

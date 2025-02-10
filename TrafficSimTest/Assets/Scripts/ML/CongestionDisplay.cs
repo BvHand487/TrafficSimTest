@@ -74,7 +74,7 @@ public class CongestionDisplay : MonoBehaviour
 
         foreach (var t in trackers)
         {
-            var trackerCongestion = t.GetCumulativeCongestion();
+            var trackerCongestion = t.GetAverageCongestion();
             totalCongestion += trackerCongestion;
         }
 

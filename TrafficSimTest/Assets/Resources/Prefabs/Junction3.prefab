@@ -10,10 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 3000031502342405124}
   - component: {fileID: 1535481194722606073}
-  - component: {fileID: 2775138799273056743}
   - component: {fileID: 673899000599802244}
   - component: {fileID: 2784084299105466730}
   - component: {fileID: 7372651272109144356}
+  - component: {fileID: 6888407861872033567}
   m_Layer: 0
   m_Name: TrafficController
   m_TagString: Untagged
@@ -56,26 +56,7 @@ MonoBehaviour:
   agent: {fileID: 0}
   lights: []
   elapsedTime: 0
-  phaseDuration: 20
   currentPhase: 0
---- !u!114 &2775138799273056743
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 99677460606695387}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2d3873f54484d6e40a8408139e269558, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  agentParameters:
-    maxStep: 0
-  hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
-  tracker: {fileID: 0}
-  timeElapsedLights: 0
 --- !u!114 &673899000599802244
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -136,6 +117,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timeWindow: 90
   updatePeriod: 1.5
+--- !u!114 &6888407861872033567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 99677460606695387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec392d823b22e8a4eb52aeac39d9ec71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
+  tracker: {fileID: 0}
+  timeElapsedLights: 0
 --- !u!1 &6960445232992493620
 GameObject:
   m_ObjectHideFlags: 0
@@ -638,3 +637,4 @@ MonoBehaviour:
   simulation: {fileID: 0}
   trafficController: {fileID: 0}
   boxCollider: {fileID: 0}
+  vehiclesExitedSinceLastStep: 0

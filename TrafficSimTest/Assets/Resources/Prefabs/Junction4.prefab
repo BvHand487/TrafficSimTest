@@ -10,10 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 6106350739284309795}
   - component: {fileID: 4580765338013274933}
-  - component: {fileID: 1306089894702143989}
   - component: {fileID: 7987409919306297750}
   - component: {fileID: 925276743311014730}
   - component: {fileID: 5187911233133717001}
+  - component: {fileID: 6532397326219126349}
   m_Layer: 0
   m_Name: TrafficController
   m_TagString: Untagged
@@ -57,26 +57,7 @@ MonoBehaviour:
   agent: {fileID: 0}
   lights: []
   elapsedTime: 0
-  phaseDuration: 20
   currentPhase: 0
---- !u!114 &1306089894702143989
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 278596252826018198}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2d3873f54484d6e40a8408139e269558, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  agentParameters:
-    maxStep: 0
-  hasUpgradedFromAgentParameters: 1
-  MaxStep: 5000
-  tracker: {fileID: 0}
-  timeElapsedLights: 0
 --- !u!114 &7987409919306297750
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -137,6 +118,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timeWindow: 90
   updatePeriod: 1.5
+--- !u!114 &6532397326219126349
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 278596252826018198}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec392d823b22e8a4eb52aeac39d9ec71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
+  tracker: {fileID: 0}
+  timeElapsedLights: 0
 --- !u!1 &3827662319154851184
 GameObject:
   m_ObjectHideFlags: 0
@@ -389,6 +388,7 @@ MonoBehaviour:
   simulation: {fileID: 0}
   trafficController: {fileID: 0}
   boxCollider: {fileID: 0}
+  vehiclesExitedSinceLastStep: 0
 --- !u!1 &6339187781795215746
 GameObject:
   m_ObjectHideFlags: 0

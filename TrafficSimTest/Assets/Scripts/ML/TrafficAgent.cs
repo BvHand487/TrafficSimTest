@@ -162,8 +162,8 @@ public class TrafficAgent : Agent
     public void EvaluateRewards()
     {
         // current and nearby congestion - negative reward
-        var congestion = tracker.GetCumulativeCongestion();
-        var neighboursCongestion = neighbours.Select(n => tracker.GetCumulativeCongestion()).Sum();
+        var congestion = tracker.GetAverageCongestion();
+        var neighboursCongestion = neighbours.Select(n => tracker.GetAverageCongestion()).Sum();
         var totalCongestion = congestion + neighboursCongestion;
         float reward = -congestion - neighboursCongestion * 0.5f;
 
@@ -171,7 +171,7 @@ public class TrafficAgent : Agent
         float collaborationReward = 0f;
         foreach (var agent in neighbours)
         {
-            collaborationReward += Mathf.Max(0, previousCongestion - agent.tracker.GetCumulativeCongestion()) * 0.05f;
+            collaborationReward += Mathf.Max(0, previousCongestion - agent.tracker.GetAverageCongestion()) * 0.2f;
         }
         reward += collaborationReward;
 
