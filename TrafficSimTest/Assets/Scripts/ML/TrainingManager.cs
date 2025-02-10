@@ -4,14 +4,6 @@ using UnityEngine;
 
 public class TrainingManager : SingletonMonobehaviour<TrainingManager>
 {
-    public enum Mode
-    {
-        Default,
-        Training,
-        LoadedModel
-    }
-    public Mode mode;
-
     [SerializeField] public bool timeDependentTraffic = false;
     [SerializeField] public bool twoModeJunctions = false;
     [SerializeField] public float episodeLength = 300.0f;  // in seconds simulated time
