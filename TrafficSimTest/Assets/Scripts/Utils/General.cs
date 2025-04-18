@@ -7,7 +7,8 @@ namespace Utils
     {
         public static T Select<T>(IEnumerable<T> list)
         {
-            return list.Count() != 0 ? list.ElementAt(UnityEngine.Random.Range(0, list.Count())) : default(T);
+            var enumerable = list.ToList();
+            return enumerable.Count() != 0 ? enumerable.ElementAt(UnityEngine.Random.Range(0, enumerable.Count())) : default(T);
         }
     }
 

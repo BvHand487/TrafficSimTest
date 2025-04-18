@@ -49,7 +49,7 @@ namespace Generation
             // TODO: refactor
             Transform ground = parent.transform.GetChild(0);
 
-            var size = (expandedGrid.size + 2) * gm.tileSize;
+            var size = (expandedGrid.size + 2) * GameManager.TileSize;
             var scale = ground.localScale;
             scale.Scale(new Vector3(size, 1f, size));
             ground.localScale = scale;

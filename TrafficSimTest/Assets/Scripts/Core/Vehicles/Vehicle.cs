@@ -293,7 +293,7 @@ public abstract class Vehicle : MonoBehaviour
                         (Vector3.up * bumperOffset.y) +
                         (dir * bumperOffset.z);
 
-                    return Physics.Raycast(junction.transform.position + worldBumperOffset - dir, dir, GameManager.Instance.tileSize, 1 << 6);
+                    return Physics.Raycast(junction.transform.position + worldBumperOffset - dir, dir, GameManager.TileSize, 1 << 6);
                 }
             }
         }

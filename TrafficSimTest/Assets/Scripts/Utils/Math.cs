@@ -15,12 +15,12 @@ namespace Utils
             if (points.Count <= 2)
                 return points;
 
-            List<Vector3> orderedPoints = new List<Vector3>() { points[points.Count - 1] };
-            points.Remove(points[points.Count - 1]);
+            List<Vector3> orderedPoints = new List<Vector3>() { points[0] };
+            points.Remove(points[0]);
 
             while (points.Count > 0)
             {
-                var closest = GetClosestVector(orderedPoints.Last(), points);
+                var closest = GetClosestVector(orderedPoints.First(), points);
                 orderedPoints.Add(closest);
                 points.Remove(closest);
             }

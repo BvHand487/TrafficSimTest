@@ -51,7 +51,7 @@ namespace Generation
 
 
                         // choose random building type based on distance from the center of the city
-                        float halfSize = 0.5f * (parent.transform.GetChild(0).localScale.x - GameManager.Instance.tileSize);
+                        float halfSize = 0.5f * (parent.transform.GetChild(0).localScale.x - GameManager.TileSize);
                         float maxDistance = Mathf.Sqrt(2f) * halfSize;
                         var type = Utils.Modeling.ChooseRandomBuildingType(building.transform.position.magnitude / maxDistance);
                         building.SetType(type);

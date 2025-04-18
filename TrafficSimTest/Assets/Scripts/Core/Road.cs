@@ -20,14 +20,15 @@ public class Road
     {
         path = new List<Vector3>();
         foreach (var localPoint in localPath)
-            path.Add(simulation.transform.position + localPoint);
+            path.Add(simulation?.transform.position ?? Vector3.zero + localPoint);
 
         this.junctionStart = j1;
         this.junctionEnd = j2;
 
         for (int i = 0; i < path.Count - 1; ++i)
             length += Vector3.Distance(path[i], path[i + 1]);
-        length += GameManager.Instance.tileSize;
+
+        length += GameManager.TileSize;
     }
 
     public bool IsConnectedTo(Junction j) => junctionStart == j || junctionEnd == j;

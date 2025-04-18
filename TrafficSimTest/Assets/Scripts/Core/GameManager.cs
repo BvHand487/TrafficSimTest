@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class GameManager : SingletonMonobehaviour<GameManager>
 {
@@ -15,9 +16,9 @@ public class GameManager : SingletonMonobehaviour<GameManager>
     public GameObject roadCrossPrefab;
     public GameObject roadEndPrefab;
     public GameObject buildingPrefab;
-
+    
     [Header("Generation Settings")]
-    [SerializeField] public float tileSize = 15f;
+    public static float TileSize = 15f;
     [SerializeField] public int gridSize = 3;
     [SerializeField] public int junctionGap = 5;
     

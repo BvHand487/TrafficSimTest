@@ -43,15 +43,27 @@ public class Junction : MonoBehaviour
 
     public void Start()
     {
-        float halfSize = 0.5f * (simulation.transform.GetChild(0).localScale.x - 2f * GameManager.Instance.tileSize);
-        float maxDistance = Mathf.Sqrt(2f) * halfSize;
+        if (simulation != null)
+        {
+            float halfSize = 0.5f * (simulation.transform.GetChild(0).localScale.x - 2f * GameManager.TileSize);
+            float maxDistance = Mathf.Sqrt(2f) * halfSize;
 
-        type = Utils.Modeling.ChooseRandomJunctionType(transform.position.magnitude / maxDistance);
+            type = Utils.Modeling.ChooseRandomJunctionType(transform.position.magnitude / maxDistance);
+        }
+        else
+        {
+            type = Junction.Type.None;
+        }
     }
 
     public static Road GetCommonRoad(Junction a, Junction b)
     {
         return a?.roads?.Intersect(b?.roads ?? Enumerable.Empty<Road>())?.FirstOrDefault();
+    }
+    
+    public static List<Road> GetCommonRoads(Junction a, Junction b)
+    {
+        return a?.roads?.Intersect(b?.roads ?? Enumerable.Empty<Road>()).ToList();
     }
 
 

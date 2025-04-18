@@ -23,7 +23,7 @@ namespace Generation
                 }
             }
 
-            this.centerOffset = - new Vector2((size / 2.0f) * GameManager.Instance.tileSize, (size / 2.0f) * GameManager.Instance.tileSize);
+            this.centerOffset = - new Vector2((size / 2.0f) * GameManager.TileSize, (size / 2.0f) * GameManager.TileSize);
         }
 
         public static float DistanceOfTiles(GridTile tile1, GridTile tile2)
@@ -36,7 +36,7 @@ namespace Generation
         public float DistanceOfTileToCenter(int x, int y) => tiles[x, y].DistanceToCenter();
         public float MaxDistanceFromCenter()
         {
-            return Mathf.Sqrt(2f) * 0.5f * (size * GameManager.Instance.tileSize - GameManager.Instance.tileSize);
+            return Mathf.Sqrt(2f) * 0.5f * (size * GameManager.TileSize - GameManager.TileSize);
         }
 
         public GridTile GetTile(Vector2Int coords) => tiles[coords.x, coords.y];

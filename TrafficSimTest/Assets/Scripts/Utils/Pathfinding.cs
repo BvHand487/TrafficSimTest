@@ -12,11 +12,6 @@ namespace Utils
 
             if (commonRoads.Count == 0)
             {
-                if (start.closestJunction == null || end.closestJunction == null)
-                {
-                    Debug.Log("???");
-                }
-
                 List<Junction> junctionPath = FindBestPath(start.closestJunction, end.closestJunction);
 
                 Road[] roadEnds = new Road[2];
@@ -194,9 +189,23 @@ namespace Utils
 
             for (int i = 0; i < junctionPath.Count - 1; ++i)
             {
-                var road = Junction.GetCommonRoad(junctionPath[i], junctionPath[i + 1]);
-                if (road != null)
-                    roadPath.Add(road);
+                Road bestRoad = null;
+                float bestMetric = float.MaxValue;
+                
+                foreach (var road in Junction.GetCommonRoads(junctionPath[i], junctionPath[i + 1]))
+                {
+                    if (road == null)
+                        continue;
+
+                    var currentMetric = Heuristic(road.junctionStart, road.junctionEnd);
+                    if (bestMetric > currentMetric)
+                    {
+                        bestMetric = currentMetric;
+                        bestRoad = road;
+                    }
+                }
+
+                roadPath.Add(bestRoad);
             }
 
             return roadPath;

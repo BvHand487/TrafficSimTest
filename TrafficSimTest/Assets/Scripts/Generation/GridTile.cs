@@ -17,7 +17,7 @@ namespace Generation
         }
 
         // instead of 0f, it has to be an offset for the center of the city
-        public Vector3 physicalPos => new Vector3((coords.x + 0.5f) * GameManager.Instance.tileSize + grid.centerOffset.x, 0, (coords.y + 0.5f) * GameManager.Instance.tileSize + grid.centerOffset.y);
+        public Vector3 physicalPos => new Vector3((coords.x + 0.5f) * GameManager.TileSize + grid.centerOffset.x, 0, (coords.y + 0.5f) * GameManager.TileSize + grid.centerOffset.y);
         public static GridTile empty => new GridTile(Type.None, null, 0, null, null, -Vector2Int.one);
 
         public Type type;
