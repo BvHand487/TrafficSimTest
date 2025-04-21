@@ -41,7 +41,7 @@ Traffic simulation with vehicles and traffic lights made in Unity with ML-Agents
 > mlagents-learn config.yaml --results-dir=results --run-id=RUN_ID
 ```
 
-#### 7. When prompted - press Play in the Unity Editor
+#### 6. When prompted - press Play in the Unity Editor
 <br/>
 
 ## 🧪 Running Tests
