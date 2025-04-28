@@ -64,7 +64,7 @@ public class GameManager : SingletonMonobehaviour<GameManager>
             // generates a simulation from a save file
             case "file":
                 {
-                    // TODO: refactor into seperate file/method
+                    // TODO: refactor into separate file/method
 
                     SimulationData data = PersistenceManager.Instance.lastData;
 

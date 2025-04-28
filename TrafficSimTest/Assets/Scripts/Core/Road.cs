@@ -20,7 +20,7 @@ public class Road
     {
         path = new List<Vector3>();
         foreach (var localPoint in localPath)
-            path.Add(simulation?.transform.position ?? Vector3.zero + localPoint);
+            path.Add((simulation?.transform.position ?? Vector3.zero) + localPoint);
 
         this.junctionStart = j1;
         this.junctionEnd = j2;
