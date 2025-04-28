@@ -9,7 +9,7 @@ Traffic simulation with vehicles and traffic lights made in Unity with ML-Agents
 #### 1. Clone the project:
 
 ```bash
-> git clone https://github.com/BvHand487/TrafficSimTest.git
+git clone https://github.com/BvHand487/TrafficSimTest.git
 ```
 
 #### 2. Open ./TrafficSimTest as a project in Unity 6.
@@ -24,21 +24,21 @@ Traffic simulation with vehicles and traffic lights made in Unity with ML-Agents
 #### 2. Create and activate conda environment:
 
 ```bash
-> conda create -n ENV_NAME python=3.10.12 && conda activate ENV_NAME
+conda create -n ENV_NAME python=3.10.12 && conda activate ENV_NAME
 ```
 
 #### 3. Download python packages:
 
 ```bash
-> pip install torch~=2.2.1 --index-url https://download.pytorch.org/whl/cu121
-> pip install mlagents==1.1.0
+pip install torch~=2.2.1 --index-url https://download.pytorch.org/whl/cu121
+pip install mlagents==1.1.0
 ```
 
 #### 4. Open ./TrafficSimTest as a project in Unity 6
 
 #### 5. Run
 ```bash
-> mlagents-learn config.yaml --results-dir=results --run-id=RUN_ID
+mlagents-learn config.yaml --results-dir=results --run-id=RUN_ID
 ```
 
 #### 6. When prompted - press Play in the Unity Editor
@@ -52,7 +52,7 @@ Traffic simulation with vehicles and traffic lights made in Unity with ML-Agents
 #### 3. Click on EditMode/PlayMode and run the tests.
 #### 4. Check the results in the panel for output.
 
-> 💡 Make sure the Unity Test Framework is installed via Package Manager if the Test Runner isn't visible.  
+>💡 Make sure the Unity Test Framework is installed via Package Manager if the Test Runner isn't visible.  
 
 
 ### Option 2 - Command Line:
@@ -61,7 +61,7 @@ Traffic simulation with vehicles and traffic lights made in Unity with ML-Agents
 #### 2. Run the following command from the root of the repository (Windows):
 
 ```bash
-> "C:\Program Files\Unity\Hub\Editor\6000.0.41f1\Editor\Unity.exe" -runTests ^
+"C:\Program Files\Unity\Hub\Editor\6000.0.41f1\Editor\Unity.exe" -runTests ^
     -projectPath /TrafficSimTest ^
     -testPlatform editmode ^
     -logFile /tests/test.log ^
