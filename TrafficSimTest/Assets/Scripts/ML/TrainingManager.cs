@@ -2,89 +2,92 @@
 using Unity.MLAgents.Policies;
 using UnityEngine;
 
-public class TrainingManager : SingletonMonobehaviour<TrainingManager>
+namespace ML
 {
-    [SerializeField] public bool timeDependentTraffic = false;
-    [SerializeField] public bool twoModeJunctions = false;
-    [SerializeField] public float episodeLength = 300.0f;  // in seconds simulated time
-
-    private List<TrafficAgent> agents;
-    private List<BehaviorParameters> behaviours;
-    private string trainingId;
-
-    public bool isTraining = false;
-    private PythonBackendManager pythonBackend;
-
-    public override void Awake()
+    public class TrainingManager : SingletonMonobehaviour<TrainingManager>
     {
-        base.Awake();
+        [SerializeField] public bool timeDependentTraffic = false;
+        [SerializeField] public bool twoModeJunctions = false;
+        [SerializeField] public float episodeLength = 300.0f;  // in seconds simulated time
 
-        pythonBackend = PythonBackendManager.Instance;
-    }
+        private List<TrafficAgent> agents;
+        private List<BehaviorParameters> behaviours;
+        private string trainingId;
 
-    public void Start()
-    {
-        LoadAgents();
-        LoadBehaviours();
+        public bool isTraining = false;
+        private PythonBackendManager pythonBackend;
 
-        if (enabled && pythonBackend.enabled)
-            trainingId = pythonBackend.StartMLAgents();
-    }
-
-    private void OnApplicationQuit()
-    {
-        if (pythonBackend.IsMLAgentsRunning())
-            pythonBackend.StopMLAgents();
-    }
-
-    public void LoadAgents()
-    {
-        agents = new List<TrafficAgent>();
-
-        GameObject[] junctions = GameObject.FindGameObjectsWithTag("Junction");
-        foreach (var j in junctions)
+        public override void Awake()
         {
-            var agent = j.GetComponentInChildren<TrafficAgent>();
-            agents.Add(agent);
+            base.Awake();
+
+            pythonBackend = PythonBackendManager.Instance;
         }
-    }
 
-    public void LoadBehaviours()
-    {
-        behaviours = new List<BehaviorParameters>();
-
-        GameObject[] junctions = GameObject.FindGameObjectsWithTag("Junction");
-        foreach (var j in junctions)
+        public void Start()
         {
-            var behaviour = j.GetComponentInChildren<BehaviorParameters>();
-            behaviour.BehaviorType = BehaviorType.HeuristicOnly;
-            behaviours.Add(behaviour);
+            LoadAgents();
+            LoadBehaviours();
+
+            if (enabled && pythonBackend.enabled)
+                trainingId = pythonBackend.StartMLAgents();
         }
-    }
 
-    public void StartTraining()
-    {
-        for (int i = 0; i < agents.Count; ++i)
-            behaviours[i].BehaviorType = BehaviorType.Default;
+        private void OnApplicationQuit()
+        {
+            if (pythonBackend.IsMLAgentsRunning())
+                pythonBackend.StopMLAgents();
+        }
 
-        isTraining = true;
-    }
+        public void LoadAgents()
+        {
+            agents = new List<TrafficAgent>();
 
-    public void StopTraining()
-    {
-        for (int i = 0; i < agents.Count; ++i)
-            behaviours[i].BehaviorType = BehaviorType.HeuristicOnly;
+            GameObject[] junctions = GameObject.FindGameObjectsWithTag("Junction");
+            foreach (var j in junctions)
+            {
+                var agent = j.GetComponentInChildren<TrafficAgent>();
+                agents.Add(agent);
+            }
+        }
 
-        isTraining = false;
-    }
+        public void LoadBehaviours()
+        {
+            behaviours = new List<BehaviorParameters>();
 
-    public void LoadModel(string path)
-    {
-        // ...
-    }
+            GameObject[] junctions = GameObject.FindGameObjectsWithTag("Junction");
+            foreach (var j in junctions)
+            {
+                var behaviour = j.GetComponentInChildren<BehaviorParameters>();
+                behaviour.BehaviorType = BehaviorType.HeuristicOnly;
+                behaviours.Add(behaviour);
+            }
+        }
 
-    public void SaveModel(string path)
-    {
-        // if training -> stop training -> go to temporary 'results' directory -> make copy of .onnx at 'path'
+        public void StartTraining()
+        {
+            for (int i = 0; i < agents.Count; ++i)
+                behaviours[i].BehaviorType = BehaviorType.Default;
+
+            isTraining = true;
+        }
+
+        public void StopTraining()
+        {
+            for (int i = 0; i < agents.Count; ++i)
+                behaviours[i].BehaviorType = BehaviorType.HeuristicOnly;
+
+            isTraining = false;
+        }
+
+        public void LoadModel(string path)
+        {
+            // ...
+        }
+
+        public void SaveModel(string path)
+        {
+            // if training -> stop training -> go to temporary 'results' directory -> make copy of .onnx at 'path'
+        }
     }
 }

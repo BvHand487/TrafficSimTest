@@ -1,50 +1,54 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Core.Buildings;
+using Core.Vehicles;
+using Persistence;
 using UnityEngine;
-using UnityEngine.Serialization;
 
-public class GameManager : SingletonMonobehaviour<GameManager>
+namespace Core
 {
-    [System.NonSerialized] public Simulation simulation;
-
-    [Header("Prefabs")]
-    public GameObject simulationPrefab;
-    public GameObject roadStraightPrefab;
-    public GameObject roadTurnPrefab;
-    public GameObject roadJoinPrefab;                        
-    public GameObject roadCrossPrefab;
-    public GameObject roadEndPrefab;
-    public GameObject buildingPrefab;
-    
-    [Header("Generation Settings")]
-    public static float TileSize = 15f;
-    [SerializeField] public int gridSize = 3;
-    [SerializeField] public int junctionGap = 5;
-    
-    [SerializeField] public int minBuildingHeight;
-    [SerializeField] public int maxBuildingHeight;
-    [SerializeField] public float buildingHeightStep = 2.0f;
-    [SerializeField] public float buildingHeightDecay;
-    [SerializeField] public float buildingHeightRandomness = 2.0f;
-
-    [Header("Vehicle Settings")]
-    [SerializeField] public List<VehiclePreset> vehicleTypes;
-    [SerializeField] public float vehicleMultiplier = 0.5f;
-
-    public override void Awake()
+    public class GameManager : SingletonMonobehaviour<GameManager>
     {
-        base.Awake();
+        [System.NonSerialized] public Simulation simulation;
 
-        string loadMethod = PlayerPrefs.GetString("Load method");
+        [Header("Prefabs")]
+        public GameObject simulationPrefab;
+        public GameObject roadStraightPrefab;
+        public GameObject roadTurnPrefab;
+        public GameObject roadJoinPrefab;                        
+        public GameObject roadCrossPrefab;
+        public GameObject roadEndPrefab;
+        public GameObject buildingPrefab;
+    
+        [Header("Generation Settings")]
+        public static float TileSize = 15f;
+        [SerializeField] public int gridSize = 3;
+        [SerializeField] public int junctionGap = 5;
+    
+        [SerializeField] public int minBuildingHeight;
+        [SerializeField] public int maxBuildingHeight;
+        [SerializeField] public float buildingHeightStep = 2.0f;
+        [SerializeField] public float buildingHeightDecay;
+        [SerializeField] public float buildingHeightRandomness = 2.0f;
 
-        if (string.IsNullOrEmpty(loadMethod))
-            loadMethod = "generate";
+        [Header("Vehicle Settings")]
+        [SerializeField] public List<VehiclePreset> vehicleTypes;
+        [SerializeField] public float vehicleMultiplier = 0.5f;
 
-        switch (loadMethod)
+        public override void Awake()
         {
-            // generate a random simulation
-            case "generate":
+            base.Awake();
+
+            string loadMethod = PlayerPrefs.GetString("Load method");
+
+            if (string.IsNullOrEmpty(loadMethod))
+                loadMethod = "generate";
+
+            switch (loadMethod)
+            {
+                // generate a random simulation
+                case "generate":
                 {
                     if (PlayerPrefs.HasKey("Grid Size"))
                         gridSize = PlayerPrefs.GetInt("Grid Size");
@@ -59,10 +63,10 @@ public class GameManager : SingletonMonobehaviour<GameManager>
                     simulation = simulationObject.GetComponent<Simulation>();
                     Generation.Generation.Generate(simulation.transform);
                 }
-                break;
+                    break;
 
-            // generates a simulation from a save file
-            case "file":
+                // generates a simulation from a save file
+                case "file":
                 {
                     // TODO: refactor into separate file/method
 
@@ -204,9 +208,10 @@ public class GameManager : SingletonMonobehaviour<GameManager>
                     // sets camera information
                     Camera.main.transform.position = new Vector3(data.viewData.pos[0], data.viewData.pos[1], data.viewData.pos[2]);
                 }
-                break;
-        }
+                    break;
+            }
                
-        PlayerPrefs.DeleteAll();
+            PlayerPrefs.DeleteAll();
+        }
     }
 }

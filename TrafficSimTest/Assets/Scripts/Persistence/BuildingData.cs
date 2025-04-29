@@ -1,23 +1,29 @@
-[System.Serializable]
-public class BuildingData
+using Core;
+using Core.Buildings;
+
+namespace Persistence
 {
-    public string typeName;
-    public float[] pos;
-    public float height;
-    public string prefabPath;
-
-    public BuildingData(Building building)
+    [System.Serializable]
+    public class BuildingData
     {
-        this.typeName = building.type.ToString();
+        public string typeName;
+        public float[] pos;
+        public float height;
+        public string prefabPath;
 
-        this.pos = new float[3] {
-            building.transform.position.x,
-            building.transform.position.y,
-            building.transform.position.z
-        };
+        public BuildingData(Building building)
+        {
+            this.typeName = building.type.ToString();
 
-        this.height = building.transform.localScale.y;
+            this.pos = new float[3] {
+                building.transform.position.x,
+                building.transform.position.y,
+                building.transform.position.z
+            };
 
-        this.prefabPath = $"Prefabs/{GameManager.Instance.buildingPrefab.name}";
+            this.height = building.transform.localScale.y;
+
+            this.prefabPath = $"Prefabs/{GameManager.Instance.buildingPrefab.name}";
+        }
     }
 }

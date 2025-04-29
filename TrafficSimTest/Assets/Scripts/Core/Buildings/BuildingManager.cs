@@ -2,40 +2,43 @@
 using System.Linq;
 using UnityEngine;
 
-public class BuildingManager : MonoBehaviour
+namespace Core.Buildings
 {
-    private Simulation simulation;
-
-    public List<Building> buildings;
-    public Dictionary<Building.Type, List<Building>> buildingsByType;
-
-    public void Awake()
+    public class BuildingManager : MonoBehaviour
     {
-        simulation = GetComponent<Simulation>();
-    }
+        private Simulation simulation;
 
-    public void Start()
-    {
-        buildings = GetComponentsInChildren<Building>().ToList();
+        public List<Building> buildings;
+        public Dictionary<Building.Type, List<Building>> buildingsByType;
 
-        buildingsByType = buildings
-            .GroupBy(building => building.type)
-            .ToDictionary(group => group.Key, group => group.ToList());
-    }
+        public void Awake()
+        {
+            simulation = GetComponent<Simulation>();
+        }
 
-    public Building GetRandomBuildingByType(Building.Type type)
-    {
-        return Utils.Random.Select(buildingsByType[type]);
-    }
+        public void Start()
+        {
+            buildings = GetComponentsInChildren<Building>().ToList();
 
-    public Building GetRandomBuilding()
-    {
-        return Utils.Random.Select(buildings);
-    }
+            buildingsByType = buildings
+                .GroupBy(building => building.type)
+                .ToDictionary(group => group.Key, group => group.ToList());
+        }
 
-    public void OnDestroy()
-    {
-        foreach (Building b in buildings)
-            Destroy(b);
+        public Building GetRandomBuildingByType(Building.Type type)
+        {
+            return Utils.Random.Select(buildingsByType[type]);
+        }
+
+        public Building GetRandomBuilding()
+        {
+            return Utils.Random.Select(buildings);
+        }
+
+        public void OnDestroy()
+        {
+            foreach (Building b in buildings)
+                Destroy(b);
+        }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Core;
+using Core.Buildings;
 using UnityEngine;
 
 namespace Utils
@@ -157,7 +159,7 @@ namespace Utils
         // Heuristic function: Straight-line distance between two junctions
         private static float Heuristic(Junction a, Junction b)
         {
-            return Junction.GetCommonRoad(a, b)?.length ?? Vector3.Distance(a.transform.localPosition, b.transform.localPosition);
+            return Junction.GetCommonRoad(a, b)?.length ?? (Vector3.Distance(a.transform.localPosition, b.transform.localPosition) + GameManager.TileSize);
         }
 
         // Reconstructs the path from end to start by tracing the cameFrom dictionary
@@ -219,7 +221,9 @@ namespace Utils
 
             for (int i = 0; i < junctionPath.Count - 1; ++i)
             {
-                nextRoad = Junction.GetCommonRoad(junctionPath[i], junctionPath[i + 1]);
+                var commonRoads = Junction.GetCommonRoads(junctionPath[i], junctionPath[i + 1]);
+                nextRoad = commonRoads.OrderBy(road => road.length).First();
+                
                 if (Vector3.Distance(junctionPath[i].transform.localPosition, nextRoad.path.First()) >
                     Vector3.Distance(junctionPath[i + 1].transform.localPosition, nextRoad.path.First()))
                     nextRoad.path.Reverse();

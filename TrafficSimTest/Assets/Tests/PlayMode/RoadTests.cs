@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Core;
+using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.TestTools;
+using Assert = UnityEngine.Assertions.Assert;
 
 namespace Tests.PlayMode
 {
@@ -70,6 +72,15 @@ namespace Tests.PlayMode
             return (j, r);
         }
 
+        [UnityTearDown]
+        public IEnumerator Cleanup()
+        {
+            foreach (var obj in Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None))
+                Object.Destroy(obj);
+            
+            yield return null;
+        }
+        
         [UnityTest]
         public IEnumerator IsConnectedTo_NormalRoad()
         {
@@ -334,6 +345,48 @@ namespace Tests.PlayMode
 
             Assert.AreEqual(r.GetClosestEndIndex(Vector3.forward), 2);
             Assert.AreEqual(r.GetClosestEndIndex(Vector3.right), 0);
+
+            yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator GetCommonRoad_NormalRoad()
+        {
+            var (j1, j2, r) = SetupNormalRoad();
+
+            Assert.AreEqual(Junction.GetCommonRoad(j1, j2), r);
+
+            var list = Junction.GetCommonRoads(j1, j2);
+            Assert.AreEqual(list.Count, 1);
+            Assert.AreEqual(list[0], r);
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator GetCommonRoad_TurnRoad()
+        {
+            var (j1, j2, r) = SetupTurnRoad();
+
+            Assert.AreEqual(Junction.GetCommonRoad(j1, j2), r);
+            
+            var list = Junction.GetCommonRoads(j1, j2);
+            Assert.AreEqual(list.Count, 1);
+            Assert.AreEqual(list[0], r);
+
+            yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator GetCommonRoad_CyclicRoad()
+        {
+            var (j, r) = SetupCyclicRoad();
+
+            Assert.AreEqual(Junction.GetCommonRoad(j, j), r);
+           
+            var list = Junction.GetCommonRoads(j, j);
+            Assert.AreEqual(list.Count, 1);
+            Assert.AreEqual(list[0], r);
 
             yield return null;
         }

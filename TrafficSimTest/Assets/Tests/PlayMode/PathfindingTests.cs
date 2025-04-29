@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Core;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
@@ -9,6 +10,15 @@ namespace Tests.PlayMode
 {
     public class PathfindingTests
     {
+        [UnityTearDown]
+        public IEnumerator Cleanup()
+        {
+            foreach (var obj in Object.FindObjectsByType<GameObject>(FindObjectsSortMode.None))
+                Object.Destroy(obj);
+            
+            yield return null;
+        }
+        
         /*
          * Tests the simple case of getting from point A to point B:
          *

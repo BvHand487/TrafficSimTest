@@ -1,41 +1,45 @@
 using System.Collections.Generic;
 using System.Linq;
+using Core.Buildings;
+using Core.Vehicles;
 using UnityEngine;
 
-
-public class Simulation : MonoBehaviour
+namespace Core
 {
-    public VehicleManager vehicleManager;
-    public BuildingManager buildingManager;
-
-    public List<Junction> junctions;
-    public List<Road> roads;
-
-    public void Awake()
+    public class Simulation : MonoBehaviour
     {
-        vehicleManager = GetComponent<VehicleManager>();
-        buildingManager = GetComponent<BuildingManager>();
-    }
+        public VehicleManager vehicleManager;
+        public BuildingManager buildingManager;
 
-    public void Start()
-    {
-        junctions = GetComponentsInChildren<Junction>().ToList();
+        public List<Junction> junctions;
+        public List<Road> roads;
 
-        roads = junctions
-            .SelectMany(junction => junction.roads)
-            .Distinct()
-            .ToList();
-    }
+        public void Awake()
+        {
+            vehicleManager = GetComponent<VehicleManager>();
+            buildingManager = GetComponent<BuildingManager>();
+        }
 
-    public void OnDestroy()
-    {
-        Destroy(vehicleManager);
-        Destroy(buildingManager);
+        public void Start()
+        {
+            junctions = GetComponentsInChildren<Junction>().ToList();
 
-        foreach (var junction in junctions)
-            Destroy(junction);
+            roads = junctions
+                .SelectMany(junction => junction.roads)
+                .Distinct()
+                .ToList();
+        }
 
-        for (int i = 0; i < transform.childCount; ++i)
-            Destroy(transform.GetChild(i).gameObject);
+        public void OnDestroy()
+        {
+            Destroy(vehicleManager);
+            Destroy(buildingManager);
+
+            foreach (var junction in junctions)
+                Destroy(junction);
+
+            for (int i = 0; i < transform.childCount; ++i)
+                Destroy(transform.GetChild(i).gameObject);
+        }
     }
 }

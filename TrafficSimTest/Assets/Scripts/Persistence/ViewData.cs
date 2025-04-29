@@ -1,14 +1,19 @@
-[System.Serializable]
-public class ViewData
-{
-    public float[] pos;
+using Core;
 
-    public ViewData(View view)
+namespace Persistence
+{
+    [System.Serializable]
+    public class ViewData
     {
-        this.pos = new float[3] {
-            view.transform.position.x,
-            view.transform.position.y,
-            view.transform.position.z,
-        };
+        public float[] pos;
+
+        public ViewData(View view)
+        {
+            this.pos = new float[3] {
+                view.transform.position.x,
+                view.transform.position.y,
+                view.transform.position.z,
+            };
+        }
     }
 }

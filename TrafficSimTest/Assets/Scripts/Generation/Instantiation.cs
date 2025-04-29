@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Core;
+using Core.Buildings;
 using UnityEngine;
 
 namespace Generation
@@ -8,7 +10,7 @@ namespace Generation
     {
         public static GameObject InstantiatePrefab(GameObject prefab, Vector3 position, Quaternion? rotation, Transform parent)
         {
-            GameObject obj = GameObject.Instantiate(prefab, position, rotation ?? Quaternion.identity, parent);
+            GameObject obj = Object.Instantiate(prefab, position, rotation ?? Quaternion.identity, parent);
             obj.name = $"{prefab.name}";
             obj.SetActive(true);
             return obj;
@@ -87,7 +89,7 @@ namespace Generation
 
                         Optimization.GetFullRoad(tile, roadTiles, junctionTiles, buildingTiles, visited);
 
-                        var roadPath = Utils.Math.OrderVectorPath(roadTiles.Select(r => r.physicalPos).ToList());
+                        var roadPath = Utils.Math.OrderVectorPath(roadTiles.Select(r => r.physicalPos).ToList(), junctionsMap[junctionTiles.First()].transform.position);
                         Road roadToAdd = new Road(
                             gm.simulation,
                             roadPath,

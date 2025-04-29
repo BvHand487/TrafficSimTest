@@ -7,20 +7,25 @@ namespace Utils
     public static class Math
     {
         // Orders a list of points so that each pair of points are nearest-neighbours
-        public static List<Vector3> OrderVectorPath(List<Vector3> points)
+        public static List<Vector3> OrderVectorPath(List<Vector3> points, Vector3? from=null)
         {
             if (points == null || points.Count == 0)
                 return null;
+            
+            if (from == null)
+                from = points[0];
+            else if (!points.Contains(from.Value))
+                from = Utils.Math.GetClosestVector(from.Value, points);
 
             if (points.Count <= 2)
                 return points;
 
-            List<Vector3> orderedPoints = new List<Vector3>() { points[0] };
-            points.Remove(points[0]);
+            List<Vector3> orderedPoints = new List<Vector3>() { from.Value };
+            points.Remove(from.Value);
 
             while (points.Count > 0)
             {
-                var closest = GetClosestVector(orderedPoints.First(), points);
+                var closest = GetClosestVector(orderedPoints.Last(), points);
                 orderedPoints.Add(closest);
                 points.Remove(closest);
             }

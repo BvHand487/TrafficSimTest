@@ -1,45 +1,49 @@
 using System.IO;
+using Core;
 using UnityEngine;
 
-public class PersistenceManager : SingletonMonobehaviour<PersistenceManager>
+namespace Persistence
 {
-    public SimulationData lastData;
-
-    public override void Awake()
+    public class PersistenceManager : SingletonMonobehaviour<PersistenceManager>
     {
-        if (Instance != null)
-            Destroy(Instance.gameObject);
+        public SimulationData lastData;
 
-        base.Awake();
-        DontDestroyOnLoad(this);
+        public override void Awake()
+        {
+            if (Instance != null)
+                Destroy(Instance.gameObject);
 
-        PlayerPrefs.DeleteAll();
-    }
+            base.Awake();
+            DontDestroyOnLoad(this);
 
-    public SimulationData SaveSimulationData(string path, Simulation simulation)
-    {
-        FileStream stream = new FileStream(path, FileMode.Create);
+            PlayerPrefs.DeleteAll();
+        }
 
-        SimulationData data = new SimulationData(simulation);
-        byte[] json = System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(data, true));
+        public SimulationData SaveSimulationData(string path, Simulation simulation)
+        {
+            FileStream stream = new FileStream(path, FileMode.Create);
 
-        stream.Write(json, 0, json.Length);
-        stream.Close();
+            SimulationData data = new SimulationData(simulation);
+            byte[] json = System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(data, true));
 
-        return lastData = data;
-    }
+            stream.Write(json, 0, json.Length);
+            stream.Close();
 
-    public SimulationData LoadSimulationData(string path)
-    {
-        FileStream stream = new FileStream(path, FileMode.Open);
+            return lastData = data;
+        }
 
-        byte[] bytes = new byte[stream.Length];
-        stream.Read(bytes, 0, bytes.Length);
-        stream.Close();
+        public SimulationData LoadSimulationData(string path)
+        {
+            FileStream stream = new FileStream(path, FileMode.Open);
 
-        string json = System.Text.Encoding.UTF8.GetString(bytes);
-        SimulationData data = JsonUtility.FromJson<SimulationData>(json);
+            byte[] bytes = new byte[stream.Length];
+            stream.Read(bytes, 0, bytes.Length);
+            stream.Close();
 
-        return lastData = data;
+            string json = System.Text.Encoding.UTF8.GetString(bytes);
+            SimulationData data = JsonUtility.FromJson<SimulationData>(json);
+
+            return lastData = data;
+        }
     }
 }
