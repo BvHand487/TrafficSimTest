@@ -62,10 +62,10 @@ mlagents-learn config.yaml --results-dir=results --run-id=RUN_ID
 
 ```bash
 "C:\Program Files\Unity\Hub\Editor\6000.0.41f1\Editor\Unity.exe" -runTests ^
-    -projectPath /TrafficSimTest ^
+    -projectPath ./TrafficSimTest ^
     -testPlatform editmode ^
-    -logFile /tests/test.log ^
-    -testResults /tests/results.xml ^
+    -logFile ./tests/test.log ^
+    -testResults ./tests/results.xml ^
     -batchmode ^
     -nographics ^
     -quit
