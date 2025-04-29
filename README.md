@@ -47,16 +47,17 @@ mlagents-learn config.yaml --results-dir=results --run-id=RUN_ID
 ## 🧪 Running Tests
 
 ### Option 1 - Unity Editor:
+
 #### 1. Open the project in Unity.
 #### 2. Navigate to Window > General > Test Runner.
 #### 3. Click on EditMode/PlayMode and run the tests.
 #### 4. Check the results in the panel for output.
 
->💡 Make sure the Unity Test Framework is installed via Package Manager if the Test Runner isn't visible.  
+>💡 Make sure the Unity Test Framework is installed via Package Manager if the Test Runner isn't visible.  <br/>
 
 
 ### Option 2 - Command Line:
-
+  
 #### 1. Close any instances of the Unity Editor.
 #### 2. Run the following command from the root of the repository (Windows):
 ##### Command:
@@ -78,11 +79,13 @@ mlagents-learn config.yaml --results-dir=results --run-id=RUN_ID
 > 💡 Make sure that the path to the Unity executable is valid or is added to PATH. On Windows it's usually something like:<br/>
 ```"C:\Program Files\Unity\Hub\Editor\VERSION\Editor\Unity.exe"```
 
-#### 📌 Flags explained:
-* ```-projectPath``` - Path of the Unity project
-* ```-testPlatform``` - Either ```EditMode``` or ```PlayMode```
-* ```-testResults``` - Output path for the test results in .xml (NUnit-style)
-* ```-logFile``` - Redirects Unity logs to a file
+##### 📌 Flags explained:
+* `-projectPath` - Path of the Unity project
+* `-testPlatform` - Either `EditMode` or `PlayMode`
+* `-testResults` - Output path for the test results in .xml (NUnit-style)
+* `-logFile` - Redirects Unity logs to a file
+
+#### 3. Check the results in ./tests/results.xml.
 <br/>
 
 ## 📄 License
