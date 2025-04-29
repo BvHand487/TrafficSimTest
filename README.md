@@ -4,6 +4,14 @@ Traffic simulation with vehicles and traffic lights made in Unity with ML-Agents
 <br/>
 <br/>
 
+## ⭐ Features:
+- Procedural generation of a road network using the WFC algorithm.
+- Saving and loading simulation states to and from `.tsf` files.
+- Time manipulation - pausing and speeding up time.
+- Training of traffic light agents.
+- Testing of the code via "EditMode" and "PlayMode" tests.
+<br/>
+
 ## 🚀 Running localy
 
 #### 1. Clone the project:
