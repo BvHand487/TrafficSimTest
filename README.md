@@ -59,7 +59,7 @@ mlagents-learn config.yaml --results-dir=results --run-id=RUN_ID
 
 #### 1. Close any instances of the Unity Editor.
 #### 2. Run the following command from the root of the repository (Windows):
-
+##### Command:
 ```bash
 "C:\Program Files\Unity\Hub\Editor\6000.0.41f1\Editor\Unity.exe" ^
   -runTests ^
@@ -69,6 +69,10 @@ mlagents-learn config.yaml --results-dir=results --run-id=RUN_ID
   -testResults ../tests/results.xml ^
   -batchmode ^
   -nographics
+```
+##### One-liner:
+```bash
+"C:\Program Files\Unity\Hub\Editor\6000.0.41f1\Editor\Unity.exe" -runTests -projectPath ./TrafficSimTest -testPlatform EditMode -logFile ./tests/test.log -testResults ../tests/results.xml -batchmode -nographics
 ```
 
 > 💡 Make sure that the path to the Unity executable is valid or is added to PATH. On Windows it's usually something like:<br/>
