@@ -61,14 +61,14 @@ mlagents-learn config.yaml --results-dir=results --run-id=RUN_ID
 #### 2. Run the following command from the root of the repository (Windows):
 
 ```bash
-"C:\Program Files\Unity\Hub\Editor\6000.0.41f1\Editor\Unity.exe" -runTests ^
-    -projectPath ./TrafficSimTest ^
-    -testPlatform editmode ^
-    -logFile ./tests/test.log ^
-    -testResults ./tests/results.xml ^
-    -batchmode ^
-    -nographics ^
-    -quit
+"C:\Program Files\Unity\Hub\Editor\6000.0.41f1\Editor\Unity.exe" ^
+  -runTests ^
+  -projectPath ./TrafficSimTest ^
+  -testPlatform EditMode ^
+  -logFile ./tests/test.log ^
+  -testResults ../tests/results.xml ^
+  -batchmode ^
+  -nographics
 ```
 
 > 💡 Make sure that the path to the Unity executable is valid or is added to PATH. On Windows it's usually something like:<br/>
@@ -76,7 +76,7 @@ mlagents-learn config.yaml --results-dir=results --run-id=RUN_ID
 
 #### 📌 Flags explained:
 * ```-projectPath``` - Path of the Unity project
-* ```-testPlatform``` - Either ```editmode``` or ```playmode```
+* ```-testPlatform``` - Either ```EditMode``` or ```PlayMode```
 * ```-testResults``` - Output path for the test results in .xml (NUnit-style)
 * ```-logFile``` - Redirects Unity logs to a file
 <br/>
