@@ -22,7 +22,7 @@ namespace Core.Buildings
         private Simulation simulation;
         private BuildingManager buildingManager;
 
-        private MeshRenderer meshRenderer;
+        public MeshRenderer meshRenderer;
 
         public void Awake()
         {

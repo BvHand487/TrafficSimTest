@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Tests.EditMode
 {
+    [TestFixture]
     public class UtilsGeneralTests
     {
         [Test]

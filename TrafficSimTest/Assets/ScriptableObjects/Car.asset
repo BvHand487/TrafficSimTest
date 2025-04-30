@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c158fae885e49043aa21d1461e8675c, type: 3}
   m_Name: Car
   m_EditorClassIdentifier: 
-  prefab: {fileID: 5966912864227686815, guid: faf35ecf27ee6e247ae90e695d4d8123, type: 3}
+  prefab: {fileID: 7099892567577809139, guid: aa766b1e55dac9f4699cc95213482161, type: 3}
   maxVelocity: 25
   accelerationRate: 5
   decelerationRate: 10

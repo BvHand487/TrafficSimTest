@@ -1,10 +1,13 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Core;
 using Core.Buildings;
 using Core.Vehicles;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Serialization;
 
 namespace Environment
 {
@@ -26,14 +29,70 @@ namespace Environment
 
         private Junction selectedJunction;
         private BoxCollider selectedJunctionCollider;
-
-
+        
+        [SerializeField] private float popAmount = 1.5f;
+        [SerializeField] private float popDuration = 0.35f;
+        private static readonly int OutlineThicknessID = Shader.PropertyToID("_Outline_Thickness");
+        private static float startingOutlineThickness;
+        private static float endingOutlineThickness;
+        private static float startingLineThickness;
+        private static float endingLineThickness;
+        private Sequence outlinePop;
+        private Sequence linePop;
+        
         void Start()
         {
             cam = Camera.main;
             lineRenderer = GetComponent<LineRenderer>();
 
             lightTooltips = new List<Tooltip>();
+            
+            if (outlineMaterial != null)
+            {
+                startingOutlineThickness = outlineMaterial.GetFloat(OutlineThicknessID);
+                endingOutlineThickness = popAmount * startingOutlineThickness;
+                
+                outlinePop =
+                    DOTween.Sequence()
+                        .Append(DOTween.To(
+                            () => outlineMaterial.GetFloat(OutlineThicknessID),
+                            x => outlineMaterial.SetFloat(OutlineThicknessID, x),
+                            endingOutlineThickness,
+                            popDuration / 2f
+                        ).SetEase(Ease.OutCubic)) // pop up
+                        .Append(DOTween.To(
+                            () => outlineMaterial.GetFloat(OutlineThicknessID),
+                            x => outlineMaterial.SetFloat(OutlineThicknessID, x),
+                            startingOutlineThickness,
+                            popDuration / 2f
+                        ).SetEase(Ease.InCubic)) // return down
+                        .SetUpdate(true)
+                        .SetAutoKill(false)
+                        .Pause();
+            }
+
+            if (lineRenderer != null)
+            {
+                startingLineThickness = lineRenderer.widthMultiplier;
+                endingLineThickness = popAmount * startingLineThickness;
+                
+                linePop = DOTween.Sequence()
+                    .Append(DOTween.To(
+                        () => lineRenderer.widthMultiplier,
+                        x => lineRenderer.widthMultiplier = x,
+                        endingLineThickness,
+                        popDuration / 2f
+                    ).SetEase(Ease.OutCubic)) // pop up
+                    .Append(DOTween.To(
+                        () => lineRenderer.widthMultiplier,
+                        x => lineRenderer.widthMultiplier = x,
+                        startingLineThickness,
+                        popDuration / 2f
+                    ).SetEase(Ease.InCubic)) // return down
+                    .SetUpdate(true)
+                    .SetAutoKill(false)
+                    .Pause();
+            }
         }
 
 
@@ -54,7 +113,7 @@ namespace Environment
                 {
                     lineRenderer.SetPosition(0, selectedVehicle.transform.position);
 
-                    vehicleTooltip.SetText($"Time waiting: {selectedVehicle.timeWaiting.ToString("0.00")}");
+                    vehicleTooltip.SetText($"Time waiting: {selectedVehicle.timeWaiting:0.00}");
 
                     if (selectedVehicle.path.Length() != pathLength)
                     {
@@ -67,14 +126,13 @@ namespace Environment
 
             if (selectedJunction)
             {
-                junctionTooltip.SetText($"Elapsed Time: {selectedJunction.trafficController.elapsedTime.ToString("0.00")}\n" +
-                                        $"Congestion: {selectedJunction.trafficController.agent.tracker.GetAverageCongestion().ToString("0.00")}\n" +
-                                        $"Vehicles passed: {selectedJunction.vehiclesExitedSinceLastStep}");
+                junctionTooltip.SetText($"Elapsed Time: {selectedJunction.trafficController.elapsedTime:0.00}\n" +
+                                        $"Congestion: {selectedJunction.trafficController.agent.tracker.GetAverageCongestion():0.00}\n");
 
                 for (int i = 0; i < selectedJunction.trafficController.lights.Count; ++i)
                 {
-                    TrafficLight light = selectedJunction.trafficController.lights[i];
-                    lightTooltips[i].SetText($"Green Interval: {light.greenInterval.ToString("0.00")}\nQueue: {light.vehicleQueue.Count}");
+                    TrafficLight trafficLight = selectedJunction.trafficController.lights[i];
+                    lightTooltips[i].SetText($"Queue: {trafficLight.vehicleQueue.Count}");
                 }
             }
 
@@ -83,10 +141,8 @@ namespace Environment
 
             if (Input.GetKeyDown(KeyCode.Mouse0))
             {
-                if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                if (EventSystem.current && EventSystem.current.IsPointerOverGameObject())
                     return;
-
-                UnselectAll();
 
                 Ray ray = cam.ScreenPointToRay(Input.mousePosition);
                 if (Physics.Raycast(ray, out RaycastHit hit))
@@ -94,6 +150,10 @@ namespace Environment
                     if (hit.collider.CompareTag("Vehicle"))
                     {
                         var vehicle = hit.collider.gameObject.GetComponent<Vehicle>();
+                        
+                        if (vehicle != selectedVehicle)
+                            UnselectAll();
+                        
                         SelectVehicle(vehicle);
                     }
 
@@ -105,13 +165,21 @@ namespace Environment
                             if (repeatedHit.collider.CompareTag("Vehicle"))
                             {
                                 var vehicle = repeatedHit.collider.gameObject.GetComponent<Vehicle>();
+                                
+                                if (vehicle != selectedVehicle)
+                                    UnselectAll();
+                                
                                 SelectVehicle(vehicle);
                             }
-                            else
-                            {
-                                var junction = hit.collider.gameObject.GetComponent<Junction>();
-                                SelectJunction(junction);
-                            }
+                        }
+                        else
+                        {
+                            var junction = hit.collider.gameObject.GetComponent<Junction>();
+                            
+                            if (junction != selectedJunction)
+                                UnselectAll();
+                            
+                            SelectJunction(junction);
                         }
                     }
                 }
@@ -120,28 +188,28 @@ namespace Environment
 
         void UnselectAll()
         {
-            if (selectedVehicle != null)
+            if (selectedVehicle)
             {
-                var meshRenderer = selectedVehicle.path.from.GetComponentInChildren<MeshRenderer>();
-                meshRenderer.materials = new Material[] { meshRenderer.materials[0] };
+                var meshRenderer = selectedVehicle.path.from.meshRenderer;
+                meshRenderer.sharedMaterials = new Material[] { meshRenderer.sharedMaterials[0] };
 
-                meshRenderer = selectedVehicle.path.to.GetComponentInChildren<MeshRenderer>();
-                meshRenderer.materials = new Material[] { meshRenderer.materials[0] };
+                meshRenderer = selectedVehicle.path.to.meshRenderer;
+                meshRenderer.sharedMaterials = new Material[] { meshRenderer.sharedMaterials[0] };
             }
+            
             selectedVehicle = null;
             lineRenderer.positionCount = 0;
             lineRenderer.loop = false;
 
-            if (vehicleTooltip != null)
+            if (vehicleTooltip)
             {
                 Destroy(vehicleTooltip.gameObject);
                 vehicleTooltip = null;
             }
-
-
+            
             selectedJunction = null;
 
-            if (junctionTooltip != null)
+            if (junctionTooltip)
             {
                 Destroy(junctionTooltip.gameObject);
                 junctionTooltip = null;
@@ -158,28 +226,51 @@ namespace Environment
 
         void SelectVehicle(Vehicle vehicle)
         {
+            bool isSameVehicle = vehicle == selectedVehicle;
             selectedVehicle = vehicle;
             pathLength = selectedVehicle.path.Length();
             lineRenderer.positionCount = pathLength + 1;
 
-            vehicleTooltip = Instantiate(tooltip, selectedVehicle.transform.position, Quaternion.identity);
-            vehicleTooltip.Initialize(selectedVehicle.transform, new Vector3(0.4f, 5f, 0.4f));
+            if (vehicleTooltip is null)
+            {
+                vehicleTooltip = Instantiate(tooltip, selectedVehicle.transform.position, Quaternion.identity);
+                vehicleTooltip.Initialize(selectedVehicle.transform, new Vector3(0.4f, 5f, 0.4f));
+            }
 
-            UpdateVehicleLineRenderer();
+            if (isSameVehicle == false)
+                UpdateVehicleLineRenderer();
+            
+            LinePopEffect();
+            
             SelectBuilding(selectedVehicle.path.from);
             SelectBuilding(selectedVehicle.path.to);
         }
 
         void SelectBuilding(Building building)
         {
-            var meshRenderer = building.GetComponentInChildren<MeshRenderer>();
+            var meshRenderer = building.meshRenderer;
 
-            List<Material> mats = meshRenderer.materials.ToList();
+            List<Material> mats = meshRenderer.sharedMaterials.ToList();
 
             if (mats.Count == 1)
+            {
                 mats.Add(outlineMaterial);
+                meshRenderer.sharedMaterials = mats.ToArray();
+            }
+            
+            OutlinePopEffect();
+        }
 
-            meshRenderer.materials = mats.ToArray();
+        // When buildings get highlighted a small pop effect with the outline happens.
+        void OutlinePopEffect()
+        {
+            outlinePop.Restart();
+        }
+        
+        // When a vehicle path gets highlighted a small pop effect with the line happens.
+        void LinePopEffect()
+        {
+            linePop.Restart();
         }
 
         void UpdateVehicleLineRenderer()
@@ -205,24 +296,40 @@ namespace Environment
 
         void SelectJunction(Junction junction)
         {
+            bool isSameJunction = selectedJunction == junction;
             selectedJunction = junction;
-            selectedJunctionCollider = junction.GetComponent<BoxCollider>();
-
-            SetJunctionLineRenderer();
-
-            junctionTooltip = Instantiate(tooltip, selectedJunction.transform.position, Quaternion.identity);
-            junctionTooltip.Initialize(selectedJunction.transform, new Vector3(-0.2f, 5f, 0f), true);
-
-            for (int i = 0; i < junction.trafficController.lights.Count; ++i)
+            selectedJunctionCollider = junction.boxCollider;
+         
+            if (isSameJunction == false)
+                SetJunctionLineRenderer();
+            
+            LinePopEffect();
+            
+            if (junctionTooltip is null)
             {
-                TrafficLight light = junction.trafficController.lights[i];
-                Vector3 customOffset = 7.5f * light.roadDirection;
-
-                var lightTooltip = Instantiate(tooltip, light.transform.position, Quaternion.identity);
-                lightTooltip.Initialize(light.transform, customOffset + 5f * Vector3.up, true);
-
-                lightTooltips.Add(lightTooltip);
+                junctionTooltip = Instantiate(tooltip, selectedJunction.transform.position, Quaternion.identity);
+                junctionTooltip.Initialize(selectedJunction.transform, new Vector3(-0.2f, 5f, 0f), true);
             }
+
+            if (lightTooltips.Count <= 0)
+            {
+                for (int i = 0; i < junction.trafficController.lights.Count; ++i)
+                {
+                    TrafficLight trafficLight = junction.trafficController.lights[i];
+                    Vector3 customOffset = 7.5f * trafficLight.roadDirection;
+                
+                    var lightTooltip = Instantiate(tooltip, trafficLight.transform.position, Quaternion.identity);
+                    lightTooltip.Initialize(trafficLight.transform, customOffset + 5f * Vector3.up, true);
+                
+                    lightTooltips.Add(lightTooltip);
+                }
+            }
+        }
+
+        private void OnDisable()
+        {
+            outlineMaterial.SetFloat(OutlineThicknessID, startingOutlineThickness);
+            lineRenderer.widthMultiplier = startingLineThickness;
         }
     }
 }

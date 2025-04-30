@@ -9,6 +9,7 @@ using Assert = UnityEngine.Assertions.Assert;
 
 namespace Tests.PlayMode
 {
+    [TestFixture]
     public class RoadTests
     {
         private (Junction, Junction, Road) SetupNormalRoad()

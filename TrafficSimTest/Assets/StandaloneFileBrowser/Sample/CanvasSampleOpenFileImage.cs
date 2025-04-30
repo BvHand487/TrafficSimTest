@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using SFB;
+using UnityEngine.Networking;
 
 [RequireComponent(typeof(Button))]
 public class CanvasSampleOpenFileImage : MonoBehaviour, IPointerDownHandler {
@@ -42,9 +43,28 @@ public class CanvasSampleOpenFileImage : MonoBehaviour, IPointerDownHandler {
     }
 #endif
 
+    // Changed from WWW to UnityWebRequest
     private IEnumerator OutputRoutine(string url) {
-        var loader = new WWW(url);
-        yield return loader;
-        output.texture = loader.texture;
+        // var loader = new WWW(url);
+        // yield return loader;
+        // output.texture = loader.texture;
+        
+        using (UnityWebRequest request = UnityWebRequestTexture.GetTexture(url))
+        {
+            // Start the request and wait for it to complete
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.ConnectionError || 
+                request.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.LogError($"Request error: {request.error}");
+            }
+            else
+            {
+                // If the request is successful, assign the texture
+                Texture2D texture = ((DownloadHandlerTexture) request.downloadHandler).texture;
+                output.texture = texture;
+            }
+        }
     }
 }

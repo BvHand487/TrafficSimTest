@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using SFB;
+using UnityEngine.Networking;
 
 [RequireComponent(typeof(Button))]
 public class CanvasSampleOpenFileTextMultiple : MonoBehaviour, IPointerDownHandler {
@@ -48,13 +49,39 @@ public class CanvasSampleOpenFileTextMultiple : MonoBehaviour, IPointerDownHandl
     }
 #endif
 
+    // Changed from WWW to UnityWebRequest
     private IEnumerator OutputRoutine(string[] urlArr) {
-        var outputText = "";
-        for (int i = 0; i < urlArr.Length; i++) {
-            var loader = new WWW(urlArr[i]);
-            yield return loader;
-            outputText += loader.text;
+        // var outputText = "";
+        // for (int i = 0; i < urlArr.Length; i++) {
+        //     var loader = new WWW(urlArr[i]);
+        //     yield return loader;
+        //     outputText += loader.text;
+        // }
+        // output.text = outputText;
+        
+        string outputText = "";
+
+        for (int i = 0; i < urlArr.Length; i++)
+        {
+            using (UnityWebRequest request = UnityWebRequest.Get(urlArr[i]))
+            {
+                // Start the request and wait for it to complete
+                yield return request.SendWebRequest();
+
+                if (request.result == UnityWebRequest.Result.ConnectionError || 
+                    request.result == UnityWebRequest.Result.ProtocolError)
+                {
+                    Debug.LogError($"Request error for URL {urlArr[i]}: {request.error}");
+                }
+                else
+                {
+                    // Append the successful response to outputText
+                    outputText += request.downloadHandler.text;
+                }
+            }
         }
+
+        // Once all URLs have been processed, update the output text
         output.text = outputText;
     }
 }

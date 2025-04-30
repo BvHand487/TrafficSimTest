@@ -826,7 +826,6 @@ MonoBehaviour:
     type: 3}
   buildingPrefab: {fileID: 3529599447628414491, guid: 7789e01f12e96704197780e34dc3fe3f,
     type: 3}
-  tileSize: 15
   gridSize: 3
   junctionGap: 5
   minBuildingHeight: 5
@@ -5898,7 +5897,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 265, y: 14.600048}
-  m_SizeDelta: {x: 50, y: 50}
+  m_SizeDelta: {x: 80, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1143451509
 MonoBehaviour:
@@ -5920,7 +5919,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 50
+  m_text: 100
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -6542,7 +6541,7 @@ MonoBehaviour:
   m_MinValue: 0
   m_MaxValue: 200
   m_WholeNumbers: 1
-  m_Value: 50
+  m_Value: 100
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
@@ -8688,6 +8687,8 @@ MonoBehaviour:
   outlineMaterial: {fileID: 2100000, guid: f6fb410719c92fb4790e34c9a6ef80d0, type: 2}
   selectionMaterial: {fileID: 2100000, guid: 6c406680f0dbb0e46a7fbd515584969b, type: 2}
   tooltip: {fileID: 8184803422944316415, guid: 436f76916eb9c3141b43594ac98cf93a, type: 3}
+  popAmount: 1.5
+  popDuration: 0.32
 --- !u!224 &2049274816
 RectTransform:
   m_ObjectHideFlags: 0

@@ -17,7 +17,7 @@ namespace Core.Vehicles
         private float minVehicleTravelDistance = 75.0f;
         private float minVehicleSpawnDistance = 30.0f;  // for a vehicle to spawn - there has to be no other vehicles within 30 units
         private float turnRadius=7.5f;
-        private int turnResolution=5;
+        private int turnResolution=10;
 
         private List<VehiclePreset> types = new List<VehiclePreset>();
 

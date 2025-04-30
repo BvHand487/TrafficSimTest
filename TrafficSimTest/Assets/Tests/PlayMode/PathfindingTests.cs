@@ -1,13 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using Core;
+using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.TestTools;
 using Utils;
+using Assert = UnityEngine.Assertions.Assert;
 
 namespace Tests.PlayMode
 {
+    [TestFixture]
     public class PathfindingTests
     {
         [UnityTearDown]

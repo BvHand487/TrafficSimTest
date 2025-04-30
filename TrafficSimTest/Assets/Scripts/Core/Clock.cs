@@ -34,7 +34,7 @@ namespace Core
         {
             base.Awake();
 
-            datetime = DateTime.Today;
+            datetime = DateTime.Today.AddHours(6);
             timeScale = 1.0f;
         }
 

@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using SFB;
+using UnityEngine.Networking;
 
 [RequireComponent(typeof(Button))]
 public class CanvasSampleOpenFileText : MonoBehaviour, IPointerDownHandler {
@@ -42,9 +43,26 @@ public class CanvasSampleOpenFileText : MonoBehaviour, IPointerDownHandler {
     }
 #endif
 
+    // Changed from WWW to UnityWebRequest
     private IEnumerator OutputRoutine(string url) {
-        var loader = new WWW(url);
-        yield return loader;
-        output.text = loader.text;
+        // var loader = new WWW(url);
+        // yield return loader;
+        // output.text = loader.text;
+        
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            yield return request.SendWebRequest();
+
+            if (request.result == UnityWebRequest.Result.ConnectionError || 
+                request.result == UnityWebRequest.Result.ProtocolError)
+            {
+                Debug.LogError($"Request error: {request.error}");
+                output.text = "Error: " + request.error;
+            }
+            else
+            {
+                output.text = request.downloadHandler.text;
+            }
+        }
     }
 }
