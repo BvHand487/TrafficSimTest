@@ -68,11 +68,11 @@ namespace ML
                 return;
 
             if (!vehicleManager)
-                vehicleManager = trafficController.junction.simulation.vehicleManager;
+                vehicleManager = trafficController?.junction?.simulation?.vehicleManager;
 
-            tracker.ResetValues();
-            vehicleManager.ClearVehicles();
-            trafficController.SetLights(Mathf.RoundToInt(Random.value));
+            tracker?.ResetValues();
+            vehicleManager?.ClearVehicles();
+            trafficController?.SetLights(Mathf.RoundToInt(Random.value));
         }
 
         private void Update()

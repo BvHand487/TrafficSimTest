@@ -525,6 +525,8 @@ MonoBehaviour:
   title: {fileID: 0}
   isToggled: 0
   checkmarkObject: {fileID: 0}
+  background: {fileID: 692748269}
+  disabledColor: {r: 1, g: 0.6862745, b: 0.6862745, a: 1}
 --- !u!1 &64002601
 GameObject:
   m_ObjectHideFlags: 0
@@ -2416,6 +2418,8 @@ MonoBehaviour:
   title: {fileID: 0}
   isToggled: 0
   checkmarkObject: {fileID: 0}
+  background: {fileID: 776925783}
+  disabledColor: {r: 1, g: 0.6862745, b: 0.6862745, a: 1}
 --- !u!1 &340805989
 GameObject:
   m_ObjectHideFlags: 0
@@ -5176,6 +5180,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: {fileID: 750425390}
+  background: {fileID: 1025698830}
+  fillArea: {fileID: 1036342133}
+  handle: {fileID: 592169937}
+  disabledBackgroundColor: {r: 1, g: 0.6862745, b: 0.6862745, a: 1}
+  disabledFillAreaColor: {r: 1, g: 0.44700003, b: 0.44700003, a: 1}
+  disabledHandleColor: {r: 1, g: 0.305, b: 0.305, a: 1}
 --- !u!114 &997393670
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6494,6 +6504,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: {fileID: 1522460790}
+  background: {fileID: 1669539263}
+  fillArea: {fileID: 1769967414}
+  handle: {fileID: 55450767}
+  disabledBackgroundColor: {r: 1, g: 0.6862745, b: 0.6862745, a: 1}
+  disabledFillAreaColor: {r: 1, g: 0.44700003, b: 0.44700003, a: 1}
+  disabledHandleColor: {r: 1, g: 0.305, b: 0.305, a: 1}
 --- !u!114 &1328405051
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7914,6 +7930,8 @@ MonoBehaviour:
   title: {fileID: 0}
   isToggled: 0
   checkmarkObject: {fileID: 0}
+  background: {fileID: 17076349}
+  disabledColor: {r: 1, g: 0.6839622, b: 0.6839622, a: 1}
 --- !u!1 &1762579530
 GameObject:
   m_ObjectHideFlags: 0
@@ -7969,6 +7987,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   title: {fileID: 1939752011}
+  background: {fileID: 738125622}
+  fillArea: {fileID: 1470735478}
+  handle: {fileID: 967251953}
+  disabledBackgroundColor: {r: 1, g: 0.6862745, b: 0.6862745, a: 1}
+  disabledFillAreaColor: {r: 1, g: 0.44700003, b: 0.44700003, a: 1}
+  disabledHandleColor: {r: 1, g: 0.305, b: 0.305, a: 1}
 --- !u!114 &1762579533
 MonoBehaviour:
   m_ObjectHideFlags: 0

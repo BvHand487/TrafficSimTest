@@ -21,14 +21,14 @@ namespace ML
 
         void Awake()
         {
-            congestionHistory = new Queue<float>();
-
-            maxHistoryLength = timeWindow / updatePeriod;
+            trafficController = GetComponent<TrafficController>();
         }
 
         public void Start()
         {
-            trafficController = GetComponent<TrafficController>();
+            congestionHistory = new Queue<float>();
+            maxHistoryLength = timeWindow / updatePeriod;
+            
             vehicleManager = trafficController.junction.simulation.vehicleManager;
         }
 
@@ -115,9 +115,8 @@ namespace ML
 
         public void ResetValues()
         {
-            Debug.Log("reset");
+            congestionHistory?.Clear();
 
-            congestionHistory.Clear();
             cumulativeCongestion = 0f;
             timeElapsed = 0f;
         }

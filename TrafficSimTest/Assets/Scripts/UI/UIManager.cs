@@ -9,8 +9,8 @@ namespace UI
     public class UIManager : SingletonMonobehaviour<UIManager>
     {
         private OptionsMenu optionsMenu;
-        public Dictionary<string, int> sliderValues = new Dictionary<string, int>();  // tracks all sliders in the scene
-        public Dictionary<string, bool> checkmarkValues = new Dictionary<string, bool>();  // tracks all checkmarks in the scene
+        public Dictionary<CustomSlider, int> sliderValues = new Dictionary<CustomSlider, int>();  // tracks all sliders in the scene
+        public Dictionary<CustomCheckmark, bool> checkmarkValues = new Dictionary<CustomCheckmark, bool>();  // tracks all checkmarks in the scene
 
         public override void Awake()
         {
@@ -30,45 +30,67 @@ namespace UI
 
         private void Start()
         {
-            foreach (CustomSlider slider in FindObjectsByType(typeof(CustomSlider), FindObjectsSortMode.None))
-                slider.UpdateSliderValue(slider.minValue);
-
-            foreach (CustomCheckmark checkmark in FindObjectsByType(typeof(CustomCheckmark), FindObjectsSortMode.None))
+            foreach (var o in FindObjectsByType(typeof(CustomSlider), FindObjectsSortMode.None))
             {
+                var slider = (CustomSlider) o;
+                slider.UpdateSliderValue(slider.minValue);
+            }
+
+            foreach (var o in FindObjectsByType(typeof(CustomCheckmark), FindObjectsSortMode.None))
+            {
+                var checkmark = (CustomCheckmark) o;
                 checkmark.isToggled = false;
-                checkmarkValues[checkmark.title.text] = false;
+                checkmarkValues[checkmark] = false;
             }
         }
 
-        public void UpdateSliderValues(string name, int value)
+        public void UpdateSliderValues(CustomSlider slider, int value)
         {
-            sliderValues[name] = value;
+            sliderValues[slider] = value;
 
-            switch (name)
+            switch (slider.title.text)
             {
                 case "Vehicle multiplier (%)":
-                    GameManager.Instance.simulation.vehicleManager.vehicleMultiplier = (float) UIManager.Instance.sliderValues[name] / 100f;
+                    GameManager.Instance.simulation.vehicleManager.vehicleMultiplier = (float) UIManager.Instance.sliderValues[slider] / 100f;
                     GameManager.Instance.simulation.vehicleManager.UpdateMaxVehicleCount();
                     break;
             }
         }
 
-        public void UpdateCheckmarkValues(string name, bool value)
+        public void UpdateCheckmarkValues(CustomCheckmark checkmark, bool value)
         {
-            checkmarkValues[name] = value;
+            checkmarkValues[checkmark] = value;
 
-            switch (name)
+            switch (checkmark.title.text)
             {
                 case "Time-dependent traffic":
-                    TrainingManager.Instance.timeDependentTraffic = UIManager.Instance.checkmarkValues[name];
+                    TrainingManager.Instance.timeDependentTraffic = UIManager.Instance.checkmarkValues[checkmark];
                     break;
                 case "Two mode junctions":
-                    TrainingManager.Instance.twoModeJunctions = UIManager.Instance.checkmarkValues[name];
+                    TrainingManager.Instance.twoModeJunctions = UIManager.Instance.checkmarkValues[checkmark];
                     break;
                 case "Vehicle collisions":
-                    GameManager.Instance.simulation.vehicleManager.vehicleCollisions = UIManager.Instance.checkmarkValues[name];
+                    GameManager.Instance.simulation.vehicleManager.vehicleCollisions = UIManager.Instance.checkmarkValues[checkmark];
                     break;
             }
+        }
+
+        public void DisableSettings()
+        {
+            foreach (var checkmark in UIManager.Instance.checkmarkValues.Keys)
+                checkmark.Disable();
+            
+            foreach (var slider in UIManager.Instance.sliderValues.Keys)
+                slider.Disable();
+        }
+        
+        public void EnableSettings()
+        {
+            foreach (var checkmark in UIManager.Instance.checkmarkValues.Keys)
+                checkmark.Enable();
+            
+            foreach (var slider in UIManager.Instance.sliderValues.Keys)
+                slider.Enable();
         }
 
 
@@ -77,9 +99,9 @@ namespace UI
             PlayerPrefs.SetString("Load method", "generate");
 
             // pass generation settings using PlayerPrefs API
-            foreach (var (name, val) in sliderValues)
-                PlayerPrefs.SetInt(name, val);
-
+            foreach (var (slider, val) in sliderValues)
+                PlayerPrefs.SetInt(slider.title.text, val);
+            
             SceneManager.LoadSceneAsync(1);
         }
 

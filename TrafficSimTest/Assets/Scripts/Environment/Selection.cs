@@ -143,7 +143,7 @@ namespace Environment
             {
                 if (EventSystem.current && EventSystem.current.IsPointerOverGameObject())
                     return;
-
+                
                 Ray ray = cam.ScreenPointToRay(Input.mousePosition);
                 if (Physics.Raycast(ray, out RaycastHit hit))
                 {
@@ -183,6 +183,7 @@ namespace Environment
                         }
                     }
                 }
+                else UnselectAll();
             }
         }
 

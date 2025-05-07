@@ -71,6 +71,8 @@ namespace ML
                 behaviours[i].BehaviorType = BehaviorType.Default;
 
             isTraining = true;
+
+            UIManager.Instance.DisableSettings();
         }
 
         public void StopTraining()
@@ -79,6 +81,8 @@ namespace ML
                 behaviours[i].BehaviorType = BehaviorType.HeuristicOnly;
 
             isTraining = false;
+            
+            UIManager.Instance.EnableSettings();
         }
 
         public void LoadModel(string path)
