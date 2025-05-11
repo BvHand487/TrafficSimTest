@@ -26,7 +26,7 @@ namespace UI
             checkmarkObject = transform.GetChild(0).GetChild(0).gameObject;
         }
 
-        private void Start()
+        public void Initialize()
         {
             enabledColor = background.color;
             isEnabled = true;

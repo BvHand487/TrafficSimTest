@@ -30,7 +30,7 @@ namespace UI
             sliderComp = GetComponent<Slider>();
         }
 
-        private void Start()
+        public void Initialize()
         {
             enabledBackgroundColor = background.color;
             enabledFillAreaColor = fillArea.color;

@@ -45,6 +45,7 @@ namespace UI
                     button.SetDisabled(true);
         }
 
+
         private void Update()
         {
             // speed up time
@@ -54,7 +55,7 @@ namespace UI
                 {
                     buttons[currentButtonIndex].SetSelected(false);
 
-                    // find first next button which is enabled, aka button.interactible is true
+                    // find first next button which is enabled, aka button.interactable is true
                     int nextButtonIndex = buttons.FindIndex(currentButtonIndex + 1, tsb => tsb.button.interactable);
                     if (nextButtonIndex != -1)
                         currentButtonIndex = nextButtonIndex;
@@ -63,14 +64,14 @@ namespace UI
                 buttons[currentButtonIndex].SetSelected(true);
             }
 
-            // slow up time
+            // slow down time
             if (Input.GetKeyDown(KeyCode.Comma))
             {
                 if (currentButtonIndex > 0)
                 {
                     buttons[currentButtonIndex].SetSelected(false);
 
-                    // find first previous button which is enabled, aka button.interactible is true
+                    // find first previous button which is enabled, aka button.interactable is true
                     int previousbuttonIndex = buttons.FindLastIndex(currentButtonIndex - 1, tsb => tsb.button.interactable);
                     if (previousbuttonIndex != -1)
                         currentButtonIndex = previousbuttonIndex;

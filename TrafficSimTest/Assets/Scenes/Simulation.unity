@@ -6200,6 +6200,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   imagePaused: {fileID: 21300000, guid: 2ea152890fe1b1a4194c3970ad3b2421, type: 3}
   imageUnpaused: {fileID: 21300000, guid: 9905f5b1555437442a9577a4132916f6, type: 3}
+  disabledColor: {r: 1, g: 0.6862745, b: 0.6862745, a: 1}
 --- !u!1 &1184102975
 GameObject:
   m_ObjectHideFlags: 0
@@ -8252,6 +8253,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f313c1fa6a2030749ac8404243b9fe67, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playPauseButton: {fileID: 0}
+  timeScaleButtons: {fileID: 0}
 --- !u!1 &1922627746
 GameObject:
   m_ObjectHideFlags: 0

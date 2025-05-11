@@ -11,6 +11,8 @@ namespace UI
         private OptionsMenu optionsMenu;
         public Dictionary<CustomSlider, int> sliderValues = new Dictionary<CustomSlider, int>();  // tracks all sliders in the scene
         public Dictionary<CustomCheckmark, bool> checkmarkValues = new Dictionary<CustomCheckmark, bool>();  // tracks all checkmarks in the scene
+        public PlayPauseButton playPauseButton;
+        public TimeScaleButtons timeScaleButtons;
 
         public override void Awake()
         {
@@ -30,17 +32,19 @@ namespace UI
 
         private void Start()
         {
-            foreach (var o in FindObjectsByType(typeof(CustomSlider), FindObjectsSortMode.None))
+            playPauseButton = GetComponentInChildren<PlayPauseButton>();
+            timeScaleButtons = GetComponentInChildren<TimeScaleButtons>();
+            
+            foreach (var o in FindObjectsByType(typeof(CustomSlider), FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 var slider = (CustomSlider) o;
-                slider.UpdateSliderValue(slider.minValue);
+                slider.Initialize();
             }
 
-            foreach (var o in FindObjectsByType(typeof(CustomCheckmark), FindObjectsSortMode.None))
+            foreach (var o in FindObjectsByType(typeof(CustomCheckmark), FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
                 var checkmark = (CustomCheckmark) o;
-                checkmark.isToggled = false;
-                checkmarkValues[checkmark] = false;
+                checkmark.Initialize();
             }
         }
 
@@ -80,8 +84,10 @@ namespace UI
             foreach (var checkmark in UIManager.Instance.checkmarkValues.Keys)
                 checkmark.Disable();
             
-            foreach (var slider in UIManager.Instance.sliderValues.Keys)
-                slider.Disable();
+            playPauseButton.Disable();
+            
+            // foreach (var slider in UIManager.Instance.sliderValues.Keys)
+            //     slider.Disable();
         }
         
         public void EnableSettings()
@@ -89,8 +95,10 @@ namespace UI
             foreach (var checkmark in UIManager.Instance.checkmarkValues.Keys)
                 checkmark.Enable();
             
-            foreach (var slider in UIManager.Instance.sliderValues.Keys)
-                slider.Enable();
+            playPauseButton.Enable();
+            
+            // foreach (var slider in UIManager.Instance.sliderValues.Keys)
+            //     slider.Enable();
         }
 
 
